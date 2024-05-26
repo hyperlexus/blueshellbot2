@@ -26,7 +26,7 @@ class BConfigs(Singleton):
             #     self.SPOTIFY_SECRET = None
             if self.SPOTIFY_ID is None or self.SPOTIFY_SECRET is None:
                 print('Spotify will not work')
-            self.CLEANER_MESSAGES_QUANT = int(os.getenv('CLEANER_MESSAGES_QUANT', 5))
+            self.CLEANER_MESSAGES_QUANT = int(os.getenv('CLEANER_MESSAGES_QUANT', 25))
             self.CLEAN_AMOUNT = int(os.getenv('CLEAN_AMOUNT', 100))
             self.ACQUIRE_LOCK_TIMEOUT = int(os.getenv('ACQUIRE_LOCK_TIMEOUT', 10))
             self.QUEUE_VIEW_TIMEOUT = int(os.getenv('QUEUE_VIEW_TIMEOUT', 120))
@@ -44,7 +44,7 @@ class BConfigs(Singleton):
             self.INVITE_MESSAGE = os.getenv('INVITE_MESSAGE', """Invite link: [here]({})""")
 
             self.MY_ERROR_BAD_COMMAND = os.getenv('MY_ERROR_BAD_COMMAND', 'This string serves to verify if some error was raised by myself on purpose')
-            self.INVITE_URL = os.getenv('INVITE_URL', 'https://discordapp.com/oauth2/authorize?client_id={}&permissions=8&scope=bot')
+            self.INVITE_URL = os.getenv('INVITE_URL', 'https://discord.com/oauth2/authorize?client_id=1242900773659086890&permissions=8&scope=bot')
 
     def getPlayersManager(self):
         return self.__manager

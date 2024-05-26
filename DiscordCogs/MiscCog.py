@@ -11,7 +11,6 @@ from Config.Colors import BColors
 from Config.Configs import BConfigs
 helper = Helper()
 
-
 def convert_to_s(time: str):
     units = {"s": 1, "m": 60, "h": 3600, "d": 86400}
     time_value = int(time[:-1])
