@@ -40,6 +40,10 @@ class SpotifySearch():
                 elif type == 'artist':
                     songs = self.__get_artist(code)
 
+            if self.__connected:
+                if type == 'album' or 'playlist' or 'track' or 'artist':
+                    eval(f'self.__get_{type}(code)')
+
             return songs
         except SpotifyException:
             raise SpotifyError(self.__messages.INVALID_SPOTIFY_URL, self.__messages.GENERIC_TITLE)

@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 from Config.Singleton import Singleton
 from Config.Folder import Folder
 
-
 load_dotenv()
+
 
 class BConfigs(Singleton):
     def __init__(self) -> None:
@@ -17,14 +17,12 @@ class BConfigs(Singleton):
                 self.BOT_PREFIX = '!'
             self.BOT_TOKEN = os.getenv('BOT_TOKEN')
             if self.BOT_TOKEN is None:
-                raise ValueError('No token was given')
+                raise ValueError('No token was given. You can find your bot token on the Discord Developer Portal')
             self.SPOTIFY_ID = os.getenv('SPOTIFY_ID')
             self.SPOTIFY_SECRET = os.getenv('SPOTIFY_SECRET')
-            # if self.SPOTIFY_ID == "Your_Own_Spotify_ID":
-            #     self.SPOTIFY_ID = None
-            # if self.SPOTIFY_SECRET == "Your_Own_Spotify_Secret":
-            #     self.SPOTIFY_SECRET = None
-            if self.SPOTIFY_ID is None or self.SPOTIFY_SECRET is None:
+            if self.SPOTIFY_ID == "Your_Own_Spotify_ID" or self.SPOTIFY_SECRET == "Your_Own_Spotify_Secret":
+                self.SPOTIFY_ID = None
+                self.SPOTIFY_SECRET = None
                 print('Spotify will not work')
             self.CLEANER_MESSAGES_QUANT = int(os.getenv('CLEANER_MESSAGES_QUANT', 25))
             self.CLEAN_AMOUNT = int(os.getenv('CLEAN_AMOUNT', 100))
@@ -44,7 +42,7 @@ class BConfigs(Singleton):
             self.INVITE_MESSAGE = os.getenv('INVITE_MESSAGE', """Invite link: [here]({})""")
 
             self.MY_ERROR_BAD_COMMAND = os.getenv('MY_ERROR_BAD_COMMAND', 'This string serves to verify if some error was raised by myself on purpose')
-            self.INVITE_URL = os.getenv('INVITE_URL', 'https://discord.com/oauth2/authorize?client_id=1242900773659086890&permissions=8&scope=bot')
+            self.INVITE_URL = os.getenv('INVITE_URL', 'https://discord.com/oauth2/authorize?client_id=1242900773659 086890&permissions=8&scope=bot')
 
     def getPlayersManager(self):
         return self.__manager
