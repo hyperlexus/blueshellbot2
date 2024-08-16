@@ -94,6 +94,9 @@ class MiscCog(Cog):
 
     @command(name='alert', help=helper.HELP_ALERT, description=helper.HELP_ALERT_LONG, aliases=['remindme', 'timer', 'reminder'])
     async def alert(self, ctx: Context, time_str: str, *args: str) -> None:
+        if ctx.author.id != 422800248935546880:
+            await ctx.send("hörn sie auf mit den scheis alerts sie nazi")
+            return
         other_user = True
         if not args == ():
             user_id = args[0]

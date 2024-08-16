@@ -1,11 +1,25 @@
+import asyncio
 from asyncio import AbstractEventLoop
 import discord
+from datetime import datetime
 from discord import Guild, Status, Game, Message
 from discord.ext.commands.errors import CommandNotFound, MissingRequiredArgument
 from Config.Configs import BConfigs
 from discord.ext.commands import Bot, Context
 from Config.Messages import Messages
 from Config.Embeds import BEmbeds
+
+
+def helper_calcdifftime(end_str, format_str='%Y-%m-%dZ%H:%M:%S'):
+    start_dt = datetime.now()
+    end_dt = datetime.strptime(end_str, format_str)
+    difference = end_dt - start_dt
+    total_seconds = int(difference.total_seconds())
+    days = total_seconds // (24 * 3600)
+    hours = (total_seconds % (24 * 3600)) // 3600
+    minutes = (total_seconds % 3600) // 60
+    result = f"{int(days):02d}d {int(hours):02d}h {int(minutes):02d}m"
+    return result
 
 
 class BlueshellBot(Bot):
@@ -44,12 +58,18 @@ class BlueshellBot(Bot):
         """Coroutine for bot connection"""
         await self.connect(reconnect=True)
 
+    async def change_status(self):
+        while True:
+            await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.playing, name=f"{helper_calcdifftime('2024-09-07Z15:00:00')}"))
+            await asyncio.sleep(1)
+
     async def on_ready(self):
         if self.__listingSlash:
             print(self.__messages.STARTUP_MESSAGE)
         await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.competing, name=f"prefix: '{self.__configs.BOT_PREFIX}'"))
         if self.__listingSlash:
             print(self.__messages.STARTUP_COMPLETE_MESSAGE)
+        await self.loop.create_task(self.change_status())
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):
