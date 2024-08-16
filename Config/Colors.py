@@ -11,10 +11,6 @@ class BColors(Singleton):
         self.__black = 0x23272A
 
     @property
-    def RED(self) -> str:
-        return self.__red
-
-    @property
     def GREEN(self) -> str:
         return self.__green
 
