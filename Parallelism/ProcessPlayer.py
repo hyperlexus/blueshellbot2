@@ -95,10 +95,10 @@ class ProcessPlayer(Process):
 
         # Start a Task to play songs
         self.__loop.create_task(self.__playPlaylistSongs())
-        # Try to acquire a semaphore, it'll be release when timeout function trigger, we use the Semaphore
+        # Try to acquire a semaphore, it'll be released when timeout function triggers, we use the Semaphore
         # from the asyncio lib to not block the event loop
         await self.__semStopPlaying.acquire()
-        # In this point the process should finalize
+        # At this point the process should finalise
         self.__timer.cancel()
 
     def __set_volume(self, volume: float) -> None:
