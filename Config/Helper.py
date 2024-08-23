@@ -53,10 +53,8 @@ class Helper(Singleton):
                                     f'any = any message (effectively a purge command)\nsaul = messages from saul goodman as he likes to spam')
             self.HELP_RESTART = 'Restart the bot.'
             self.HELP_RESTART_LONG = 'Restarts the bot. Can only be used by bot admins.'
-            self.HELP_BAN = 'Bans a user from voice channel.'
-            self.HELP_BAN_LONG = ('\"Bans\" a user from the current voice channel by making the bot repeatedly kick the user on join.\n'
-                                  'This is not the same as a discord timeout, it kicks a user if they are in the same channel as the bot.\n'
-                                  'It is a switching command, meaning if you ban someone already banned, it will unban them.\n'
+            self.HELP_BAN = 'Bans a user from using Blueshellbot.'
+            self.HELP_BAN_LONG = ('Bans a user from using the bot. Any command they run will not work and will not be executed.'
                                   'This command is admin only')
 
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
