@@ -3,7 +3,6 @@ from asyncio import AbstractEventLoop
 from datetime import datetime
 import discord
 from discord import Guild, Status, Game, Message
-from discord.ext import tasks
 from discord.ext.commands import Bot, Context
 from discord.ext.commands.errors import CommandNotFound, MissingRequiredArgument
 from Config.Configs import BConfigs
@@ -68,10 +67,6 @@ class BlueshellBot(Bot):
             await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.playing, name=f"{helper_calcdifftime('2024-09-03Z19:10:00')}"))
             await asyncio.sleep(1)
 
-    async def ban_loop(self):
-        while True:
-            print(check_bans())
-
     async def on_ready(self):
         if self.__listingSlash:
             print(self.__messages.STARTUP_MESSAGE)
@@ -79,7 +74,6 @@ class BlueshellBot(Bot):
         if self.__listingSlash:
             print(self.__messages.STARTUP_COMPLETE_MESSAGE)
         await self.loop.create_task(self.change_status())
-        await self.loop.create_task(self.ban_loop())
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):
