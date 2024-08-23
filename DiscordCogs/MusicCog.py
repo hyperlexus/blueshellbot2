@@ -46,7 +46,7 @@ class MusicCog(Cog):
         else:
             configs.setPlayersManager(ThreadPlayerManager(bot))
 
-    @command(name="play", help=helper.HELP_PLAY, description=helper.HELP_PLAY_LONG, aliases=['p'])
+    @command(name="play", help=helper.HELP_PLAY, description=helper.HELP_PLAY_LONG, aliases=['p', 'paly'])
     async def play(self, ctx: Context, *args) -> None:
         try:
             controller = PlayHandler(ctx, self.__bot)

@@ -61,7 +61,7 @@ class BlueshellBot(Bot):
     async def change_status(self):
         while True:
             # line to change when prim gives you the time of arrival :)
-            await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.playing, name=f"{helper_calcdifftime('2024-09-03Z17:10:00')}"))
+            await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.playing, name=f"{helper_calcdifftime('2024-09-03Z19:10:00')}"))
             await asyncio.sleep(1)
 
     async def on_ready(self):
