@@ -1,5 +1,5 @@
 import asyncio
-import subprocess
+import os
 import sys
 from datetime import datetime
 from random import randint, random
@@ -209,9 +209,8 @@ class MiscCog(Cog):
             if c % 5 == 0:
                 await asyncio.sleep(1)
 
-        if who == "bot":
-            last_message = await ctx.channel.history(limit=1).flatten()
-            await last_message[0].delete()
+        last_message = await ctx.channel.history(limit=1).flatten()
+        await last_message[0].delete()
 
         if c == 0:
             c = 1
@@ -235,22 +234,19 @@ class MiscCog(Cog):
 
     @command(name='restart', help=helper.HELP_RESTART, description=helper.HELP_RESTART_LONG, aliases=['reboot', 'kill'])
     async def restart(self, ctx: Context) -> None:
-        if ctx.author.id != 422800248935546880:
-            await ctx.send("You are not the owner of this bot and are not permitted to run this command.")
+        bot_admins = self.__config.BOT_ADMINS.split(",")
+        if str(ctx.author.id) not in bot_admins:
+            embed = self.__embeds.MISSING_PERMISSIONS("restart")
+            await ctx.send(embed=embed)
             return
-        await ctx.send("restarting bot, please be patient")
-        print(sys.executable)
+        await ctx.send("restarting bot, please be patient. the embed is there because im too lazy to check if the bot is playing anything")
+        os.chdir("C:\\Users\\HyperLexus\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup")
+        os.startfile("runbot.bat")
 
-        await self.__bot.close()
         await asyncio.sleep(2)
-
-        process = subprocess.Popen(
-            ["cmd.exe", "/c", "start", "runbot.bat"],
-            cwd="C:\\Users\\HyperLexus\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup"
-        )
-        return_code = process.wait()
-        if return_code != 0:
-            print(f"An error occurred: {return_code}")
+        stop_music_command = self.__bot.get_command('stop')
+        await stop_music_command(ctx)
+        await self.__bot.close()
         sys.exit(0)
 
 def setup(bot):

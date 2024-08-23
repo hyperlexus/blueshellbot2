@@ -6,7 +6,7 @@ from Config.Configs import BConfigs
 from Config.Messages import SpotifyMessages
 
 
-class SpotifySearch():
+class SpotifySearch:
     def __init__(self) -> None:
         self.__messages = SpotifyMessages()
         self.__config = BConfigs()
@@ -25,24 +25,36 @@ class SpotifySearch():
         if not self.__checkUrlValid(url):
             raise SpotifyError(self.__messages.INVALID_SPOTIFY_URL, self.__messages.GENERIC_TITLE)
 
-        type = url.split('/')[3].split('?')[0]
+        song_type = url.split('/')[3].split('?')[0]
         code = url.split('/')[4].split('?')[0]
         songs = []
 
         try:
             if self.__connected:
-                if type == 'album':
-                    songs = self.__get_album(code)
-                elif type == 'playlist':
-                    songs = self.__get_playlist(code)
-                elif type == 'track':
-                    songs = self.__get_track(code)
-                elif type == 'artist':
-                    songs = self.__get_artist(code)
+                match song_type:
+                    case 'album':
+                        songs = self.__get_album(code)
+                    case 'playlist':
+                        songs = self.__get_playlist(code)
+                    case 'track':
+                        songs = self.__get_track(code)
+                    case 'artist':
+                        songs = self.__get_artist(code)
 
             if self.__connected:
-                if type == 'album' or 'playlist' or 'track' or 'artist':
-                    eval(f'self.__get_{type}(code)')
+                match song_type:
+                    case 'album':
+                        self.__get_album(code)
+                    case 'playlist':
+                        self.__get_playlist(code)
+                    case 'track':
+                        self.__get_track(code)
+                    case 'artist':
+                        self.__get_artist(code)
+
+                # ↓ this will stay here as a testiment to my lack of brain ↓
+                # if type == 'album' or 'playlist' or 'track' or 'artist':
+                #     eval(f'self.__get_{song_type}(code)')
 
             return songs
         except SpotifyException:

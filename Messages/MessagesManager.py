@@ -77,4 +77,5 @@ class MessagesManager(Singleton):
 
             await message.delete()
         except Exception:
-            print(f'[ERROR DELETING MESSAGE] -> {traceback.format_exc()}')
+            #print(f'[ERROR DELETING MESSAGE] -> {traceback.format_exc()}')
+            print("[ERROR DELETING MESSAGE] -> allah")

@@ -42,7 +42,8 @@ class BConfigs(Singleton):
             self.INVITE_MESSAGE = os.getenv('INVITE_MESSAGE', """Invite link: [here]({})""")
 
             self.MY_ERROR_BAD_COMMAND = os.getenv('MY_ERROR_BAD_COMMAND', 'This string serves to verify if some error was raised by myself on purpose')
-            self.INVITE_URL = os.getenv('INVITE_URL', 'https://discord.com/oauth2/authorize?client_id=1242900773659 086890&permissions=8&scope=bot')
+            self.INVITE_URL = os.getenv('INVITE_URL', 'https://discord.com/oauth2/authorize?client_id=1242900773659086890&permissions=8&scope=bot')
+            self.BOT_ADMINS = os.getenv('BOT_ADMINS', '422800248935546880,')
 
     def getPlayersManager(self):
         return self.__manager

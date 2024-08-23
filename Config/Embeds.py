@@ -511,3 +511,11 @@ class BEmbeds:
             colour=self.__colors.RED
         )
         return embed
+
+    def MISSING_PERMISSIONS(self, command_name):
+        embed = Embed(
+            title=f'Error: Use of {self.__config.BOT_PREFIX}{command_name} is forbidden for this user',
+            description='You do not have the necessary permission to run this command.',
+            color=self.__colors.RED
+        )
+        return embed
