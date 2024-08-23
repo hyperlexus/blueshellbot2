@@ -519,3 +519,11 @@ class BEmbeds:
             color=self.__colors.RED
         )
         return embed
+
+    def BANNED(self):
+        embed = Embed(
+            title=f'Error: You are banned',
+            description=f'You are banned from blueshellbot and cannot run this command.',
+            color=self.__colors.RED
+        )
+        return embed

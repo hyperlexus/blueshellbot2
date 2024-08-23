@@ -5,6 +5,7 @@ from Config.Helper import Helper
 from Config.Colors import BColors
 from Music.BlueshellBot import BlueshellBot
 from Config.Embeds import BEmbeds
+from DiscordCogs.MusicCog import check_if_banned
 
 helper = Helper()
 
@@ -22,15 +23,18 @@ class ControlCog(Cog):
                       'skip', 'play', 'queue', 'clear',
                       'np', 'shuffle', 'move', 'remove',
                       'reset', 'prev', 'history', 'volume'],
-            'MISC': ['wahl', 'random', 'choose', 'alert', 'clean']
+            'MOD': ['restart']
         }
 
     @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h'])
     async def help_msg(self, ctx, command_help=''):
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         if command_help != '':
-            for command in self.__bot.commands:
-                if command.name == command_help:
-                    txt = command.description if command.description else command.help
+            for assigned_command in self.__bot.commands:
+                if assigned_command.name == command_help:
+                    txt = assigned_command.description if assigned_command.description else assigned_command.help
 
                     embedhelp = Embed(
                         title=f'help page for **{command_help}**',
@@ -51,20 +55,20 @@ class ControlCog(Cog):
         else:
             help_music = '🎧 `MUSIC`\n'
             help_misc = '🗿 `MISC`\n'
-            help_help = '🥺 `HELP`\n'
+            help_mod = '🎩 `MOD`\n'
 
             for command in self.__bot.commands:
                 if command.name in self.__commands['MUSIC']:
                     help_music += f'**{command}**, '
 
-                elif command.name in self.__commands['MISC']:
-                    help_misc += f'**{command}** - {command.help}\n'
+                elif command.name in self.__commands['MOD']:
+                    help_mod += f'**{command}** - {command.help}\n'
 
                 else:
-                    help_help += f'**{command}** - {command.help}\n'
+                    help_misc += f'**{command}** - {command.help}\n'
             help_music = help_music[:-2] + '\n'
 
-            helptxt = f'\n{help_music}\n{help_help}\n{help_misc}'
+            helptxt = f'\n{help_music}\n{help_misc}\n{help_mod}'
             helptxt += f'\n\nType {self.__config.BOT_PREFIX}help <command> for more info'
             embedhelp = Embed(
                 title=f'**Commands: {self.__bot.user.name}**',
@@ -78,6 +82,9 @@ class ControlCog(Cog):
 
     @command(name='invite', help=helper.HELP_INVITE, description=helper.HELP_INVITE_LONG, aliases=['inv'])
     async def invite_bot(self, ctx):
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         invite_url = self.__config.INVITE_URL.format(self.__bot.user.id)
         txt = self.__config.INVITE_MESSAGE.format(invite_url, invite_url)
 
@@ -88,7 +95,6 @@ class ControlCog(Cog):
         )
 
         await ctx.send(embed=embed)
-
 
 def setup(bot):
     bot.add_cog(ControlCog(bot))

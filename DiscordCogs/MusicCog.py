@@ -1,4 +1,5 @@
-from discord.ext.commands import Context, command, Cog
+import os
+from discord.ext.commands import Context, command, Cog, check, before_invoke
 from Config.Exceptions import InvalidInput
 from Config.Helper import Helper
 from Handlers.ClearHandler import ClearHandler
@@ -28,6 +29,22 @@ from Parallelism.ProcessPlayerManager import ProcessPlayerManager
 from Parallelism.ThreadPlayerManager import ThreadPlayerManager
 
 helper = Helper()
+parentDirectory = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
+def check_bans(path) -> list:
+    banned_ids = []
+    os.chdir(path)
+    with open("./banlist.txt", "r") as file:
+        for line in file:
+            try:
+                banned_ids.append(int(line))
+            except ValueError:
+                print("something went past the checker in the ban command, and a character is in here")
+                return
+        return banned_ids
+
+def check_if_banned(user, path) -> bool:
+    return True if user in check_bans(path) else False
 
 
 class MusicCog(Cog):
@@ -40,14 +57,17 @@ class MusicCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
         self.__bot: BlueshellBot = bot
         self.__embeds = BEmbeds()
-        configs = BConfigs()
-        if configs.SONG_PLAYBACK_IN_SEPARATE_PROCESS:
-            configs.setPlayersManager(ProcessPlayerManager(bot))
+        self.__config = BConfigs()
+        if self.__config.SONG_PLAYBACK_IN_SEPARATE_PROCESS:
+            self.__config.setPlayersManager(ProcessPlayerManager(bot))
         else:
-            configs.setPlayersManager(ThreadPlayerManager(bot))
+            self.__config.setPlayersManager(ThreadPlayerManager(bot))
 
     @command(name="play", help=helper.HELP_PLAY, description=helper.HELP_PLAY_LONG, aliases=['p', 'paly'])
     async def play(self, ctx: Context, *args) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = PlayHandler(ctx, self.__bot)
 
@@ -67,6 +87,9 @@ class MusicCog(Cog):
 
     @command(name="volume", help=helper.CHANGE_VOLUME, description=helper.CHANGE_VOLUME_LONG, aliases=['v'])
     async def volume(self, ctx: Context, *args) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = VolumeHandler(ctx, self.__bot)
 
@@ -88,6 +111,9 @@ class MusicCog(Cog):
 
     @command(name="queue", help=helper.HELP_QUEUE, description=helper.HELP_QUEUE_LONG, aliases=['q'])
     async def queue(self, ctx: Context, *args) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             pageNumber = " ".join(args)
 
@@ -115,6 +141,9 @@ class MusicCog(Cog):
 
     @command(name="skip", help=helper.HELP_SKIP, description=helper.HELP_SKIP_LONG, aliases=['s', 'next'])
     async def skip(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = SkipHandler(ctx, self.__bot)
 
@@ -128,6 +157,9 @@ class MusicCog(Cog):
 
     @command(name='stop', help=helper.HELP_STOP, description=helper.HELP_STOP_LONG, aliases=['kys', 'leave', 'youshouldkillyourselfnow⚡'])
     async def stop(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = StopHandler(ctx, self.__bot)
 
@@ -141,6 +173,9 @@ class MusicCog(Cog):
 
     @command(name='pause', help=helper.HELP_PAUSE, description=helper.HELP_PAUSE_LONG, aliases=['pautism'])
     async def pause(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = PauseHandler(ctx, self.__bot)
 
@@ -154,6 +189,9 @@ class MusicCog(Cog):
 
     @command(name='resume', help=helper.HELP_RESUME, description=helper.HELP_RESUME_LONG, aliases=['unpause'])
     async def resume(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = ResumeHandler(ctx, self.__bot)
 
@@ -167,6 +205,9 @@ class MusicCog(Cog):
 
     @command(name='prev', help=helper.HELP_PREV, description=helper.HELP_PREV_LONG, aliases=['return', 'previous', 'back'])
     async def prev(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = PrevHandler(ctx, self.__bot)
 
@@ -181,6 +222,9 @@ class MusicCog(Cog):
 
     @command(name='history', help=helper.HELP_HISTORY, description=helper.HELP_HISTORY_LONG, aliases=['previoussongs'])
     async def history(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = HistoryHandler(ctx, self.__bot)
 
@@ -194,6 +238,9 @@ class MusicCog(Cog):
 
     @command(name='loop', help=helper.HELP_LOOP, description=helper.HELP_LOOP_LONG, aliases=['l', 'repeat'])
     async def loop(self, ctx: Context, args='') -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = LoopHandler(ctx, self.__bot)
 
@@ -207,6 +254,9 @@ class MusicCog(Cog):
 
     @command(name='clear', help=helper.HELP_CLEAR, description=helper.HELP_CLEAR_LONG, aliases=['c', 'clearqueue', 'cq'])
     async def clear(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = ClearHandler(ctx, self.__bot)
 
@@ -220,6 +270,9 @@ class MusicCog(Cog):
 
     @command(name='np', help=helper.HELP_NP, description=helper.HELP_NP_LONG, aliases=['playing', 'now', 'this', 'nowplaying'])
     async def now_playing(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = NowPlayingHandler(ctx, self.__bot)
 
@@ -233,6 +286,9 @@ class MusicCog(Cog):
 
     @command(name='shuffle', help=helper.HELP_SHUFFLE, description=helper.HELP_SHUFFLE_LONG, aliases=['randomise'])
     async def shuffle(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = ShuffleHandler(ctx, self.__bot)
 
@@ -246,6 +302,9 @@ class MusicCog(Cog):
 
     @command(name='move', help=helper.HELP_MOVE, description=helper.HELP_MOVE_LONG, aliases=['mv'])
     async def move(self, ctx: Context, pos1, pos2='1') -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = MoveHandler(ctx, self.__bot)
 
@@ -259,6 +318,9 @@ class MusicCog(Cog):
 
     @command(name='remove', help=helper.HELP_REMOVE, description=helper.HELP_REMOVE_LONG, aliases=['delete'])
     async def remove(self, ctx: Context, position) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = RemoveHandler(ctx, self.__bot)
 
@@ -272,6 +334,9 @@ class MusicCog(Cog):
 
     @command(name='reset', help=helper.HELP_RESET, description=helper.HELP_RESET_LONG, aliases=['restart, fix'])
     async def reset(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         try:
             controller = ResetHandler(ctx, self.__bot)
 

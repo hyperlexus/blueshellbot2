@@ -1,14 +1,13 @@
 import asyncio
-import os
-import sys
 from datetime import datetime
-from random import randint, random
+from random import random
 from Music.BlueshellBot import BlueshellBot
 from discord.ext.commands import Context, command, Cog
 from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
+from DiscordCogs.MusicCog import check_if_banned
 helper = Helper()
 
 def convert_to_s(time: str):
@@ -53,29 +52,11 @@ class MiscCog(Cog):
         self.__config = BConfigs()
         self.__bot: BlueshellBot = bot
 
-    @command(name='random', help=helper.HELP_RANDOM, description=helper.HELP_RANDOM_LONG, aliases=['rand'])
-    async def random(self, ctx: Context, arg: str) -> None:
-        try:
-            arg = int(arg)
-
-        except:
-            embed = self.__embeds.ERROR_NUMBER()
-            await ctx.send(embed=embed)
-            return None
-
-        if arg < 1:
-            a = arg
-            b = 1
-        else:
-            a = 1
-            b = arg
-
-        x = randint(a, b)
-        embed = self.__embeds.RANDOM_NUMBER(a, b, x)
-        await ctx.send(embed=embed)
-
     @command(name='wahl', help=helper.HELP_WAHL, description=helper.HELP_WAHL_LONG, aliases=['wahlkommission'])
     async def wahlkommission(self, ctx: Context) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         x = random()
         result = round(x * 100)
         if result == 69:
@@ -94,8 +75,8 @@ class MiscCog(Cog):
 
     @command(name='alert', help=helper.HELP_ALERT, description=helper.HELP_ALERT_LONG, aliases=['remindme', 'timer', 'reminder'])
     async def alert(self, ctx: Context, time_str: str, *args: str) -> None:
-        if ctx.author.id != 422800248935546880:
-            await ctx.send("hörn sie auf mit den scheis alerts sie nazi")
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
             return
         other_user = True
         if not args == ():
@@ -157,6 +138,9 @@ class MiscCog(Cog):
 
     @command(name='clean', help=helper.HELP_CLEAN, description=helper.HELP_CLEAN_LONG, aliases=[''])
     async def clean(self, ctx: Context, *args: str) -> None:
+        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         number_set, limit, c, who = False, 20, 0, "all"  # innit bruv
         if not args == ():
             for i in args:
@@ -217,37 +201,6 @@ class MiscCog(Cog):
 
         embed = self.__embeds.CLEANED(limit, c-1, who, inspect_amount)
         await ctx.send(embed=embed, delete_after=10)
-
-    @command(name='choose', help=helper.HELP_CHOOSE, description=helper.HELP_CHOOSE_LONG, aliases=['pick'])
-    async def choose(self, ctx: Context, *args: str) -> None:
-        try:
-            user_input = " ".join(args)
-            items = user_input.split(sep=',')
-
-            index = randint(0, len(items) - 1)
-
-            embed = self.__embeds.CHOSEN_THING(items[index])
-            await ctx.send(embed=embed)
-        except:
-            embed = self.__embeds.BAD_CHOOSE_USE()
-            await ctx.send(embed=embed)
-
-    @command(name='restart', help=helper.HELP_RESTART, description=helper.HELP_RESTART_LONG, aliases=['reboot', 'kill'])
-    async def restart(self, ctx: Context) -> None:
-        bot_admins = self.__config.BOT_ADMINS.split(",")
-        if str(ctx.author.id) not in bot_admins:
-            embed = self.__embeds.MISSING_PERMISSIONS("restart")
-            await ctx.send(embed=embed)
-            return
-        await ctx.send("restarting bot, please be patient. the embed is there because im too lazy to check if the bot is playing anything")
-        os.chdir("C:\\Users\\HyperLexus\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup")
-        os.startfile("runbot.bat")
-
-        await asyncio.sleep(2)
-        stop_music_command = self.__bot.get_command('stop')
-        await stop_music_command(ctx)
-        await self.__bot.close()
-        sys.exit(0)
 
 def setup(bot):
     bot.add_cog(MiscCog(bot))

@@ -42,10 +42,6 @@ class Helper(Singleton):
             self.HELP_HELP_LONG = f'Nice recursion bro'
             self.HELP_INVITE = 'Send invite URL'
             self.HELP_INVITE_LONG = 'Sends bot invite link'
-            self.HELP_RANDOM = 'Return a random number between 1 and x. (first command xd)'
-            self.HELP_RANDOM_LONG = 'Selects a random number between 1 and x'
-            self.HELP_CHOOSE = 'Chooses a random one out of the items you feed it.'
-            self.HELP_CHOOSE_LONG = 'Chooses a random one out of the items you feed it. Pass as many as you want (I think)'
             self.HELP_WAHL = 'Ask the "Heilige Wahlkommission" a question'
             self.HELP_WAHL_LONG = 'Asks the "Heilige Wahlkommission" for salvation and enlightenment.'
             self.HELP_ALERT = 'Pings you after some time.'
@@ -55,8 +51,13 @@ class Helper(Singleton):
                                     f', defaults are all, 20.\nArgument order doesn\'t matter.\nQueries the last {config.CLEAN_AMOUNT} messages.\n\n'
                                     f'user = messages that start with "{config.BOT_PREFIX}"\nbot = messages by bot\nall = both\n'
                                     f'any = any message (effectively a purge command)\nsaul = messages from saul goodman as he likes to spam')
-            self.HELP_RESTART = 'Restart the bot (owner only)'
-            self.HELP_RESTART_LONG = 'Restarts the bot. Can only be used by bot owner.'
+            self.HELP_RESTART = 'Restart the bot.'
+            self.HELP_RESTART_LONG = 'Restarts the bot. Can only be used by bot admins.'
+            self.HELP_BAN = 'Bans a user from voice channel.'
+            self.HELP_BAN_LONG = ('\"Bans\" a user from the current voice channel by making the bot repeatedly kick the user on join.\n'
+                                  'This is not the same as a discord timeout, it kicks a user if they are in the same channel as the bot.\n'
+                                  'It is a switching command, meaning if you ban someone already banned, it will unban them.\n'
+                                  'This command is admin only')
 
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
             self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'
