@@ -23,7 +23,7 @@ class ControlCog(Cog):
                       'skip', 'play', 'queue', 'clear',
                       'np', 'shuffle', 'move', 'remove',
                       'reset', 'prev', 'history', 'volume'],
-            'MOD': ['restart']
+            'MOD': ['restart', 'ban']
         }
 
     @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h'])
