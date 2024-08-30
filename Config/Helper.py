@@ -56,6 +56,8 @@ class Helper(Singleton):
             self.HELP_BAN = 'Bans a user from using Blueshellbot.'
             self.HELP_BAN_LONG = ('Bans a user from using the bot. Any command they run will not work and will not be executed.'
                                   'This command is admin only')
+            self.HELP_FEET = 'laal.'
+            self.HELP_FEET_LONG = 'Maggda loves feets and loves briar imagine he had brier feets aka YOU CANT PLURALS YOU CAKE SNAKE SKIBIDI SEVERUS SNAPE'
 
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
             self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'

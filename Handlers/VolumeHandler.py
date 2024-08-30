@@ -32,7 +32,7 @@ class VolumeHandler(AbstractHandler):
 
         playerLock = playersManager.getPlayerLock(self.guild)
         acquired = playerLock.acquire(timeout=self.config.ACQUIRE_LOCK_TIMEOUT)
-        volume = self.__convert_input_to_volume(args)        
+        volume = self.__convert_input_to_volume(args)
         if acquired:
             volumeCommand = BCommands(BCommandsType.VOLUME, volume)
             await playersManager.sendCommandToPlayer(volumeCommand, self.guild, self.ctx)
@@ -49,12 +49,7 @@ class VolumeHandler(AbstractHandler):
 
     def __convert_input_to_volume(self, input_volume: str) -> float:
         volume = float(input_volume)
-        if volume < 0:
-            volume = 0
-        if volume > 100:
-            volume = 100
-        
-        return volume
+        return min(100.0, max(0.0, volume))
 
     def __validateInput(self, volume: str) -> Union[BlueshellError, None]:
         try:

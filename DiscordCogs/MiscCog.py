@@ -136,6 +136,10 @@ class MiscCog(Cog):
             embed = self.__embeds.BAD_ALERT(new_time_str)
             await ctx.send(embed=embed)
 
+    @command(name='feet', help=helper.HELP_FEET, description=helper.HELP_FEET_LONG)
+    async def feet(self, ctx: Context, *args: str) -> None:
+        await ctx.send('I love feet🦶')
+
     @command(name='clean', help=helper.HELP_CLEAN, description=helper.HELP_CLEAN_LONG, aliases=[''])
     async def clean(self, ctx: Context, *args: str) -> None:
         if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):

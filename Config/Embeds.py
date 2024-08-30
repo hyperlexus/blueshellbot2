@@ -345,6 +345,8 @@ class BEmbeds:
         return embed
     
     def VOLUME_CHANGED(self, volume: float) -> Embed:
+        if isinstance(volume, float) and volume == int(volume):
+            volume = int(volume)
         embed = Embed(
             title=self.__messages.SONG_PLAYER,
             description=self.__messages.VOLUME_CHANGED.format(volume),

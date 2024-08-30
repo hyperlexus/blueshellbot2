@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from time import time
 from urllib.parse import parse_qs, urlparse
 from discord import PCMVolumeTransformer, VoiceClient
@@ -64,22 +65,17 @@ class ThreadPlayer(Thread):
         try:
             if self.__voiceClient is None:
                 return
-            
+
             if not isinstance(volume, float):
                 print('[THREAD ERROR] -> Volume instance must be float')
                 return
 
-            if volume < 0:
-                volume = 0
-            if volume > 100:
-                volume = 100
-
-            volume = volume / 100
+            volume = min(100.0, max(0.0, volume)) / 100.0
 
             if not self.__currentSongChangeVolume:
                 print('[THREAD ERROR] -> Cannot change the volume of this song')
                 return
-            
+
             self.__songVolumeUsing = volume
             self.__voiceClient.source.volume = volume
         except Exception as e:
