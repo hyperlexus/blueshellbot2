@@ -73,7 +73,7 @@ class BlueshellBot(Bot):
         await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.competing, name=f"prefix: '{self.__configs.BOT_PREFIX}'"))
         if self.__listingSlash:
             print(self.__messages.STARTUP_COMPLETE_MESSAGE)
-        await self.loop.create_task(self.change_status())
+        # await self.loop.create_task(self.change_status())
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):

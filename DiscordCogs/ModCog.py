@@ -24,7 +24,7 @@ class ModCog(Cog):
             embed = self.__embeds.MISSING_PERMISSIONS("restart")
             await ctx.send(embed=embed)
             return
-        await ctx.send("restarting bot, please be patient. the embed is there because im too lazy to check if the bot is playing anything")
+        await ctx.send("restarting bot, please be patient.")
         os.chdir(self.__config.BAT_PATH)
         os.startfile("runbot.bat")
         stop_music_command = self.__bot.get_command('stop')
