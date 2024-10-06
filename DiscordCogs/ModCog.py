@@ -48,7 +48,6 @@ class ModCog(Cog):
             return
         os.chdir(self.__config.PROJECT_PATH)
         with open("./banlist.txt", "a") as file:
-            await ctx.send(str(to_ban))
             file.write(str(to_ban))
             await ctx.send("successful")
 
