@@ -18,6 +18,7 @@ SPOTIFY_SECRET=Your_Own_Spotify_Secret
 BOT_PREFIX=Your_Wanted_Prefix_For_Blueshell
 SHOULD_AUTO_DISCONNECT_WHEN_ALONE=True
 BOT_ADMINS="<userid1>,<userid2>"
+BAT_PATH="C:\\Users\\HyperLexus\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\runbot.bat"
 
 PROJECT_PATH="C:\\Users\\HyperLexus\\PycharmProjects\\blueshellbot2"
 PROJECT_URL="https://github.com/hyperlexus/blueshellbot2"
@@ -38,6 +39,6 @@ Change the necessary config in `.env`, mainly `PROJECT_PATH` and `BAT_PATH`, whi
 As shown above, it should be like `BOT_ADMINS="<id1>,<id2>"` with no space in between.
 5. you can add new commands by adding a new command in the MiscCog.py file and following the rough structure of what I did.\
 If you know what you're doing, you'll figure it out.\
-The reason I'm adding this is because this command will automatically be added to the `b.help` command.
+The reason I'm adding this is that new commands will automatically be added to the `b.help` output.
 
 Enjoy! :D

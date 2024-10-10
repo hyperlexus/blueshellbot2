@@ -11,24 +11,24 @@ class BColors(Singleton):
         self.__black = 0x23272A
 
     @property
-    def GREEN(self) -> str:
+    def GREEN(self):
         return self.__green
 
     @property
-    def GREY(self) -> str:
+    def GREY(self):
         return self.__grey
 
     @property
-    def BLUE(self) -> str:
+    def BLUE(self):
         return self.__blue
 
     @property
-    def BLACK(self) -> str:
+    def BLACK(self):
         return self.__black
 
-    def PURPLE(self) -> str:
+    def PURPLE(self):
         return self.__purple
 
     @property
-    def RED(self) -> str:
+    def RED(self):
         return self.__red

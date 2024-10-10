@@ -54,8 +54,13 @@ class Helper(Singleton):
             self.HELP_RESTART = 'Restart the bot.'
             self.HELP_RESTART_LONG = 'Restarts the bot. Can only be used by bot admins.'
             self.HELP_BAN = 'Bans a user from using Blueshellbot.'
-            self.HELP_BAN_LONG = ('Bans a user from using the bot. Any command they run will not work and will not be executed.'
+            self.HELP_BAN_LONG = ('Bans a user from using the bot. Any command they run will not work and will not be executed.\n'
+                                  'If the command is used again, the user will be unbanned.\n'
+                                  'Format: `b.ban <user_id>`'
                                   'This command is admin only')
+            self.HELP_FORCE_EMBED = 'Forces any embed for testing purposes.'
+            self.HELP_FORCE_EMBED_LONG = (f'Run `{config.BOT_PREFIX}force_embed list` to display all available embeds.'
+                                          f'Run `{config.BOT_PREFIX}force_embed <embed>` to show any embed. This command is admin only.')
             self.HELP_FEET = 'laal.'
             self.HELP_FEET_LONG = 'Maggda loves feets and loves briar imagine he had brier feets aka YOU CANT PLURALS YOU CAKE SNAKE SKIBIDI SEVERUS SNAPE'
 

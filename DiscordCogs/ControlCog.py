@@ -23,7 +23,7 @@ class ControlCog(Cog):
                       'skip', 'play', 'queue', 'clear',
                       'np', 'shuffle', 'move', 'remove',
                       'reset', 'prev', 'history', 'volume'],
-            'MOD': ['restart', 'ban']
+            'MOD': ['restart', 'ban', 'force_embed']
         }
 
     @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h'])
@@ -37,7 +37,7 @@ class ControlCog(Cog):
                     txt = assigned_command.description if assigned_command.description else assigned_command.help
 
                     embedhelp = Embed(
-                        title=f'help page for **{command_help}**',
+                        title=f'help page for `{self.__config.BOT_PREFIX}{command_help}`',
                         description=txt,
                         colour=self.__colors.BLUE
                     )

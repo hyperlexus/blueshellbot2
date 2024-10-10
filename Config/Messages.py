@@ -17,9 +17,9 @@ class Messages(Singleton):
             self.SONGINFO_POSITION = 'Position in Queue: '
 
             self.VOLUME_CHANGED = 'Volume changed to `{}`%'
-            self.SONGS_ADDED = 'Downloading `{}` songs. Warning, I am bad at coding and this is very inefficient so it\'s gonna take a while'
+            self.SONGS_ADDED = 'Downloading `{}` songs.'
             self.SONG_ADDED = 'Downloading `{}`'
-            self.SONG_ADDED_TWO = f'{self.__emojis.MUSIC} Song enqueued (hidden reference)'
+            self.SONG_ADDED_TWO = f'{self.__emojis.MUSIC} Song added to queue'
             self.SONG_PLAYING = f'Now Playing'
             self.SONG_PLAYER = f'Song Player'
             self.QUEUE_TITLE = f'Queue'
@@ -37,18 +37,11 @@ class Messages(Singleton):
             self.HISTORY_TITLE = f'{self.__emojis.MUSIC} Played Songs'
             self.HISTORY_EMPTY = f'{self.__emojis.QUEUE} History is empty. Pay attention next time.'
 
-            self.SONG_MOVED_SUCCESSFULLY = 'Song `{}` in position `{}` moved to the position `{}` successfully'
+            self.SONG_MOVED_SUCCESSFULLY = 'Song `{}` in position `{}` moved to position `{}`.'
             self.SONG_REMOVED_SUCCESSFULLY = 'Song `{}` removed successfully'
 
-            self.LOOP_ALL_ON = f'{self.__emojis.ERROR} Loop already set to "all", use {configs.BOT_PREFIX}loop off to disable the loop first'
-            self.LOOP_ONE_ON = f'{self.__emojis.ERROR} Loop already set to "one", use {configs.BOT_PREFIX}loop off to disable this loop first'
-            self.LOOP_ALL_ALREADY_ON = f'{self.__emojis.LOOP_ALL} "Loop all" is already the current loop state.'
-            self.LOOP_ONE_ALREADY_ON = f'{self.__emojis.LOOP_ONE} "Loop one" is already the current loop state.'
             self.LOOP_ALL_ACTIVATE = f'{self.__emojis.LOOP_ALL} Looping all songs'
             self.LOOP_ONE_ACTIVATE = f'{self.__emojis.LOOP_ONE} Looping the current song'
-            self.LOOP_DISABLE = f'{self.__emojis.LOOP_OFF} Loop disabled'
-            self.LOOP_ALREADY_DISABLE = f'{self.__emojis.ERROR} Loop is already off.'
-            self.LOOP_ON = f'{self.__emojis.ERROR} Loop is already on.'
             self.BAD_USE_OF_LOOP = (f"{self.__emojis.ERROR} You can't use 'loop' like this. Check {configs.BOT_PREFIX}help loop"
                                     f"-> Possible commands: all, off, one, ''")
 

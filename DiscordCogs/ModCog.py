@@ -35,21 +35,66 @@ class ModCog(Cog):
 
     @command(name='ban', help=helper.HELP_BAN, description=helper.HELP_BAN_LONG)
     async def ban(self, ctx: Context, *args) -> None:
+        os.chdir(self.__config.PROJECT_PATH)
         bot_admins = self.__config.BOT_ADMINS.split(",")
         if str(ctx.author.id) not in bot_admins:
             embed = self.__embeds.MISSING_PERMISSIONS("ban")
             await ctx.send(embed=embed)
             return
+
         try:
             to_ban = int(args[0])
+            if to_ban // 1_000_000_000_000 < 1:
+                embed = self.__embeds.BAD_USER_ID(args[0])
+                await ctx.send(embed=embed)
+                return
+            to_ban = str(to_ban)
         except ValueError:
             embed = self.__embeds.BAD_USER_ID(args[0])
             await ctx.send(embed=embed)
             return
-        os.chdir(self.__config.PROJECT_PATH)
-        with open("./banlist.txt", "a") as file:
-            file.write(str(to_ban))
-            await ctx.send("successful")
+
+        if to_ban in bot_admins:
+            embed = self.__embeds.INVALID_BAN_COMMAND()
+            await ctx.send(embed=embed)
+            return
+
+        username = str(self.__bot.get_user(int(to_ban)))[:-2]
+
+        with open("./banlist.txt", "r+") as file:
+            banlist = file.read().splitlines()
+            if to_ban not in banlist:
+                banlist.append(to_ban)
+                embed = self.__embeds.SUCCESSFUL_BAN(username)
+            else:
+                embed = self.__embeds.SUCCESSFUL_UNBAN(username)
+                banlist[:] = (uid for uid in banlist if uid != to_ban)
+
+        with open("./banlist.txt", "w") as file:
+            for i in banlist:
+                file.write(f"{i}\n")
+
+        username = self.__bot.get_user(int(to_ban))
+        await ctx.send(str(username)[:-2])
+
+        await ctx.send(embed=embed)
+        return
+
+    @command(name='force_embed', help=helper.HELP_FORCE_EMBED, description=helper.HELP_FORCE_EMBED_LONG)
+    async def force_embed(self, ctx: Context, *args) -> None:
+        bot_admins = self.__config.BOT_ADMINS.split(",")
+        if str(ctx.author.id) not in bot_admins:
+            embed = self.__embeds.MISSING_PERMISSIONS("force_embed")
+            await ctx.send(embed=embed)
+            return
+
+        if args[0] == "list":
+            output = "All available embeds: \n"
+            all_embeds = [embed_name for embed_name in dir(self.__embeds)]
+            for embed in all_embeds:
+                if embed[0] != "_":
+                    output += f"{embed} \n"
+            await ctx.send(output)
 
 
 

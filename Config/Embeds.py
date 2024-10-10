@@ -89,7 +89,7 @@ class BEmbeds:
             colour=self.__colors.BLUE)
         return embed
 
-    def SONG_INFO(self, info: dict, title: str, position='0') -> Embed:
+    def SONG_INFO(self, info: dict, title: str) -> Embed:
         embedvc = Embed(
             title=title,
             description=f"[{info['title']}]({info['original_url']})",
@@ -116,10 +116,6 @@ class BEmbeds:
             embedvc.add_field(name=self.__messages.SONGINFO_DURATION,
                               value=self.__messages.SONGINFO_UNKNOWN_DURATION,
                               inline=True)
-
-        embedvc.add_field(name=self.__messages.SONGINFO_POSITION,
-                          value=position,
-                          inline=True)
 
         if self.__willShowProject():
             embedvc = self.__addFooterContent(embedvc)
@@ -522,10 +518,41 @@ class BEmbeds:
         )
         return embed
 
+    def SUCCESSFUL_BAN(self, username):
+        embed = Embed(
+            title=f'Successfully banned user {username}.',
+            description='This user will now be unable to access blueshellbot.',
+            color=self.__colors.BLUE
+        )
+        return embed
+
+    def SUCCESSFUL_UNBAN(self, username):
+        embed = Embed(
+            title=f'Successfully unbanned user {username}.',
+            description='This user will now be able to access blueshellbot again.',
+            color=self.__colors.BLUE
+        )
+        return embed
+
+    def INVALID_BAN_COMMAND(self):
+        embed = Embed(
+            title=f'Error: You cannot ban yourself or other bot admins.',
+            color=self.__colors.RED
+        )
+        return embed
+
     def BANNED(self):
         embed = Embed(
             title=f'Error: You are banned',
             description=f'You are banned from blueshellbot and cannot run this command.',
+            color=self.__colors.RED
+        )
+        return embed
+
+    def INCORRECT_FORCE_EMBED(self):
+        embed = Embed(
+            title=f'Error: Bad use of "force_embed" command',
+            description=f'Check {self.__config.BOT_PREFIX}help force_embed for more information.',
             color=self.__colors.RED
         )
         return embed
