@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import os
 import sys
 from Music.BlueshellBot import BlueshellBot
@@ -79,6 +80,7 @@ class ModCog(Cog):
 
     @command(name='force_embed', help=helper.HELP_FORCE_EMBED, description=helper.HELP_FORCE_EMBED_LONG)
     async def force_embed(self, ctx: Context, *args) -> None:
+        embed_to_force = None
         if len(args) != 1:
             embed = self.__embeds.INCORRECT_FORCE_EMBED()
             await ctx.send(embed=embed)
@@ -90,14 +92,40 @@ class ModCog(Cog):
             await ctx.send(embed=embed)
             return
 
+        all_embeds = [embed_name for embed_name in dir(self.__embeds)
+                      if callable(getattr(self.__embeds, embed_name))
+                      and not embed_name.startswith("_")]
+
         if args[0] == "list":
             output = "All available embeds: \n"
-            all_embeds = [embed_name for embed_name in dir(self.__embeds)]
-            for embed in all_embeds:
-                if embed[0] != "_":
-                    output += f"{embed} \n"
+            for number, embed in enumerate(all_embeds):
+                output += f"{number+1}. {embed} \n"
             await ctx.send(output)
+            return
 
+        if args[0].isdigit():
+            embed_index = int(args[0]) - 1
+            if 0 <= embed_index < len(all_embeds):
+                embed_to_force = all_embeds[embed_index]
+        else:
+            if args[0].upper() in all_embeds:
+                embed_to_force = args[0].upper()
+            else:
+                embed = self.__embeds.INCORRECT_FORCE_EMBED()
+                await ctx.send(embed=embed)
+                return
+
+        embed_method = getattr(self.__embeds, embed_to_force)
+
+        sig = inspect.signature(embed_method).parameters
+        call_args = []
+
+        for i in range(len(sig)):
+            call_args.append(f"default_forced_arg_{i}")
+
+        embed = embed_method(*call_args)
+        await ctx.send(embed=embed)
+        return
 
 
 def setup(bot):

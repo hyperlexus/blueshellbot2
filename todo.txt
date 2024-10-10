@@ -1,3 +1,0 @@
-fix ban command to work with unbanning (and not just appending the uid again) - done
-make an embed for (un)successful ban - done
-ping on the first of the month, every hour until a slash command is used
