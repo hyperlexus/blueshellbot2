@@ -89,7 +89,7 @@ class BEmbeds:
             colour=self.__colors.BLUE)
         return embed
 
-    def SONG_INFO(self, info: dict, title: str) -> Embed:
+    def SONG_INFO(self, info: dict, title: str, position='0') -> Embed:
         embedvc = Embed(
             title=title,
             description=f"[{info['title']}]({info['original_url']})",
@@ -116,6 +116,10 @@ class BEmbeds:
             embedvc.add_field(name=self.__messages.SONGINFO_DURATION,
                               value=self.__messages.SONGINFO_UNKNOWN_DURATION,
                               inline=True)
+
+        embedvc.add_field(name=self.__messages.SONGINFO_POSITION,
+                          value=position,
+                          inline=True)
 
         if self.__willShowProject():
             embedvc = self.__addFooterContent(embedvc)

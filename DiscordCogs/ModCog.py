@@ -74,14 +74,16 @@ class ModCog(Cog):
             for i in banlist:
                 file.write(f"{i}\n")
 
-        username = self.__bot.get_user(int(to_ban))
-        await ctx.send(str(username)[:-2])
-
         await ctx.send(embed=embed)
         return
 
     @command(name='force_embed', help=helper.HELP_FORCE_EMBED, description=helper.HELP_FORCE_EMBED_LONG)
     async def force_embed(self, ctx: Context, *args) -> None:
+        if len(args) != 1:
+            embed = self.__embeds.INCORRECT_FORCE_EMBED()
+            await ctx.send(embed=embed)
+            return
+
         bot_admins = self.__config.BOT_ADMINS.split(",")
         if str(ctx.author.id) not in bot_admins:
             embed = self.__embeds.MISSING_PERMISSIONS("force_embed")

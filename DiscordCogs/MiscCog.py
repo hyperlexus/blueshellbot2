@@ -197,9 +197,6 @@ class MiscCog(Cog):
             if c % 5 == 0:
                 await asyncio.sleep(1)
 
-        last_message = await ctx.channel.history(limit=1).flatten()
-        await last_message[0].delete()
-
         if c == 0:
             c = 1
 

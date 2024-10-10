@@ -40,8 +40,15 @@ class Messages(Singleton):
             self.SONG_MOVED_SUCCESSFULLY = 'Song `{}` in position `{}` moved to position `{}`.'
             self.SONG_REMOVED_SUCCESSFULLY = 'Song `{}` removed successfully'
 
+            self.LOOP_ALL_ON = f'{self.__emojis.ERROR} Loop already set to "all", use {configs.BOT_PREFIX}loop off to disable the loop first'
+            self.LOOP_ONE_ON = f'{self.__emojis.ERROR} Loop already set to "one", use {configs.BOT_PREFIX}loop off to disable this loop first'
+            self.LOOP_ALL_ALREADY_ON = f'{self.__emojis.LOOP_ALL} "Loop all" is already the current loop state.'
+            self.LOOP_ONE_ALREADY_ON = f'{self.__emojis.LOOP_ONE} "Loop one" is already the current loop state.'
             self.LOOP_ALL_ACTIVATE = f'{self.__emojis.LOOP_ALL} Looping all songs'
             self.LOOP_ONE_ACTIVATE = f'{self.__emojis.LOOP_ONE} Looping the current song'
+            self.LOOP_DISABLE = f'{self.__emojis.LOOP_OFF} Loop disabled'
+            self.LOOP_ALREADY_DISABLE = f'{self.__emojis.ERROR} Loop is already off.'
+            self.LOOP_ON = f'{self.__emojis.ERROR} Loop is already on.'
             self.BAD_USE_OF_LOOP = (f"{self.__emojis.ERROR} You can't use 'loop' like this. Check {configs.BOT_PREFIX}help loop"
                                     f"-> Possible commands: all, off, one, ''")
 
