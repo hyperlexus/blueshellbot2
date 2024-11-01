@@ -1,3 +1,5 @@
+from tokenize import group
+
 hiragana_dict = {
     "a": "あ", "i": "い", "u": "う", "e": "え", "o": "お",
     "ka": "か", "ki": "き", "ku": "く", "ke": "け", "ko": "こ",
@@ -29,7 +31,9 @@ hiragana_dict = {
     "ja": "じゃ", "ju": "じゅ", "jo": "じょ",
     "bya": "びゃ", "byu": "びゅ", "byo": "びょ",
 
-    "pya": "ぴゃ", "pyu": "ぴゅ", "pyo": "ぴょ"
+    "pya": "ぴゃ", "pyu": "ぴゅ", "pyo": "ぴょ",
+
+    "small_tsu": "っ"
 }
 
 katakana_dict = {
@@ -63,7 +67,9 @@ katakana_dict = {
     "ja": "ジャ", "ju": "ジュ", "jo": "ジョ",
     "bya": "ビャ", "byu": "ビュ", "byo": "ビョ",
 
-    "pya": "ピャ", "pyu": "ピュ", "pyo": "ピョ"
+    "pya": "ピャ", "pyu": "ピュ", "pyo": "ピョ",
+
+    "small_tsu": "ッ"
 }
 
 # reverse cursed technique
@@ -86,3 +92,59 @@ def get_katakana(input_str):
         return reverse_katakana_dict[input_str]
     else:
         return False
+
+def conv_multiple_kana(kana_type, to_conv):
+    if not to_conv:
+        return False
+
+    converting, output = "", ""
+    groupings = []
+    input_as_list = list(to_conv)
+
+    for count, character in enumerate(input_as_list):
+        current_item = character
+        if current_item == " ":
+            continue
+        converting += current_item
+
+        if count+1 < len(input_as_list):  # edge case: small tsu when two consonants != n in a row
+            if converting.isascii() and converting == input_as_list[count+1] and converting not in ['a', 'e', 'i', 'o', 'u'] and input_as_list[count+1] != "n":
+                groupings.append("small_tsu")
+                converting = ""
+                continue
+
+        if converting == "n":  # edge case: standalone n character should not be converted if followed by vowel
+            if len(input_as_list) != count+1 and input_as_list[count+1] in ['a', 'e', 'i', 'o', 'u']:
+                continue
+
+        if kana_type == 'h':
+            if converting in hiragana_dict.keys() or converting in hiragana_dict.values():
+                groupings.append(converting)
+                converting = ""
+        elif kana_type == 'k':
+            if converting in katakana_dict.keys() or converting in katakana_dict.values():
+                groupings.append(converting)
+                converting = ""
+
+    if kana_type == 'h':
+        for count, character in enumerate(groupings):
+            if character == "っ":
+                output += get_hiragana(groupings[count+1])[0]
+                continue
+            output += get_hiragana(character)
+    elif kana_type == 'k':
+        for count, character in enumerate(groupings):
+            if character == "ッ":
+                output += get_katakana(groupings[count + 1])[0]
+                continue
+            output += get_katakana(character)
+    else:
+        return False
+
+    if converting != "":
+        if output == "":
+            return "found no results", 1
+        return f"Found: {output}, not found: {converting}", 2
+    return output, 0
+
+print(conv_multiple_kana('h', 'kakkoii'))

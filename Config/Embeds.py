@@ -13,6 +13,15 @@ class BEmbeds:
         self.__messages = Messages()
         self.__colors = BColors()
 
+    def BAD_COMMAND_USAGE(self, command_name: str):
+        embed = Embed(
+            title="Incorrect command usage",
+            description=f"You cannot use this command like that.\n"
+                        f"Check `{self.__config.BOT_PREFIX}help {command_name}` for more information.",
+            color=self.__colors.RED
+        )
+        return embed
+
     def __willShowProject(self) -> bool:
         return random() * 100 < self.__config.CHANCE_SHOW_TEXT
 
@@ -419,22 +428,6 @@ class BEmbeds:
         embed.set_footer(text='Pizza Romani reference.')
         return embed
 
-    def CHOSEN_THING(self, thing: str) -> Embed:
-        embed = Embed(
-            title='Choose result',
-            description=f'Chosen: {thing}',
-            colour=self.__colors.GREEN
-        )
-        return embed
-
-    def BAD_CHOOSE_USE(self) -> Embed:
-        embed = Embed(
-            title='Error while choosing',
-            description=f'Incorrect command usage. Use {self.__config.BOT_PREFIX}help choose.',
-            colour=self.__colors.RED
-        )
-        return embed
-
     def ALERT_SET(self, time_str: str) -> Embed:
         embed = Embed(
             title='Alert',
@@ -484,7 +477,7 @@ class BEmbeds:
     def BAD_USER_ID(self, user_id: str) -> Embed:
         embed = Embed(
             title='Bad User ID',
-            description=f'User ID "{user_id}" didn\'t work. Right click someone to copy their ID or just ping someone.',
+            description=f'User ID "{user_id}" didn\'t work. Right click someone to copy their ID.',
             colour=self.__colors.RED
         )
         return embed
@@ -559,10 +552,17 @@ class BEmbeds:
         )
         return embed
 
-    def INCORRECT_FORCE_EMBED(self):
+    def KANA_CONVERTED_EMBED(self, conv_from, conv_to, kana_type, success_code):
+        if success_code == 0:
+            description_text = f'{conv_from} -> {conv_to} ({"hiragana" if kana_type == "h" else "katakana"})'
+            color_to_set = self.__colors.GREEN
+        else:
+            description_text = (f'Could not or only partially convert input "{conv_from}".\n'
+                                f'{conv_to} ({"hiragana" if kana_type == "h" else "katakana"})')
+            color_to_set = self.__colors.RED
         embed = Embed(
-            title=f'Error: Bad use of "force_embed" command',
-            description=f'Check {self.__config.BOT_PREFIX}help force_embed for more information.',
-            color=self.__colors.RED
+            title=f'Kana conversion',
+            description=description_text,
+            color=color_to_set
         )
         return embed

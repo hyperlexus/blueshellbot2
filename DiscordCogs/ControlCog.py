@@ -23,10 +23,11 @@ class ControlCog(Cog):
                       'skip', 'play', 'queue', 'clear',
                       'np', 'shuffle', 'move', 'remove',
                       'reset', 'prev', 'history', 'volume'],
-            'MOD': ['restart', 'ban', 'force_embed']
+            'MOD': ['restart', 'ban', 'force_embed'],
+            'JP': ['convkana']
         }
 
-    @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h'])
+    @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h', 'hjälp'])
     async def help_msg(self, ctx, command_help=''):
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
@@ -56,27 +57,31 @@ class ControlCog(Cog):
             help_music = '🎧 `MUSIC`\n'
             help_misc = '🗿 `MISC`\n'
             help_mod = '🎩 `MOD`\n'
+            help_jp = '🇯🇵 `JP`\n'
 
-            for command in self.__bot.commands:
-                if command.name in self.__commands['MUSIC']:
-                    help_music += f'**{command}**, '
+            for cmd in self.__bot.commands:
+                if cmd.name in self.__commands['MUSIC']:
+                    help_music += f'**{cmd}**, '
 
-                elif command.name in self.__commands['MOD']:
-                    help_mod += f'**{command}** - {command.help}\n'
+                elif cmd.name in self.__commands['MOD']:
+                    help_mod += f'**{cmd}** - {cmd.help}\n'
+
+                elif cmd.name in self.__commands['JP']:
+                    help_jp += f'**{cmd}** - {cmd.help}\n'
 
                 else:
-                    help_misc += f'**{command}** - {command.help}\n'
+                    help_misc += f'**{cmd}** - {cmd.help}\n'
             help_music = help_music[:-2] + '\n'
 
-            helptxt = f'\n{help_music}\n{help_misc}\n{help_mod}'
-            helptxt += f'\n\nType {self.__config.BOT_PREFIX}help <command> for more info'
+            helptxt = f'\n{help_music}\n{help_misc}\n{help_jp}\n{help_mod}'
+            helptxt += f'\n\nType {self.__config.BOT_PREFIX}help <cmd> for more info'
             embedhelp = Embed(
                 title=f'**Commands: {self.__bot.user.name}**',
                 description=helptxt,
                 colour=self.__colors.BLUE
             )
 
-            if self.__bot.user.avatar != None:
+            if self.__bot.user.avatar is None:
                 embedhelp.set_thumbnail(url=self.__bot.user.avatar)
             await ctx.send(embed=embedhelp)
 

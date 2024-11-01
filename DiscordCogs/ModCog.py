@@ -82,7 +82,7 @@ class ModCog(Cog):
     async def force_embed(self, ctx: Context, *args) -> None:
         embed_to_force = None
         if len(args) != 1:
-            embed = self.__embeds.INCORRECT_FORCE_EMBED()
+            embed = self.__embeds.BAD_COMMAND_USAGE('force_embed')
             await ctx.send(embed=embed)
             return
 
@@ -111,7 +111,7 @@ class ModCog(Cog):
             if args[0].upper() in all_embeds:
                 embed_to_force = args[0].upper()
             else:
-                embed = self.__embeds.INCORRECT_FORCE_EMBED()
+                embed = self.__embeds.BAD_COMMAND_USAGE('force_embed')
                 await ctx.send(embed=embed)
                 return
 

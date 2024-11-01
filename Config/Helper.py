@@ -45,9 +45,9 @@ class Helper(Singleton):
             self.HELP_WAHL = 'Ask the "Heilige Wahlkommission" a question'
             self.HELP_WAHL_LONG = 'Asks the "Heilige Wahlkommission" for salvation and enlightenment.'
             self.HELP_ALERT = 'Pings you after some time.'
-            self.HELP_ALERT_LONG = 'Pings you after some time. Format: [1-60][s,m,h,d] (ID/Message) (Message).'
+            self.HELP_ALERT_LONG = 'Pings you after some time. Syntax: [1-60][s,m,h,d] (ID/Message) (Message).'
             self.HELP_CLEAN = 'Cleans messages sent by bot and bot commands'
-            self.HELP_CLEAN_LONG = (f'Cleans messages sent by bot and bot commands.\nFormat: {config.BOT_PREFIX}clean [(user,bot,all,any,saul) (n)]'
+            self.HELP_CLEAN_LONG = (f'Cleans messages sent by bot and bot commands.\nSyntax: {config.BOT_PREFIX}clean [(user,bot,all,any,saul) (n)]'
                                     f', defaults are all, 20.\nArgument order doesn\'t matter.\nQueries the last {config.CLEAN_AMOUNT} messages.\n\n'
                                     f'user = messages that start with "{config.BOT_PREFIX}"\nbot = messages by bot\nall = both\n'
                                     f'any = any message (effectively a purge command)\nsaul = messages from saul goodman as he likes to spam')
@@ -56,13 +56,22 @@ class Helper(Singleton):
             self.HELP_BAN = 'Bans a user from using Blueshellbot.'
             self.HELP_BAN_LONG = ('Bans a user from using the bot. Any command they run will not work and will not be executed.\n'
                                   'If the command is used again, the user will be unbanned.\n'
-                                  'Format: `b.ban <user_id>`'
+                                  'Syntax: `b.ban <user_id>`'
                                   'This command is admin only')
             self.HELP_FORCE_EMBED = 'Forces any embed for testing purposes.'
             self.HELP_FORCE_EMBED_LONG = (f'Run `{config.BOT_PREFIX}force_embed list` to display all available embeds.'
                                           f'Run `{config.BOT_PREFIX}force_embed <embed>` to show any embed. This command is admin only.')
             self.HELP_FEET = 'laal.'
             self.HELP_FEET_LONG = 'Maggda loves feets and loves briar imagine he had brier feets aka YOU CANT PLURALS YOU CAKE SNAKE SKIBIDI SEVERUS SNAPE'
+            self.HELP_CONVKANA = 'Converts kana into romaji or the other way around.'
+            self.HELP_CONVKANA_LONG = (f'Converts between hiragana/katakana and romaji.\n'
+                                       f'Syntax: `{config.BOT_PREFIX}convkana [h/k] "kana/romaji"`\n'
+                                       f'Example: `{config.BOT_PREFIX}convkana h りょ` returns "ryo"\n'
+                                       f'Works with multiple kana.')
+            self.HELP_KANA_GAME = 'Starts the kana game.'
+            self.HELP_KANA_GAME_LONG = (f'Starts an interactive game for guessing kana.\n'
+                                        f'Syntax: `{config.BOT_PREFIX}kanagame [h/k/b] [t/f/b]`\n'
+                                        f'Letter meanings: hiragana, katakana, both | to, from, both')
 
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
             self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'

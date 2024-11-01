@@ -5,16 +5,21 @@ from Config.Emojis import BEmojis
 
 class Messages(Singleton):
     def __init__(self) -> None:
+
+
         if not super().created:
             self.__emojis = BEmojis()
             configs = BConfigs()
             self.STARTUP_MESSAGE = 'starting bot'
             self.STARTUP_COMPLETE_MESSAGE = 'bot is running.'
+            self.INVITE_URL = 'https://discord.com/oauth2/authorize?client_id=1242900773659086890&permissions=8&scope=bot'
+            self.INVITE_MESSAGE = 'Balls, idk this is not needed but if i remove it it breaks lol (dunno why)'
 
             self.SONGINFO_UPLOADER = "Channel/Artist: "
             self.SONGINFO_DURATION = "Duration: "
             self.SONGINFO_REQUESTER = 'Requested by: '
             self.SONGINFO_POSITION = 'Position in Queue: '
+            self.SONGINFO_UNKNOWN_DURATION = 'Unknown duration.'
 
             self.VOLUME_CHANGED = 'Volume changed to `{}`%'
             self.SONGS_ADDED = 'Downloading `{}` songs.'
@@ -89,8 +94,7 @@ class Messages(Singleton):
 class SearchMessages(Singleton):
     def __init__(self) -> None:
         if not super().created:
-            config = BConfigs()
-            self.UNKNOWN_INPUT = f'Weird ass input, even I dunno what happened.'
+            self.UNKNOWN_INPUT = 'Weird ass input, even I dunno what happened.'
             self.UNKNOWN_INPUT_TITLE = 'Nothing Found'
             self.GENERIC_TITLE = 'URL didnt work.'
             self.SPOTIFY_NOT_FOUND = 'Spotify didn\'t find any songs.'

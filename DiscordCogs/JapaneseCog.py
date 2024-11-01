@@ -6,7 +6,8 @@ from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
 from Utils.Utils import Utils
-import Utils.Kana
+import Utils.Kana as Kana
+
 helper = Helper()
 
 class JapaneseCog(Cog):
@@ -17,6 +18,28 @@ class JapaneseCog(Cog):
         self.__colors = BColors()
         self.__config = BConfigs()
         self.__bot: BlueshellBot = bot
+
+    # testing
+    @command(name="convkana", help=helper.HELP_CONVKANA, description=helper.HELP_CONVKANA_LONG, aliases=['conv'])
+    async def convkana(self, ctx: Context, *args) -> None:
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
+        if len(args) != 2:
+            embed = self.__embeds.BAD_COMMAND_USAGE('convkana')
+            await ctx.send(embed=embed)
+            return
+        output = Kana.conv_multiple_kana(args[0], args[1])
+        embed = self.__embeds.KANA_CONVERTED_EMBED(args[1], output[0], args[0], output[1])
+        await ctx.send(embed=embed)
+        return
+
+    @command(name="kanagame", help=helper.HELP_KANA_GAME, description=helper.HELP_KANA_GAME_LONG, aliases=['kgame'])
+    async def kanagame(self, ctx: Context, *args) -> None:
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
+        pass
 
 def setup(bot):
     bot.add_cog(JapaneseCog(bot))
