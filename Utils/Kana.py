@@ -146,5 +146,3 @@ def conv_multiple_kana(kana_type, to_conv):
             return "found no results", 1
         return f"Found: {output}, not found: {converting}", 2
     return output, 0
-
-print(conv_multiple_kana('h', 'kakkoii'))
