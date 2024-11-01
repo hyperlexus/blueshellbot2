@@ -5,7 +5,7 @@ from Config.Helper import Helper
 from Config.Colors import BColors
 from Music.BlueshellBot import BlueshellBot
 from Config.Embeds import BEmbeds
-from DiscordCogs.MusicCog import check_if_banned
+from Utils.Utils import Utils
 
 helper = Helper()
 
@@ -28,7 +28,7 @@ class ControlCog(Cog):
 
     @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h'])
     async def help_msg(self, ctx, command_help=''):
-        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
         if command_help != '':
@@ -82,7 +82,7 @@ class ControlCog(Cog):
 
     @command(name='invite', help=helper.HELP_INVITE, description=helper.HELP_INVITE_LONG, aliases=['inv'])
     async def invite_bot(self, ctx):
-        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
         invite_url = self.__config.INVITE_URL.format(self.__bot.user.id)

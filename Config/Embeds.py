@@ -444,9 +444,15 @@ class BEmbeds:
         return embed
 
     def ALERT_DONE(self, *args: tuple) -> Embed:
+        time_str = args[0]
+        message = args[1] if len(args) > 1 and args[1] else None
+
+        description = f"⏰ Alert of {time_str} done"
+        description += f", message is: {message}." if message else "."
+
         embed = Embed(
-            title='Alert',
-            description=f"\"⏰\" of {args[0]} done{f', message is {args[1]}.' if len(args) > 1 or len(args) == 3 and args[2] == False else '.'}",
+            title="Alert",
+            description=description,
             colour=self.__colors.GREEN
         )
         return embed

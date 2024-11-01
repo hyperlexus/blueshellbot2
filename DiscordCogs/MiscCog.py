@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 from random import random
 from Music.BlueshellBot import BlueshellBot
 from discord.ext.commands import Context, command, Cog
@@ -7,41 +6,8 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from DiscordCogs.MusicCog import check_if_banned
+from Utils.Utils import Utils
 helper = Helper()
-
-def convert_to_s(time: str):
-    units = {"s": 1, "m": 60, "h": 3600, "d": 86400}
-    time_value = int(time[:-1])
-    time_unit = time[-1]
-
-    if time_unit in units:
-        return time_value * units[time_unit]
-    else:
-        return None
-
-def seconds_until(time_str: str):
-    try:
-        if ':' in time_str:
-            time_array = time_str.split(':')
-        else:
-            return False
-        time_int: int = 0
-        for i in range(len(time_array)):
-            time_array[i] = int(time_array[i])
-            time_int += time_array[i] * 3600 / (60**i)
-        time_int = int(time_int)
-    except ValueError:
-        return False
-    now = datetime.now()
-    now_h, now_m, now_s = now.hour, now.minute, now.second
-    now_seconds = now_h * 3600 + now_m * 60 + now_s
-    try:
-        time_int = (time_int - now_seconds) % 86400
-    except ValueError:
-        return False
-    time = f"{time_int}s"
-    return time
 
 class MiscCog(Cog):
     """Class to listen to commands of type Misc"""
@@ -54,11 +20,10 @@ class MiscCog(Cog):
 
     @command(name='wahl', help=helper.HELP_WAHL, description=helper.HELP_WAHL_LONG, aliases=['wahlkommission'])
     async def wahlkommission(self, ctx: Context) -> None:
-        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
-        x = random()
-        result = round(x * 100)
+        result = round(random() * 100)
         if result == 69:
             result = (f"{str(result)}. 恭喜你獲得傳奇號碼69！無論您是擲骰子、轉動輪盤，還是只是碰巧發現了這個標誌性數字，今天都是您的幸運"
                       f"日！69 不只是一個普通的數字──它是平衡、二元性和樂趣的象徵。擁抱 69 的俏皮能量！它提醒我們不要把生活看得太嚴肅，並在"
@@ -75,74 +40,45 @@ class MiscCog(Cog):
 
     @command(name='alert', help=helper.HELP_ALERT, description=helper.HELP_ALERT_LONG, aliases=['remindme', 'timer', 'reminder'])
     async def alert(self, ctx: Context, time_str: str, *args: str) -> None:
-        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
-        other_user = True
-        if not args == ():
+
+        other_user, text = False, None
+        if args:
             user_id = args[0]
-            if len(args) > 1:
-                text = args[1]
-            try:
-                if user_id[0] == '<':
-                    user_id = user_id[2:-1]
-                try:
-                    user_id = int(user_id)
-                except ValueError:
-                    text = user_id
-                    other_user = False
-            except ValueError:
-                embed = self.__embeds.BAD_USER_ID(user_id)
-                await ctx.send(embed=embed)
-                return
-        else:
-            other_user = False
+            text = " ".join(args[1:]) if len(args) > 1 else None
 
-        try:
-            new_time_str = False
-            if time_str[0] == 't':
-                new_time_str = seconds_until(time_str[1:])
-                if not new_time_str:
-                    embed = self.__embeds.BAD_ALERT(time_str)
-                    await ctx.send(embed=embed)
-                    return
-            if not new_time_str:
-                new_time_str = time_str
-            seconds = convert_to_s(new_time_str)
-
-            if seconds is None:
-                embed = self.__embeds.BAD_ALERT(time_str)
-                await ctx.send(embed=embed)
-                return
-
-            embed = self.__embeds.ALERT_SET(new_time_str)
-            await ctx.send(embed=embed)
-
-            await asyncio.sleep(seconds)
-            if len(args) == 2 or len(args) == 1 and not other_user:
-                embed = self.__embeds.ALERT_DONE(new_time_str, text, other_user)
-            elif len(args) < 2:
-                embed = self.__embeds.ALERT_DONE(new_time_str)
-
+            other_user = user_id.startswith('<')
             if other_user:
-                await ctx.send(f'<@{user_id}>')
-                await ctx.send(embed=embed)
-            else:
-                await ctx.reply(embed=embed)
+                user_id = int(user_id[2:-1])
+                if not isinstance(user_id, int):
+                    await ctx.send(embed=self.__embeds.BAD_USER_ID(user_id))
+                    return
 
-        except IndexError as i:
-            await ctx.send(i)
-        except Exception as e:
-            embed = self.__embeds.BAD_ALERT(new_time_str)
-            await ctx.send(embed=embed)
+        new_time_str = Utils.seconds_until(time_str[1:]) if time_str.startswith('t') else time_str
+        seconds = Utils.convert_to_s(new_time_str)
+        if seconds is None:
+            await ctx.send(embed=self.__embeds.BAD_ALERT(time_str))
+            return
+
+        await ctx.send(embed=self.__embeds.ALERT_SET(new_time_str))
+
+        await asyncio.sleep(seconds)
+
+        embed = self.__embeds.ALERT_DONE(new_time_str, text or "", other_user)
+
+        if other_user:
+            await ctx.send(f'<@{user_id}>')
+        await ctx.send(embed=embed)
 
     @command(name='feet', help=helper.HELP_FEET, description=helper.HELP_FEET_LONG)
-    async def feet(self, ctx: Context, *args: str) -> None:
+    async def feet(self, ctx: Context) -> None:
         await ctx.send('I love feet🦶')
 
     @command(name='clean', help=helper.HELP_CLEAN, description=helper.HELP_CLEAN_LONG)
     async def clean(self, ctx: Context, *args: str) -> None:
-        if check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
         number_set, limit, c, who = False, 20, 0, "all"  # innit bruv
