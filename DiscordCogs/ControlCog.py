@@ -24,7 +24,8 @@ class ControlCog(Cog):
                       'np', 'shuffle', 'move', 'remove',
                       'reset', 'prev', 'history', 'volume'],
             'MOD': ['restart', 'ban', 'force_embed'],
-            'JP': ['convkana']
+            'JP': ['convkana', 'kanagame'],
+            'PIZZA': ['pinsert', 'plist', 'premove', 'pinfo']
         }
 
     @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h', 'hjälp'])
@@ -58,6 +59,7 @@ class ControlCog(Cog):
             help_misc = '🗿 `MISC`\n'
             help_mod = '🎩 `MOD`\n'
             help_jp = '🇯🇵 `JP`\n'
+            help_pizza = '🍕 `PIZZA`\n'
 
             for cmd in self.__bot.commands:
                 if cmd.name in self.__commands['MUSIC']:
@@ -69,11 +71,14 @@ class ControlCog(Cog):
                 elif cmd.name in self.__commands['JP']:
                     help_jp += f'**{cmd}** - {cmd.help}\n'
 
+                elif cmd.name in self.__commands['PIZZA']:
+                    help_pizza += f'**{cmd}** - {cmd.help}\n'
+
                 else:
                     help_misc += f'**{cmd}** - {cmd.help}\n'
             help_music = help_music[:-2] + '\n'
 
-            helptxt = f'\n{help_music}\n{help_misc}\n{help_jp}\n{help_mod}'
+            helptxt = f'\n{help_music}\n{help_misc}\n{help_jp}\n{help_pizza}\n{help_mod}'
             helptxt += f'\n\nType {self.__config.BOT_PREFIX}help <cmd> for more info'
             embedhelp = Embed(
                 title=f'**Commands: {self.__bot.user.name}**',

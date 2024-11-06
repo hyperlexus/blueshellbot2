@@ -65,13 +65,19 @@ class Helper(Singleton):
             self.HELP_FEET_LONG = 'Maggda loves feets and loves briar imagine he had brier feets aka YOU CANT PLURALS YOU CAKE SNAKE SKIBIDI SEVERUS SNAPE'
             self.HELP_CONVKANA = 'Converts kana into romaji or the other way around.'
             self.HELP_CONVKANA_LONG = (f'Converts between hiragana/katakana and romaji.\n'
-                                       f'Syntax: `{config.BOT_PREFIX}convkana [h/k] "kana/romaji"`\n'
+                                       f'Syntax: `{config.BOT_PREFIX}convkana [h/k] <kana/romaji>`\n'
                                        f'Example: `{config.BOT_PREFIX}convkana h りょ` returns "ryo"\n'
                                        f'Works with multiple kana.')
             self.HELP_KANA_GAME = 'Starts the kana game.'
             self.HELP_KANA_GAME_LONG = (f'Starts an interactive game for guessing kana.\n'
                                         f'Syntax: `{config.BOT_PREFIX}kanagame [h/k/b] [t/f/b]`\n'
                                         f'Letter meanings: hiragana, katakana, both | to, from, both')
+
+            self.HELP_PINSERT = 'Inserts a new command into pizza romani.'
+            self.HELP_PINSERT_LONG = (f'Adds a new command into pizza romani.\n'
+                                      f'Syntax: `{config.BOT_PREFIX}pinsert [is/in/start/end] "message" "response"`\n'
+                                      f'Example: `{config.BOT_PREFIX}pinsert in test testicles`\n'
+                                      f'If message and/or response have spaces in it, use quotation marks.')
 
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
             self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'
