@@ -73,8 +73,8 @@
             "replace": false
         },
         {
-            "time": "2024-11-08 17:47:50",
-            "author": "<@468786219258740756>",
+            "time": "1731084526579",
+            "author": "468786219258740756",
             "type": "end",
             "read": " tun",
             "write": "ES GIBT HUHN?!?!",
@@ -89,11 +89,11 @@
             "replace": false
         },
         {
-            "time": "1731086414218",
+            "time": "1731100537992",
             "author": "422800248935546880",
-            "type": "end",
-            "read": "alluhn",
-            "write": "ES GIBT HUHN?!?!",
+            "type": "in",
+            "read": "invisible",
+            "write": "\u00ad",
             "replace": false
         }
     ]

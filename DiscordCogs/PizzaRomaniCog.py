@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from copy import deepcopy
 from Music.BlueshellBot import BlueshellBot
 from discord.ext.commands import Context, command, Cog
 from Config.Helper import Helper
@@ -158,13 +158,23 @@ class PizzaRomaniCog(Cog):
         if len(args) == 1:
             target_command = matching_commands[0]
         elif len(args) == 2:
-            target_command = matching_commands[args[1] - 1]
-        print(target_command)
+            try:
+                int(args[1])
+            except ValueError:
+                await ctx.send(embed=self.__embeds.INTEGER_ONLY_HERE(args[1]))
+                return
+            target_command = matching_commands[int(args[1]) - 1]
+        command_editable = deepcopy(target_command)
 
-        target_command['author'] = f"<@{target_command['author']}>"
-        target_command['time'] = str(datetime.fromtimestamp(float(target_command['time'])//1000))
-        result = "\n".join(f"{key}: {value}" for key, value in target_command.items())
-        await ctx.send(result)
+        command_editable['author'] = f"<@{command_editable['author']}>"
+        command_editable['time'] = f"<t:{int(command_editable['time'])//1000}>"
+        result = "\n".join(f"{key}: {value}" for key, value in command_editable.items())
+
+        embed = self.__embeds.PIZZA_INFO(result)
+        if len(args) == 1 and len(matching_commands) > 1:
+            embed.set_footer(text="There is more than 1 command with this write result. Did you select the right command?")
+        await ctx.send(embed=embed)
+        return
 
 
 def setup(bot):

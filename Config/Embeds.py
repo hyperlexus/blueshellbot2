@@ -1,3 +1,4 @@
+from idlelib.colorizer import color_config
 from random import random
 from Config.Messages import Messages
 from Config.Exceptions import BlueshellError
@@ -594,7 +595,23 @@ class BEmbeds:
     def PIZZA_LIST_FILTERED(self, text, filter_type, filter_keyword):
         embed = Embed(
             title="List of pizza commands",
-            description=f"Filtered by {filter_type}, matching {filter_keyword}\n\n" + text,
+            description=f"Filtered by {filter_type}, matching {filter_keyword}\n\n{text}",
             color=self.__colors.BLUE
+        )
+        return embed
+
+    def PIZZA_INFO(self, text):
+        embed = Embed(
+            title="Information on a pizza command",
+            description=text,
+            color=self.__colors.BLUE
+        )
+        return embed
+
+    def INTEGER_ONLY_HERE(self, not_an_int):
+        embed = Embed(
+            title="Error: an integer is required here.",
+            description=f"The input {not_an_int} is not an integer. Please only input integers here.",
+            color=self.__colors.RED
         )
         return embed
