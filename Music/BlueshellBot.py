@@ -4,24 +4,11 @@ from datetime import datetime
 import discord
 from discord import Guild, Status, Game, Message
 from discord.ext.commands import Bot, Context
-from discord.ext.commands.errors import CommandNotFound, MissingRequiredArgument
+from discord.ext.commands.errors import CommandNotFound, MissingRequiredArgument, ExpectedClosingQuoteError, UnexpectedQuoteError, BadArgument
 from Config.Configs import BConfigs
-
-
 from Config.Messages import Messages
 from Config.Embeds import BEmbeds
-
-
-def helper_calcdifftime(end_str: str, format_str='%Y-%m-%dZ%H:%M:%S') -> str:
-    start_dt = datetime.now()
-    end_dt = datetime.strptime(end_str, format_str)
-    difference = end_dt - start_dt
-    total_seconds = int(difference.total_seconds())
-    days = total_seconds // (24 * 3600)
-    hours = (total_seconds % (24 * 3600)) // 3600
-    minutes = (total_seconds % 3600) // 60
-    result = f"{int(days):02d}d {int(hours):02d}h {int(minutes):02d}m"
-    return result
+from Utils.Utils import Utils
 
 
 class BlueshellBot(Bot):
@@ -64,7 +51,7 @@ class BlueshellBot(Bot):
     async def change_status(self):
         while True:
             # line to change when prim gives you the time of arrival :)
-            await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.playing, name=f"{helper_calcdifftime('2024-09-03Z19:10:00')}"))
+            await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.playing, name=f"{Utils.helper_calcdifftime('2024-09-03Z19:10:00')}"))
             await asyncio.sleep(1)
 
     async def on_ready(self):
@@ -73,21 +60,26 @@ class BlueshellBot(Bot):
         await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.competing, name=f"prefix: '{self.__configs.BOT_PREFIX}'"))
         if self.__listingSlash:
             print(self.__messages.STARTUP_COMPLETE_MESSAGE)
-        # await self.loop.create_task(self.change_status())
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):
-            embed = self.__embeds.MISSING_ARGUMENTS()
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
+
+        elif isinstance(error, ExpectedClosingQuoteError):
+            await ctx.send("Daan lassen siis bleiben bitte, das ist langsam WIRKLICH nicht mehr witzig mal ehrlich")
 
         elif isinstance(error, CommandNotFound):
-            embed = self.__embeds.COMMAND_NOT_FOUND()
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.COMMAND_NOT_FOUND())
+
+        elif isinstance(error, UnexpectedQuoteError):
+            await ctx.send("Das geht so nicht sie pizzierender spast, machen sie einfach keine quotes")
+
+        elif isinstance(error, BadArgument):
+            await ctx.send("Please leave a space between arguments")
 
         else:
             print(f'Command has thrown an error -> {error}')
-            embed = self.__embeds.UNKNOWN_ERROR()
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.UNKNOWN_ERROR())
 
     async def process_commands(self, message: Message):
         if message.author.bot:

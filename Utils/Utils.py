@@ -1,9 +1,12 @@
 import os
 import re
 import asyncio
-from Config.Configs import BConfigs
+from datetime import datetime
 from functools import wraps, partial
+from Config.Configs import BConfigs
+from Config.Embeds import BEmbeds
 config = BConfigs()
+embeds = BEmbeds()
 
 
 class Utils:
@@ -80,6 +83,30 @@ class Utils:
         else:
             return False
 
+    @classmethod
+    def ping_to_id(cls, user_id) -> (int | bool):
+        """Turns a ping to a user id, and keeps the id if it already is an id"""
+        if user_id.startswith('<@') and user_id.endswith('>'):
+            user_id = user_id[2:-1]
+        try:
+            user_id = int(user_id)
+        except ValueError:
+            return False
+        if isinstance(user_id, int) and not (user_id // 1_000_000_000_000 < 1):
+            return user_id
+        return False
+
+    @classmethod
+    def helper_calcdifftime(cls, end_str: str, format_str='%Y-%m-%dZ%H:%M:%S') -> str:
+        start_dt = datetime.now()
+        end_dt = datetime.strptime(end_str, format_str)
+        difference = end_dt - start_dt
+        total_seconds = int(difference.total_seconds())
+        days = total_seconds // (24 * 3600)
+        hours = (total_seconds % (24 * 3600)) // 3600
+        minutes = (total_seconds % 3600) // 60
+        result = f"{int(days):02d}d {int(hours):02d}h {int(minutes):02d}m"
+        return result
 
 def run_async(func):
     @wraps(func)

@@ -35,8 +35,7 @@ class MiscCog(Cog):
         if result == 0:
             result = f"{str(result)}, sie ham gekackt. sie können einfach garnix; sie blöder kackspast. gehen sie sich begraben."
 
-        embed = self.__embeds.WAHLKOMMISSION(result)
-        await ctx.send(embed=embed)
+        await ctx.send(embed=self.__embeds.WAHLKOMMISSION(result))
 
     @command(name='alert', help=helper.HELP_ALERT, description=helper.HELP_ALERT_LONG, aliases=['remindme', 'timer', 'reminder'])
     async def alert(self, ctx: Context, time_str: str, *args: str) -> None:
@@ -46,15 +45,13 @@ class MiscCog(Cog):
 
         other_user, text = False, None
         if args:
-            user_id = args[0]
             text = " ".join(args[1:]) if len(args) > 1 else None
-
-            other_user = user_id.startswith('<')
-            if other_user:
-                user_id = int(user_id[2:-1])
-                if not isinstance(user_id, int):
-                    await ctx.send(embed=self.__embeds.BAD_USER_ID(user_id))
-                    return
+            user_id = Utils.ping_to_id(args[0])
+            if not user_id:
+                await ctx.send(embed=self.__embeds.BAD_USER_ID(args[0]))
+                return
+            if user_id != args[0]:
+                other_user = True
 
         new_time_str = Utils.seconds_until(time_str[1:]) if time_str.startswith('t') else time_str
         seconds = Utils.convert_to_s(new_time_str)
@@ -66,11 +63,11 @@ class MiscCog(Cog):
 
         await asyncio.sleep(seconds)
 
-        embed = self.__embeds.ALERT_DONE(new_time_str, text or "", other_user)
-
         if other_user:
             await ctx.send(f'<@{user_id}>')
-        await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.ALERT_DONE(new_time_str, text or "", other_user))
+        else:
+            await ctx.reply(embed=self.__embeds.ALERT_DONE(new_time_str, text or "", other_user))
 
     @command(name='feet', help=helper.HELP_FEET, description=helper.HELP_FEET_LONG)
     async def feet(self, ctx: Context) -> None:
@@ -93,13 +90,11 @@ class MiscCog(Cog):
                     if type(i) == str and i in ("all", "bot", "user", "saul", "any"):
                         who = i
                     else:
-                        embed = self.__embeds.BAD_CLEAN_INPUT(args)
-                        await ctx.send(embed=embed)
+                        await ctx.send(embed=self.__embeds.BAD_CLEAN_INPUT(args))
                         return
 
         if limit > self.__config.CLEAN_AMOUNT:
-            embed = self.__embeds.TOO_MANY_CLEAN_QUERIES(limit)
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.TOO_MANY_CLEAN_QUERIES(limit))
             return
 
         if who == "any":
@@ -136,8 +131,7 @@ class MiscCog(Cog):
         if c == 0:
             c = 1
 
-        embed = self.__embeds.CLEANED(limit, c-1, who, inspect_amount)
-        await ctx.send(embed=embed, delete_after=10)
+        await ctx.send(embed=self.__embeds.CLEANED(limit, c-1, who, inspect_amount), delete_after=10)
 
 def setup(bot):
     bot.add_cog(MiscCog(bot))

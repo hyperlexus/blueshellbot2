@@ -5,21 +5,96 @@
             "author": "422800248935546880",
             "type": "end",
             "read": "allah",
-            "write": "allahuakbar"
+            "write": "allahuakbar",
+            "replace": false
         },
         {
             "time": "1730904198605",
             "author": "422800248935546880",
             "type": "is",
             "read": "nigger",
-            "write": "das ist aber wirklich politisch nicht korrekt"
+            "write": "das ist aber wirklich politisch nicht korrekt",
+            "replace": false
         },
         {
             "time": "1730904198605",
             "author": "422800248935546880",
             "type": "is",
             "read": "ich bin doch nicht gay",
-            "write": "doch bist du schon"
+            "write": "doch bist du schon",
+            "replace": false
+        },
+        {
+            "time": "1731062138114",
+            "author": "422800248935546880",
+            "type": "in",
+            "read": "deine mamer",
+            "write": "dein vater",
+            "replace": false
+        },
+        {
+            "time": "1731066071308",
+            "author": "422800248935546880",
+            "type": "in",
+            "read": "oxygen",
+            "write": "hat da jemand oxygen gesagt",
+            "replace": false
+        },
+        {
+            "time": "1731065160396",
+            "author": "422800248935546880",
+            "type": "in",
+            "read": "oxygen",
+            "write": "b.play oxygen kloudz",
+            "replace": false
+        },
+        {
+            "time": "1731066143082",
+            "author": "422800248935546880",
+            "type": "in",
+            "read": "test",
+            "write": "testicles",
+            "replace": false
+        },
+        {
+            "time": "1731071370785",
+            "author": "422800248935546880",
+            "type": "start",
+            "read": "ich",
+            "write": "ne, ich",
+            "replace": true
+        },
+        {
+            "time": "1731083415075",
+            "author": "468786219258740756",
+            "type": "is",
+            "read": "x",
+            "write": "y",
+            "replace": false
+        },
+        {
+            "time": "2024-11-08 17:47:50",
+            "author": "<@468786219258740756>",
+            "type": "end",
+            "read": " tun",
+            "write": "ES GIBT HUHN?!?!",
+            "replace": false
+        },
+        {
+            "time": "1731084526581",
+            "author": "538132383531008001",
+            "type": "in",
+            "read": "kill yourself",
+            "write": "b.kys",
+            "replace": false
+        },
+        {
+            "time": "1731086414218",
+            "author": "422800248935546880",
+            "type": "end",
+            "read": "alluhn",
+            "write": "ES GIBT HUHN?!?!",
+            "replace": false
         }
     ]
 }

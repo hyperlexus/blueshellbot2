@@ -75,9 +75,31 @@ class Helper(Singleton):
 
             self.HELP_PINSERT = 'Inserts a new command into pizza romani.'
             self.HELP_PINSERT_LONG = (f'Adds a new command into pizza romani.\n'
-                                      f'Syntax: `{config.BOT_PREFIX}pinsert [is/in/start/end] "message" "response"`\n'
-                                      f'Example: `{config.BOT_PREFIX}pinsert in test testicles`\n'
-                                      f'If message and/or response have spaces in it, use quotation marks.')
+                                      f'Syntax: `{config.BOT_PREFIX}pinsert [is/in/start/end] "to_match" "response" (replace)`\n'
+                                      f'Example: `{config.BOT_PREFIX}pinsert in test "test icles"`\n'
+                                      f'If message and/or response have spaces in it, use quotation marks.\n'
+                                      f'If you want pizza romani to instead replace the match with the response, '
+                                      f'add "replace" at the end.\n\n'
+                                      f'is = is exactly equal\nin = contains\nstart = starts with\nend = ends with')
+            self.HELP_PLIST = 'Lists pizza romani matches, with further options.'
+            self.HELP_PLIST_LONG = (f'Lists all pizza romani matches. You can provide arguments to search further.\n\n'
+                                    f'Syntax: `{config.BOT_PREFIX}plist (filter keyword)`\n'
+                                    f'Example: `{config.BOT_PREFIX}plist write "test icles"`\n\n'
+                                    f'Possible search filters are:\n'
+                                    f'author (id/ping)\n'
+                                    f'read (what it matches)\n'
+                                    f'write (what it replies with)\n'
+                                    f'type (which match type)\n'
+                                    f'replace (lists all with replace mode on')
+
+            self.HELP_PINFO = 'Gets info about one pizza command.'
+            self.HELP_PINFO_LONG = (f'Retrieves information about one pizza romani command.\n'
+                                    f'You can find this command by searching for its write value.\n\n'
+                                    f'Syntax: `{config.BOT_PREFIX}pinfo write_value (number)`\n'
+                                    f'Example: `{config.BOT_PREFIX}pinfo "test icles" 2\n\n'
+                                    f'If there are 2 or more commands with the same write value '
+                                    f'(you can find them by running and filtering `{config.BOT_PREFIX}plist`), '
+                                    f'enter a number after the first argument to select different ones.')
 
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
             self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'

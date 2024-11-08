@@ -477,7 +477,7 @@ class BEmbeds:
     def BAD_USER_ID(self, user_id: str) -> Embed:
         embed = Embed(
             title='Bad User ID',
-            description=f'User ID "{user_id}" didn\'t work. Right click someone to copy their ID.',
+            description=f'User ID "{user_id}" didn\'t work. Right click someone to copy their ID, or ping them.',
             colour=self.__colors.RED
         )
         return embed
@@ -564,5 +564,37 @@ class BEmbeds:
             title=f'Kana conversion',
             description=description_text,
             color=color_to_set
+        )
+        return embed
+
+    def PIZZA_INSERTED(self, read, write, replace):
+        embed = Embed(
+            title="Successfully inserted a new command into pizza romani!",
+            description=f"{read} -> {write}{' (replace mode on)' if replace else ''}",
+            color=self.__colors.BLUE
+        )
+        return embed
+
+    def PIZZA_LIST_TOO_LONG(self):
+        embed = Embed(
+            title="Error: list too long",
+            description="The list of commands is too long. Try narrowing down your search results!",
+            color=self.__colors.RED
+        )
+        return embed
+
+    def PIZZA_LIST(self, text):
+        embed = Embed(
+            title="List of pizza commands",
+            description=text,
+            color=self.__colors.BLUE
+        )
+        return embed
+
+    def PIZZA_LIST_FILTERED(self, text, filter_type, filter_keyword):
+        embed = Embed(
+            title="List of pizza commands",
+            description=f"Filtered by {filter_type}, matching {filter_keyword}\n\n" + text,
+            color=self.__colors.BLUE
         )
         return embed

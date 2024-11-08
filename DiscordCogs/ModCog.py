@@ -8,6 +8,7 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
+from Utils.Utils import Utils
 helper = Helper()
 
 class ModCog(Cog):
@@ -22,8 +23,7 @@ class ModCog(Cog):
     async def restart(self, ctx: Context) -> None:
         bot_admins = self.__config.BOT_ADMINS.split(",")
         if str(ctx.author.id) not in bot_admins:
-            embed = self.__embeds.MISSING_PERMISSIONS("restart")
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.MISSING_PERMISSIONS("restart"))
             return
         await ctx.send("restarting bot, please be patient.")
         os.chdir(self.__config.BAT_PATH)
@@ -39,25 +39,16 @@ class ModCog(Cog):
         os.chdir(self.__config.PROJECT_PATH)
         bot_admins = self.__config.BOT_ADMINS.split(",")
         if str(ctx.author.id) not in bot_admins:
-            embed = self.__embeds.MISSING_PERMISSIONS("ban")
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.MISSING_PERMISSIONS("ban"))
             return
 
-        try:
-            to_ban = int(args[0])
-            if to_ban // 1_000_000_000_000 < 1:
-                embed = self.__embeds.BAD_USER_ID(args[0])
-                await ctx.send(embed=embed)
-                return
-            to_ban = str(to_ban)
-        except ValueError:
-            embed = self.__embeds.BAD_USER_ID(args[0])
-            await ctx.send(embed=embed)
+        to_ban = str(Utils.ping_to_id(args[0]))
+        if to_ban == 'False':
+            await ctx.send(embed=self.__embeds.BAD_USER_ID(args[0]))
             return
 
         if to_ban in bot_admins:
-            embed = self.__embeds.INVALID_BAN_COMMAND()
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.INVALID_BAN_COMMAND())
             return
 
         username = str(self.__bot.get_user(int(to_ban)))[:-2]
@@ -82,14 +73,12 @@ class ModCog(Cog):
     async def force_embed(self, ctx: Context, *args) -> None:
         embed_to_force = None
         if len(args) != 1:
-            embed = self.__embeds.BAD_COMMAND_USAGE('force_embed')
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE('force_embed'))
             return
 
         bot_admins = self.__config.BOT_ADMINS.split(",")
         if str(ctx.author.id) not in bot_admins:
-            embed = self.__embeds.MISSING_PERMISSIONS("force_embed")
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.MISSING_PERMISSIONS("force_embed"))
             return
 
         all_embeds = [embed_name for embed_name in dir(self.__embeds)
@@ -111,8 +100,7 @@ class ModCog(Cog):
             if args[0].upper() in all_embeds:
                 embed_to_force = args[0].upper()
             else:
-                embed = self.__embeds.BAD_COMMAND_USAGE('force_embed')
-                await ctx.send(embed=embed)
+                await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE('force_embed'))
                 return
 
         embed_method = getattr(self.__embeds, embed_to_force)

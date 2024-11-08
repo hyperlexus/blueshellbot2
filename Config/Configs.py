@@ -49,6 +49,8 @@ class BConfigs(Singleton):
             self.PROJECT_URL = os.getenv('PROJECT_URL', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
             self.SUPPORTING_ICON = os.getenv('SUPPORTING_ICON', 'https://i.ytimg.com/vi/zktTuXl24dk/maxresdefault.jpg')
 
+            self.PIZZA_LIST_LENGTH = os.getenv('PIZZA_LIST_LENGTH', 20)
+
 
     def getPlayersManager(self):
         return self.__manager

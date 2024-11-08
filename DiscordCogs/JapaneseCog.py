@@ -26,12 +26,10 @@ class JapaneseCog(Cog):
             await ctx.send(embed=self.__embeds.BANNED())
             return
         if len(args) != 2:
-            embed = self.__embeds.BAD_COMMAND_USAGE('convkana')
-            await ctx.send(embed=embed)
+            await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE('convkana'))
             return
         output = Kana.conv_multiple_kana(args[0], args[1])
-        embed = self.__embeds.KANA_CONVERTED_EMBED(args[1], output[0], args[0], output[1])
-        await ctx.send(embed=embed)
+        await ctx.send(embed=self.__embeds.KANA_CONVERTED_EMBED(args[1], output[0], args[0], output[1]))
         return
 
     @command(name="kanagame", help=helper.HELP_KANA_GAME, description=helper.HELP_KANA_GAME_LONG, aliases=['kgame'])
