@@ -108,6 +108,25 @@ class Utils:
         result = f"{int(days):02d}d {int(hours):02d}h {int(minutes):02d}m"
         return result
 
+    @classmethod
+    def is_allowed_complex_input(cls, read_string):
+        print(read_string)
+        for i in ['False', 'None', 'True', 'and', 'as', 'assert',
+                           'async', 'await', 'break', 'class', 'continue',
+                           'def', 'del', 'elif', 'else', 'except', 'finally',
+                           'for', 'from', 'global', 'if', 'import',
+                           'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return',
+                           'try', 'while', 'with', 'yield']:
+            if i in read_string:
+                return 0
+        print(read_string)
+        if not [i in read_string for i in ['is', 'in', 'start', 'end']]:
+            return 1
+        print(read_string)
+        if not [i in read_string for i in ['|', '&']]:
+            return 2
+        return True
+
 def run_async(func):
     @wraps(func)
     async def run(*args, loop=None, executor=None, **kwargs):

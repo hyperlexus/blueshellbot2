@@ -6,6 +6,7 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
+from Utils.PizzaEvaluator import pizza_eval
 from Utils.Utils import Utils
 
 helper = Helper()
@@ -29,21 +30,28 @@ class PizzaRomaniCog(Cog):
 
         for current_dict in data['commands']:
             send = False
-            if current_dict['read'] in message.content.lower():
-                if current_dict['type'] == 'in':
+
+            if current_dict['type'] == 'in':
+                if current_dict['read'] in message.content.lower():
                     send = True
 
-                elif current_dict['type'] == 'is':
-                    if message.content == current_dict['read']:
-                        send = True
+            elif current_dict['type'] == 'is':
+                if message.content == current_dict['read']:
+                    send = True
 
-                elif current_dict['type'] == 'start':
-                    if message.content.startswith(current_dict['read']):
-                        send = True
+            elif current_dict['type'] == 'start':
+                if message.content.startswith(current_dict['read']):
+                    send = True
 
-                elif current_dict['type'] == 'end':
-                    if message.content.endswith(current_dict['read']):
-                        send = True
+            elif current_dict['type'] == 'end':
+                if message.content.endswith(current_dict['read']):
+                    send = True
+
+            elif current_dict['type'] == 'complex':
+                if pizza_eval(message.content.lower(), current_dict['read']):
+                    send = True
+                else:
+                    send = False
 
             if send and (message.guild is None or message.guild.id != 995966314877300737 or any(role.id == 1304403741759508500 for role in message.author.roles)):
                 if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
@@ -66,7 +74,7 @@ class PizzaRomaniCog(Cog):
 
         time = str(int(ctx.message.created_at.timestamp() * 1000))
         author = str(ctx.message.author.id)
-        if args[0] in ["is", "in", "start", "end"]:
+        if args[0] in ["is", "in", "start", "end", "complex"]:
             pizza_type = args[0]
         else:
             await ctx.send(embed=fail_embed)
@@ -77,6 +85,11 @@ class PizzaRomaniCog(Cog):
             replace = True if args[3] == "replace" else False
         else:
             replace = False
+
+        if pizza_type == "complex":
+            if not Utils.is_allowed_complex_input(args[1]):
+                await ctx.send(embed=fail_embed)
+                return
 
         new_command = {
             "time": time,
