@@ -1,5 +1,6 @@
 import re
 
+
 def pizza_eval(value: str, condition: str) -> bool:
     def replace_condition(match):
         command, arg = match.groups()

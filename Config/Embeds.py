@@ -1,4 +1,3 @@
-from idlelib.colorizer import color_config
 from random import random
 from Config.Messages import Messages
 from Config.Exceptions import BlueshellError
@@ -612,6 +611,14 @@ class BEmbeds:
         embed = Embed(
             title="Error: an integer is required here.",
             description=f"The input {not_an_int} is not an integer. Please only input integers here.",
+            color=self.__colors.RED
+        )
+        return embed
+
+    def PREMOVE_NOT_SPECIFIED(self):
+        embed = Embed(
+            title="Error: more than 1 option",
+            description="The command you are trying to remove has more than 1 match. Please specify a number as second argument.",
             color=self.__colors.RED
         )
         return embed

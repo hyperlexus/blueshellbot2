@@ -15,6 +15,7 @@ with open("pizza_database.json", "r") as f:
     data = json.load(f)
 
 
+# noinspection DuplicatedCode
 class PizzaRomaniCog(Cog):
     """ich ess pizza"""
     def __init__(self, bot: BlueshellBot):
@@ -188,6 +189,33 @@ class PizzaRomaniCog(Cog):
             embed.set_footer(text="There is more than 1 command with this write result. Did you select the right command?")
         await ctx.send(embed=embed)
         return
+
+    @command(name='premove', help=helper.HELP_PREMOVE, description=helper.HELP_PREMOVE_LONG, aliases=['pizza_remove'])
+    async def premove(self, ctx: Context, *args) -> None:
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
+        if len(args) not in (1, 2):
+            await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE("pinfo"))
+            return
+        try:
+            if len(args) == 2:
+                cmd_number = int(args[1])
+        except ValueError:
+            await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE('premove'))
+            return
+
+        valid_commands = []
+
+        for current_dict in data['commands']:
+            if args[0] == current_dict['write']:
+                valid_commands.append(current_dict)
+
+        if len(valid_commands) > 1:
+            if len(args) < 2:
+                await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
+                return
+
 
 
 def setup(bot):

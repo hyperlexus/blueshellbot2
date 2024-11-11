@@ -101,5 +101,13 @@ class Helper(Singleton):
                                     f'(you can find them by running and filtering `{config.BOT_PREFIX}plist`), '
                                     f'enter a number after the first argument to select different ones.')
 
+            self.HELP_PREMOVE = 'Removes a command from pizza romani.'
+            self.HELP_PREMOVE_LONG = ('Remove a command.\n\n'
+                                      f'Syntax: `{config.BOT_PREFIX}premove write_value (number)`'
+                                      f'Example: `{config.BOT_PREFIX}premove "test icles" 2`\n\n'
+                                      f'If there are 2 or more commands with the same write value '
+                                      f'(you can find them by running and filtering `{config.BOT_PREFIX}plist`), '
+                                      f'enter a number after the first argument to select different ones.')
+
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
             self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'
