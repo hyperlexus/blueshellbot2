@@ -6,7 +6,7 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils.PizzaEvaluator import pizza_eval_read
+from Utils import PizzaEvaluator
 from Utils.Utils import Utils
 
 helper = Helper()
@@ -49,7 +49,7 @@ class PizzaRomaniCog(Cog):
                     send = True
 
             elif current_dict['type'] == 'complex':
-                evaluated = pizza_eval_read(message.content.lower(), current_dict['read'])
+                evaluated = PizzaEvaluator.pizza_eval_read(message.content.lower(), current_dict['read'])
                 if evaluated:
                     send = True
 
@@ -200,13 +200,14 @@ class PizzaRomaniCog(Cog):
         await ctx.send(embed=embed)
         return
 
+    # this was never finished LOL
     @command(name='premove', help=helper.HELP_PREMOVE, description=helper.HELP_PREMOVE_LONG, aliases=['pizza_remove'])
     async def premove(self, ctx: Context, *args) -> None:
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
         if len(args) not in (1, 2):
-            await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE("pinfo"))
+            await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE("premove"))
             return
         try:
             if len(args) == 2:
@@ -222,7 +223,7 @@ class PizzaRomaniCog(Cog):
                 valid_commands.append(current_dict)
 
         if len(valid_commands) > 1:
-            if len(args) < 2:
+            if len(args) == 1:
                 await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
                 return
 
