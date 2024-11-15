@@ -622,3 +622,25 @@ class BEmbeds:
             color=self.__colors.RED
         )
         return embed
+
+    def PIZZA_INVALID_COMPLEX_INPUT(self, error_code: str):
+        description: str = ""
+        if 1 not in error_code and 2 not in error_code:
+            description += "you fucked up. check your code retard"
+        if 1 in error_code:
+            description += '\nOne of the valid pizza types (in, is, start, end) is missing.'
+        if 2 in error_code:
+            description += '\nOne of the pizza separators needed in complex input ("|", "&") are missing.'
+        problem_text = "s:\n" if len(error_code) == 2 else ":\n"
+
+
+        embed = Embed(
+            title="Error: Input not valid for 'complex' type.",
+            description="The input did not satisfy requirements for 'complex' type. Problem" + problem_text + description,
+            color=self.__colors.RED
+        )
+        embed.set_footer(text="Check if you made a typo, or if your command should have a simple type.",
+                         icon_url="https://static-00.iconduck.com/assets.00/cold-face-emoji-512x512-k8er8wn9.png")
+        return embed
+
+

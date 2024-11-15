@@ -80,7 +80,7 @@ class PlayHandler(AbstractHandler):
                 return response
             else:  # If multiple songs added
                 # Trigger a task to download all songs and then store them in the playlist
-                asyncio.create_task(self.__downloadSongsInLots(songs, playersManager))
+                asyncio.create_task(self.__downloadSongsInBatches(songs, playersManager))
 
                 embed = self.embeds.SONGS_ADDED(len(songs))
                 return HandlerResponse(self.ctx, embed)
@@ -98,31 +98,28 @@ class PlayHandler(AbstractHandler):
 
             return HandlerResponse(self.ctx, embed, error)
 
-    async def __downloadSongsInLots(self, songs: List[Song], playersManager: AbstractPlayersManager) -> None:
-        """
-        To avoid having a lot of tasks delaying the song playback we will lock the maximum songs downloading at a time
-        """
+    async def __downloadSongsInBatches(self, songs: List[Song], playersManager: AbstractPlayersManager) -> None:
         playlist = playersManager.getPlayerPlaylist(self.guild)
         playCommand = BCommands(BCommandsType.PLAY, None)
         maxDownloads = self.config.MAX_DOWNLOAD_SONGS_AT_A_TIME
 
         while len(songs) > 0:
-            # Verify how many songs will be downloaded in this lot and extract from the songs list
+            # Verify how many songs will be downloaded in this batch and extract from the songs list
             songsQuant = min(maxDownloads, len(songs))
-            # Get the first quantInLot songs
-            songsInLot = songs[:songsQuant]
-            # Remove the first quantInLot songs from the songs
+            # Get the first quantInBatch songs
+            songsInBatch = songs[:songsQuant]
+            # Remove the first quantInBatch songs from the songs
             songs = songs[songsQuant:]
 
-            # Create task to download the songs in the lot
+            # Create task to download the songs in the batch
             tasks: List[asyncio.Task] = []
-            for index, song in enumerate(songsInLot):
+            for index, song in enumerate(songsInBatch):
                 task = asyncio.create_task(self.__down.download_song(song))
                 tasks.append(task)
 
             for index, task, in enumerate(tasks):
                 await task
-                song = songsInLot[index]
+                song = songsInBatch[index]
                 if not song.problematic:  # If downloaded add to the playlist and send play command
                     playerLock = playersManager.getPlayerLock(self.guild)
                     acquired = playerLock.acquire(timeout=self.config.ACQUIRE_LOCK_TIMEOUT)
@@ -134,7 +131,4 @@ class PlayHandler(AbstractHandler):
                         playersManager.resetPlayer(self.guild, self.ctx)
 
     def __isUserConnected(self) -> bool:
-        if self.ctx.author.voice:
-            return True
-        else:
-            return False
+        return self.ctx.author.voice

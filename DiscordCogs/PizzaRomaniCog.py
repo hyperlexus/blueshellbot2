@@ -6,7 +6,7 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils.PizzaEvaluator import pizza_eval
+from Utils.PizzaEvaluator import pizza_eval_read
 from Utils.Utils import Utils
 
 helper = Helper()
@@ -49,10 +49,12 @@ class PizzaRomaniCog(Cog):
                     send = True
 
             elif current_dict['type'] == 'complex':
-                if pizza_eval(message.content.lower(), current_dict['read']):
+                evaluated = pizza_eval_read(message.content.lower(), current_dict['read'])
+                if evaluated:
                     send = True
-                else:
-                    send = False
+
+            if current_dict['read'] == "react":
+                print(current_dict)
 
             if send and (message.guild is None or message.guild.id != 995966314877300737 or any(role.id == 1304403741759508500 for role in message.author.roles)):
                 if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
@@ -68,11 +70,18 @@ class PizzaRomaniCog(Cog):
 
     @command(name='pinsert', help=helper.HELP_PINSERT, description=helper.HELP_PINSERT_LONG, aliases=['pizza_insert'])
     async def pinsert(self, ctx: Context, *args):
+        """
+        Args: type, to_match, response, (replace)
+        """
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
         fail_embed = self.__embeds.BAD_COMMAND_USAGE("pinsert")
         if len(args) not in (3, 4):
             await ctx.send(embed=fail_embed)
             return
 
+        # initialise all variables that will be passed to the json
         time = str(int(ctx.message.created_at.timestamp() * 1000))
         author = str(ctx.message.author.id)
         if args[0] in ["is", "in", "start", "end", "complex"]:
@@ -87,9 +96,11 @@ class PizzaRomaniCog(Cog):
         else:
             replace = False
 
+        # check if complex input is actually necessary
         if pizza_type == "complex":
-            if not Utils.is_allowed_complex_input(args[1]):
-                await ctx.send(embed=fail_embed)
+            complex_allowed = Utils.is_allowed_complex_input(args[1])
+            if len(complex_allowed) > 0:
+                await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(complex_allowed))
                 return
 
         new_command = {
@@ -100,7 +111,6 @@ class PizzaRomaniCog(Cog):
             "write": write,
             "replace": replace
         }
-
         data['commands'].append(new_command)
 
         with open("pizza_database.json", "w") as f2:
@@ -186,7 +196,7 @@ class PizzaRomaniCog(Cog):
 
         embed = self.__embeds.PIZZA_INFO(result)
         if len(args) == 1 and len(matching_commands) > 1:
-            embed.set_footer(text="There is more than 1 command with this write result. Did you select the right command?")
+            embed.set_footer(text=f"There are {len(matching_commands)} commands with this write result. Did you select the right command?")
         await ctx.send(embed=embed)
         return
 

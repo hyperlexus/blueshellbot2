@@ -10,7 +10,7 @@ class HandlerResponse:
         self.__ctx: Context = ctx
         self.__error: BlueshellError = error
         self.__embed: Embed = embed
-        self.__success = False if error else True
+        self.__success = not error
         self.__view = view
 
     @property

@@ -92,40 +92,28 @@ class Utils:
             user_id = int(user_id)
         except ValueError:
             return False
-        if isinstance(user_id, int) and not (user_id // 1_000_000_000_000 < 1):
+        if not (user_id // 1_000_000_000_000 < 1):
             return user_id
         return False
 
     @classmethod
-    def helper_calcdifftime(cls, end_str: str, format_str='%Y-%m-%dZ%H:%M:%S') -> str:
-        start_dt = datetime.now()
-        end_dt = datetime.strptime(end_str, format_str)
-        difference = end_dt - start_dt
+    def helper_calcdifftime(cls, end_str: str) -> str:
+        difference = datetime.strptime(end_str, '%Y-%m-%dZ%H:%M:%S') - datetime.now()
         total_seconds = int(difference.total_seconds())
         days = total_seconds // (24 * 3600)
         hours = (total_seconds % (24 * 3600)) // 3600
         minutes = (total_seconds % 3600) // 60
-        result = f"{int(days):02d}d {int(hours):02d}h {int(minutes):02d}m"
-        return result
+        return f"{int(days):02d}d {int(hours):02d}h {int(minutes):02d}m"
 
     @classmethod
-    def is_allowed_complex_input(cls, read_string):
-        print(read_string)
-        for i in ['False', 'None', 'True', 'and', 'as', 'assert',
-                           'async', 'await', 'break', 'class', 'continue',
-                           'def', 'del', 'elif', 'else', 'except', 'finally',
-                           'for', 'from', 'global', 'if', 'import',
-                           'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return',
-                           'try', 'while', 'with', 'yield']:
-            if i in read_string:
-                return 0
-        print(read_string)
-        if not [i in read_string for i in ['is', 'in', 'start', 'end']]:
-            return 1
-        print(read_string)
-        if not [i in read_string for i in ['|', '&']]:
-            return 2
-        return True
+    def is_allowed_complex_input(cls, read_string: str) -> int | bool:
+        """Checks if string is allowed input for pizza type 'complex'"""
+        errors = []
+        if all(i not in read_string for i in ['is ', 'in ', 'start ', 'end ']):
+            errors.append(1)
+        if all(i not in read_string for i in [' | ', ' & ']):
+            errors.append(2)
+        return errors
 
 def run_async(func):
     @wraps(func)
