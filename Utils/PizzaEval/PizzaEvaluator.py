@@ -10,6 +10,11 @@ def evaluate_simple_expression(simple_expression: str | bool, message_content: s
     if isinstance(simple_expression, bool):
         return simple_expression
 
+    if simple_expression.strip() == "True":
+        return True
+    if simple_expression.strip() == "False":
+        return False
+
     if '\'' in simple_expression:
         expr_array = simple_expression.split("\'")
         expr_array = expr_array[:-1]
@@ -61,14 +66,16 @@ def evaluate_not_expression(not_expression: str, bool_to_flip: bool):
         raise PizzaError({'c': 401, 'e': not_expression})
 
 def get_lowest_depth_expression(complex_condition: str) -> str | bool:
-    expr_in_parenth_start = ""
-    for char in complex_condition:
+    stack = []
+
+    for index, char in enumerate(complex_condition):
         if char == '(':
-            expr_in_parenth_start = ""
+            stack.append(index)
         elif char == ')':
-            return expr_in_parenth_start
-        else:
-            expr_in_parenth_start += char
+            if stack:
+                start_index = stack.pop()  # Get the matching '('
+                return complex_condition[start_index + 1:index]  # Return contents inside parentheses
+    raise PizzaError({'c': 303, e: complex_condition})
 
 def recursively_evaluate_parentheses(complex_condition: str, message_content: str) -> any:
     pass
@@ -79,7 +86,7 @@ def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool
         return complex_condition
 
     if not is_valid_complex_expression(complex_condition):
-        print('man this fucking fella failed again', complex_condition, message_content)
+        raise PizzaError({'c': -1, 'e': complex_condition})
 
     if all(i not in complex_condition for i in [' | ', ' ^ ', ' & ', '(', ')']):
         if is_valid_simple_expression(complex_condition):
@@ -87,7 +94,11 @@ def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool
 
     if '(' in complex_condition or ')' in complex_condition:
         if valid_parentheses_amount(complex_condition):
-            return pizza_eval_read(get_lowest_depth_expression(complex_condition), message_content)
+            # return pizza_eval_read(get_lowest_depth_expression(complex_condition), message_content)
+            while '(' in complex_condition and ')' in complex_condition:
+                lowest_depth_expression = get_lowest_depth_expression(complex_condition)
+                inner_result = pizza_eval_read(lowest_depth_expression, message_content)
+                complex_condition = complex_condition.replace(f"({lowest_depth_expression})", str(inner_result))
 
     for i in [' | ', ' ^ ', ' & ']:
         if i in complex_condition:

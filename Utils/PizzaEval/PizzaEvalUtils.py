@@ -1,5 +1,6 @@
 import re
 from Utils.PizzaEval.PizzaEvalErrorDict import error_dict
+from Utils.PizzaEval.test import expression
 
 
 class PizzaError(Exception):
@@ -13,17 +14,20 @@ def is_valid_complex_expression(complex_condition: str) -> bool:
         raise PizzaError({'c': 0, 'e': complex_condition})
 
     if complex_condition[0] == "'":
-        raise PizzaError({'c': 4, 'e': complex_condition})
+        raise PizzaError({'c': 1, 'e': complex_condition})
 
     if all(i not in complex_condition for i in [' | ', ' ^ ', ' & ', '(', ')']):
         if not is_valid_simple_expression(complex_condition):
-            raise PizzaError({'c': 1, 'e': complex_condition})
+            raise PizzaError({'c': 2, 'e': complex_condition})
 
     if all(i not in complex_condition for i in ['in ', 'is ', 'start ', 'end ']):
-        raise PizzaError({'c': 2, 'e': complex_condition})
+        raise PizzaError({'c': 3, 'e': complex_condition})
 
     if bool_operators_in_quotes(complex_condition):
-        raise PizzaError({'c': 3, 'e': complex_condition})
+        raise PizzaError({'c': 4, 'e': complex_condition})
+
+    if complex_condition.strip() in ("True", "False"):
+        raise PizzaError({'c': 5, 'e': complex_condition})
     return True
 
 def has_simple_keywords(read_string: str) -> int | bool:
