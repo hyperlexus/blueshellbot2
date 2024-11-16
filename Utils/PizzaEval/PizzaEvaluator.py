@@ -10,10 +10,8 @@ def evaluate_simple_expression(simple_expression: str | bool, message_content: s
     if isinstance(simple_expression, bool):
         return simple_expression
 
-    if simple_expression.strip() == "True":
-        return True
-    if simple_expression.strip() == "False":
-        return False
+    if simple_expression.strip() in ("True", "False"):
+        return eval(simple_expression.strip())
 
     if '\'' in simple_expression:
         expr_array = simple_expression.split("\'")
@@ -109,11 +107,3 @@ try:
 except PizzaError as e:
     details = e.args[0]
     print(identify_error(details['c'], details['e']))
-
-# try:
-#     print(pizza_eval_read("(is a)", "a"))
-# except PizzaError as e:
-#     details = e.args[0]
-#     print(identify_error(details['c'], details['e']))
-
-# game plan: pass everything to eval_parenth if containing parentheses. function will then call itself if it has more parentheses, and will then work bottom to top to evaluate parentheses from inside out by calling pizza_eval_read

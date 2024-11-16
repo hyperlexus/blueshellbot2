@@ -1,7 +1,5 @@
 import re
 from Utils.PizzaEval.PizzaEvalErrorDict import error_dict
-from Utils.PizzaEval.test import expression
-
 
 class PizzaError(Exception):
     pass
@@ -10,6 +8,9 @@ def identify_error(error_code: int, expression: str) -> str:
     return f"Error code {str(error_code)}: {error_dict[error_code]}. \nprocessing this expression: `{expression}`"
 
 def is_valid_complex_expression(complex_condition: str) -> bool:
+    if complex_condition in ("True", "False"):
+        return True
+
     if complex_condition == "":
         raise PizzaError({'c': 0, 'e': complex_condition})
 
@@ -38,6 +39,9 @@ def is_complex_expression(expression: str):
     return not all(i not in expression for i in [' | ', ' ^ ', ' & ', ' (', ') ', ' not '])
 
 def is_valid_simple_expression(expression: str) -> bool:
+    if expression in ("True", "False"):
+        return True
+
     if not has_simple_keywords(expression):
         raise PizzaError({'c': 101, 'e': expression})
     if '\'' in expression:
@@ -70,9 +74,3 @@ def valid_parentheses_amount(expression: str) -> bool:
 
 def bool_operators_in_quotes(expression: str) -> bool:
     return any(char in match for match in re.findall(r"'[^']*'", expression) for char in '|&^')
-
-# try:
-#     print(valid_parentheses_amount('in b & (in a & (in c | in d))'))
-# except PizzaError as e:
-#     details = e.args[0]
-#     print(identify_error(details['c'], details['e']))
