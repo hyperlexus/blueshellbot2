@@ -6,7 +6,8 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils import PizzaEvaluator
+from Utils.PizzaEval.PizzaEvalUtils import OwnError, identify_error
+from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
 from Utils.Utils import Utils
 
 helper = Helper()
@@ -28,30 +29,33 @@ class PizzaRomaniCog(Cog):
     async def on_message(self, message):
         if message.author == self.__bot.user or message.content.lower().startswith('b.pinsert') or not message.content:
             return
+        ctx = await self.__bot.get_context(message)
 
         for current_dict in data['commands']:
             send = False
 
             if current_dict['type'] == 'in':
-                if current_dict['read'] in message.content.lower():
-                    send = True
+                send = current_dict['read'] in message.content.lower()
 
             elif current_dict['type'] == 'is':
-                if message.content == current_dict['read']:
-                    send = True
+                send = message.content == current_dict['read']
 
             elif current_dict['type'] == 'start':
-                if message.content.startswith(current_dict['read']):
-                    send = True
+                send = message.content.startswith(current_dict['read'])
 
             elif current_dict['type'] == 'end':
-                if message.content.endswith(current_dict['read']):
-                    send = True
+                send = message.content.endswith(current_dict['read'])
 
             elif current_dict['type'] == 'complex':
-                evaluated = PizzaEvaluator.pizza_eval_read(message.content.lower(), current_dict['read'])
-                if evaluated:
-                    send = True
+                try:
+                    evaluated = pizza_eval_read(current_dict['read'], message.content.lower())
+                except OwnError as e:
+                    details = e.args[0]
+                    await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
+                send = evaluated
+
+            else:
+                return False
 
             if current_dict['read'] == "react":
                 print(current_dict)
@@ -60,7 +64,6 @@ class PizzaRomaniCog(Cog):
                 if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
                     command_and_args = current_dict['write'][2:].split(" ")
                     command_to_run = self.__bot.get_command(command_and_args[0])
-                    ctx = await self.__bot.get_context(message)
                     await ctx.invoke(command_to_run, *command_and_args[1:])
                     continue
                 if current_dict['replace']:
@@ -96,12 +99,17 @@ class PizzaRomaniCog(Cog):
         else:
             replace = False
 
-        # check if complex input is actually necessary
+        # turn replace mode off if the user set it to on
         if pizza_type == "complex":
-            complex_allowed = Utils.is_allowed_complex_input(args[1])
-            if len(complex_allowed) > 0:
-                await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(complex_allowed))
+            try:
+                evaluated = pizza_eval_read(read, 'a')  # test an evaluation to see if complex read input is valid
+            except OwnError as e:
+                details = e.args[0]
+                await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
                 return
+            if replace:
+                await ctx.send("replace mode won't work with complex inputs, therefore it will be disabled.")
+                replace = False
 
         new_command = {
             "time": time,

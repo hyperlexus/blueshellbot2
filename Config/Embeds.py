@@ -1,10 +1,13 @@
 from random import random
+from datetime import timedelta
+from discord import Embed
+
 from Config.Messages import Messages
 from Config.Exceptions import BlueshellError
-from discord import Embed
 from Config.Configs import BConfigs
 from Config.Colors import BColors
-from datetime import timedelta
+from Utils.PizzaEval.PizzaEvalUtils import identify_error
+from Utils.PizzaEval.PizzaEvalErrorDict import error_dict
 
 
 class BEmbeds:
@@ -623,24 +626,29 @@ class BEmbeds:
         )
         return embed
 
-    def PIZZA_INVALID_COMPLEX_INPUT(self, error_code: str):
-        description: str = ""
-        if 1 not in error_code and 2 not in error_code:
-            description += "you fucked up. check your code retard"
-        if 1 in error_code:
-            description += '\nOne of the valid pizza types (in, is, start, end) is missing.'
-        if 2 in error_code:
-            description += '\nOne of the pizza separators needed in complex input ("|", "&") are missing.'
-        problem_text = "s:\n" if len(error_code) == 2 else ":\n"
-
-
+    def PIZZA_INVALID_COMPLEX_INPUT(self, error_code, expression):
         embed = Embed(
             title="Error: Input not valid for 'complex' type.",
-            description="The input did not satisfy requirements for 'complex' type. Problem" + problem_text + description,
+            description="The input did not satisfy requirements for type 'complex'. Problem: \n\n" + identify_error(error_code, expression),
             color=self.__colors.RED
         )
-        embed.set_footer(text="Check if you made a typo, or if your command should have a simple type.",
+        embed.set_footer(text="Check if you made a typo or are maybe missing a space.",
                          icon_url="https://static-00.iconduck.com/assets.00/cold-face-emoji-512x512-k8er8wn9.png")
         return embed
 
+    def PIZZA_MOD_LIST_ERROR_DICT(self):
+        embed = Embed(
+            title='Forced embed: Error dict for complex evaluator',
+            description="\n".join(f"{code}: {message}" for code, message in error_dict.items()),
+            color=self.__colors.GREY
+        )
+        return embed
+
+    def TURNED_REPLACE_OFF(self):
+        embed = Embed(
+            title='Information: replace mode turned off',
+            description="'complex' mode does not support replace mode, therefore it has been turned off.'",
+            color=self.__colors.GREY
+        )
+        return embed
 

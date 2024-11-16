@@ -112,7 +112,8 @@ class ModCog(Cog):
             call_args.append(f"default_forced_arg_{i}")
 
         embed = embed_method(*call_args)
-        await ctx.send(embed=embed)
+
+        await ctx.send(embed=embed.set_footer(text='This embed was forced.'))
         return
 
 

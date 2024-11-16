@@ -105,15 +105,6 @@ class Utils:
         minutes = (total_seconds % 3600) // 60
         return f"{int(days):02d}d {int(hours):02d}h {int(minutes):02d}m"
 
-    @classmethod
-    def is_allowed_complex_input(cls, read_string: str) -> int | bool:
-        """Checks if string is allowed input for pizza type 'complex'"""
-        errors = []
-        if all(i not in read_string for i in ['is ', 'in ', 'start ', 'end ']):
-            errors.append(1)
-        if all(i not in read_string for i in [' | ', ' & ']):
-            errors.append(2)
-        return errors
 
 def run_async(func):
     @wraps(func)

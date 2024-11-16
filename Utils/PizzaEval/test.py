@@ -21,4 +21,36 @@
 #
 # print(1 != True)
 
-print(None is True)
+# a = "start b | in c"
+# print(a.split(' | '))
+
+# def fella(type, b, a):
+#     if type == 'a':
+#         return a.startswith(b)
+#     if type == 'b':
+#         return a.endswith(b)
+#     if type == 'c':
+#         return a == b
+#     if type == 'd':
+#         return b in a
+#
+# print(fella('a', 'nig', 'fella'))
+# print(fella('b', 'nig', 'fella'))
+# print(fella('c', 'nig', 'nig'))
+# print(fella('d', 'nig', 'fella'))
+
+# print(True ^ True)
+
+import re
+
+# Input string
+input_string = "is a | is 'b | is c' | is 'd & is e'"
+
+# Regular expression to match quoted strings
+pattern = r"'[^']*'"
+
+# Find all quoted segments
+result = [match for match in re.findall(pattern, input_string)]
+
+print(result)
+
