@@ -14,13 +14,16 @@ error_dict = {
 
     201: "couldn't evaluate two sides, as one side was not correctly evaluated to True/False",
     202: "wrong operand was passed to evaluate_two_sides function",
-    203: "less than 2 sides were passed to two_side function during 'or' operation",
-    204: "less than 2 sides were passed to two_side function during 'and' operation",
+    203: "less than 2 sides were passed to two_side function",
 
     301: "valid_parentheses_amount function did not receive any parentheses",
     302: "condition contains an opening parentheses, but no closing.",
     303: "condition contains a closing parentheses, but no opening.",
-    304: "amount of opening and closing parentheses do not match."
+    304: "amount of opening and closing parentheses do not match.",
+
+    401: "not expression has more than 1 space",
+
+    501: ""
 }
 
 

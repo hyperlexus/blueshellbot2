@@ -30,9 +30,10 @@ if you use a web portal instead of docker desktop to run the image, you have to 
 if you do that, i recommend changing the default values so you have to pass less variables manually :)
 
 ### known issues and other small bits:
-1. if someone runs `b.alert "`, the bot returns an error. why this happens is sorta known but
-it's sort of a running gag among my friends to make it produce a 🥶 emoji this easily, so i didnt fix it yet
-2. `b.alert` also does not work with roles or bot users.\
+1. ~~if someone runs `b.alert "`, the bot returns an error. why this happens is sorta known but
+it's sort of a running gag among my friends to make it produce a 🥶 emoji this easily, so i didnt fix it yet~~
+THIS HAS BEEN FIXED AFTER A YEAR
+2. `b.alert` does not work with roles or bot users.\
 3. A lot of the `b.restart` problems have been FIXED, now what you need to do to get it to work is the following:\
 Change the necessary config in `.env`, mainly `PROJECT_PATH` and `BAT_PATH`, which point to where your project root and where the executable for the bot is.
 4. Any admin commands (those in the `ModCog.py` file) can only be executed by "Bot admins". These are to be defined by **USER ID** in the .env file.\
@@ -40,5 +41,10 @@ As shown above, it should be like `BOT_ADMINS="<id1>,<id2>"` with no space in be
 5. you can add new commands by adding a new command in the MiscCog.py file and following the rough structure of what I did.\
 If you know what you're doing, you'll figure it out.\
 The reason I'm adding this is that new commands will automatically be added to the `b.help` output.
+6. "Pizza Romani" only works when (boolean or):<br>
+    &ensp;&ensp;&ensp;- The user is NOT in the server defined in the config<br>
+    &ensp;&ensp;&ensp;- The user has the role defined in the config<br>
+    &ensp;&ensp;&ensp;- The user is sending a dm (currently broken)
+7. "Pizza Romani"'s compiler and syntax is a little finnicky.
 
 Enjoy! :D

@@ -652,3 +652,12 @@ class BEmbeds:
         )
         return embed
 
+    def NO_CLOSING_QUOTE(self):
+        embed = Embed(
+            title="Error: no closing quote provided",
+            description="One of your arguments does not have a closing quote. Close all opened quotes, and try again.",
+            color=self.__colors.RED
+        )
+        embed.set_footer(text="If that was on purpose, please do not purpose", icon_url="https://cdn.discordapp.com/emojis/1126999492131029033.webp?size=96")
+        return embed
+

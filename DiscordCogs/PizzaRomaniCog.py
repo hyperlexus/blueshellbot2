@@ -6,7 +6,7 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils.PizzaEval.PizzaEvalUtils import OwnError, identify_error
+from Utils.PizzaEval.PizzaEvalUtils import PizzaError, identify_error
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
 from Utils.Utils import Utils
 
@@ -48,19 +48,15 @@ class PizzaRomaniCog(Cog):
 
             elif current_dict['type'] == 'complex':
                 try:
-                    evaluated = pizza_eval_read(current_dict['read'], message.content.lower())
-                except OwnError as e:
+                    send = pizza_eval_read(current_dict['read'], message.content.lower())
+                except PizzaError as e:
                     details = e.args[0]
                     await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
-                send = evaluated
 
             else:
                 return False
 
-            if current_dict['read'] == "react":
-                print(current_dict)
-
-            if send and (message.guild is None or message.guild.id != 995966314877300737 or any(role.id == 1304403741759508500 for role in message.author.roles)):
+            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
                 if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
                     command_and_args = current_dict['write'][2:].split(" ")
                     command_to_run = self.__bot.get_command(command_and_args[0])
@@ -103,7 +99,7 @@ class PizzaRomaniCog(Cog):
         if pizza_type == "complex":
             try:
                 evaluated = pizza_eval_read(read, 'a')  # test an evaluation to see if complex read input is valid
-            except OwnError as e:
+            except PizzaError as e:
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
                 return
@@ -234,7 +230,6 @@ class PizzaRomaniCog(Cog):
             if len(args) == 1:
                 await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
                 return
-
 
 
 def setup(bot):

@@ -50,6 +50,8 @@ class BConfigs(Singleton):
             self.SUPPORTING_ICON = os.getenv('SUPPORTING_ICON', 'https://i.ytimg.com/vi/zktTuXl24dk/maxresdefault.jpg')
 
             self.PIZZA_LIST_LENGTH = os.getenv('PIZZA_LIST_LENGTH', 20)
+            self.PIZZA_ROLE = os.getenv('PIZZA_ROLE', 1304403741759508500)
+            self.PIZZA_SERVER = os.getenv('PIZZA_SERVER', 995966314877300737)
 
 
     def getPlayersManager(self):

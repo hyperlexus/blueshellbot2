@@ -1,10 +1,12 @@
 import asyncio
+import traceback
 from asyncio import AbstractEventLoop
 from datetime import datetime
 import discord
 from discord import Guild, Status, Game, Message
 from discord.ext.commands import Bot, Context
-from discord.ext.commands.errors import CommandNotFound, MissingRequiredArgument, ExpectedClosingQuoteError, UnexpectedQuoteError, BadArgument
+from discord.ext.commands.errors import CommandNotFound, MissingRequiredArgument, ExpectedClosingQuoteError, \
+    UnexpectedQuoteError, BadArgument, InvalidEndOfQuotedStringError
 from Config.Configs import BConfigs
 from Config.Messages import Messages
 from Config.Embeds import BEmbeds
@@ -66,18 +68,20 @@ class BlueshellBot(Bot):
             await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
 
         elif isinstance(error, ExpectedClosingQuoteError):
-            await ctx.send("Daan lassen siis bleiben bitte, das ist langsam WIRKLICH nicht mehr witzig mal ehrlich")
+            await ctx.send(embed=self.__embeds.NO_CLOSING_QUOTE())
 
         elif isinstance(error, CommandNotFound):
             await ctx.send(embed=self.__embeds.COMMAND_NOT_FOUND())
 
+        elif isinstance(error, InvalidEndOfQuotedStringError):
+            await ctx.send("Please leave a space between arguments")
+
         elif isinstance(error, UnexpectedQuoteError):
             await ctx.send("Das geht so nicht sie pizzierender spast, machen sie einfach keine quotes")
 
-        elif isinstance(error, BadArgument):
-            await ctx.send("Please leave a space between arguments")
-
         else:
+            error_type = type(error).__name__
+            print(f"Unhandled error: {error_type}")
             print(f'Command has thrown an error -> {error}')
             await ctx.send(embed=self.__embeds.UNKNOWN_ERROR())
 
