@@ -56,7 +56,7 @@ def recursively_evaluate_two_sides_for_operator(complex_condition: str, message_
     elif amount_operations < 2:
         raise OwnError({'c': 203, 'e': complex_condition})
     else:
-        for i in range(len(next_layer_array) - 2):
+        for i in range(len(next_layer_array) - 1):
             next_layer_array[0] = evaluate_two_sides(next_layer_array[0], next_layer_array[1], message_content, operator)
             next_layer_array.pop(1)
         return next_layer_array[0]
@@ -81,9 +81,7 @@ def pizza_eval_read(complex_condition: str, message_content: str) -> bool:
             return recursively_evaluate_two_sides_for_operator(complex_condition, message_content, i)
 
 try:
-    print(pizza_eval_read("in e & is bc | in d", 'dcd'))  # True - is equivalent to "(in e & is bc) | in d"
-    print(pizza_eval_read("in e & is bc | in d", 'bc'))  # False
-    print(pizza_eval_read("in e & is bc | in d", 'e'))  # False
+    print(pizza_eval_read("in e & in bc | in d", 'ec'))
 except OwnError as e:
     details = e.args[0]
     print(identify_error(details['c'], details['e']))
