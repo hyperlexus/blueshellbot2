@@ -59,12 +59,16 @@ def is_valid_not_expression(expression: str) -> bool:
 def valid_parentheses_amount(expression: str) -> bool:
     if '(' not in expression or ')' not in expression:
         raise PizzaError({'c': 301, 'e': expression})
+    if expression.count('(') != expression.count(')'):
+        raise PizzaError({'c': 302, 'e': expression})
+    return True
+
 
 def bool_operators_in_quotes(expression: str) -> bool:
     return any(char in match for match in re.findall(r"'[^']*'", expression) for char in '|&^')
 
-try:
-    pass
-except PizzaError as e:
-    details = e.args[0]
-    print(identify_error(details['c'], details['e']))
+# try:
+#     print(valid_parentheses_amount('in b & (in a & (in c | in d))'))
+# except PizzaError as e:
+#     details = e.args[0]
+#     print(identify_error(details['c'], details['e']))

@@ -1,4 +1,6 @@
-from Utils.PizzaEval.PizzaEvalUtils import identify_error, is_complex_expression, is_valid_simple_expression, PizzaError, bool_operators_in_quotes, is_valid_complex_expression
+from Utils.PizzaEval.PizzaEvalUtils import identify_error, is_complex_expression, is_valid_simple_expression, \
+    PizzaError, bool_operators_in_quotes, is_valid_complex_expression, valid_parentheses_amount
+
 
 def split_by_brackets_1_layer():
     pass
@@ -41,13 +43,6 @@ def evaluate_two_sides(left_expression: str | bool, right_expression: str | bool
         case _:
             raise PizzaError({'c': 202, 'e': left_expression + right_expression})
 
-def evaluate_parentheses(complex_condition: str, message_content: str) -> bool:
-    pass
-
-def evaluate_not_expression(not_expression: str, bool_to_flip: bool):
-    if not_expression.count(' ') != 1:
-        raise PizzaError({'c': 401, 'e': not_expression})
-
 def recursively_evaluate_two_sides_for_operator(complex_condition: str, message_content: str, operator: str) -> bool:
     next_layer_array = complex_condition.split(operator)
     amount_operations = len(next_layer_array)
@@ -60,6 +55,23 @@ def recursively_evaluate_two_sides_for_operator(complex_condition: str, message_
             next_layer_array[0] = evaluate_two_sides(next_layer_array[0], next_layer_array[1], message_content, operator)
             next_layer_array.pop(1)
         return next_layer_array[0]
+
+def evaluate_not_expression(not_expression: str, bool_to_flip: bool):
+    if not_expression.count(' ') != 1:
+        raise PizzaError({'c': 401, 'e': not_expression})
+
+def get_lowest_depth_expression(complex_condition: str) -> str | bool:
+    expr_in_parenth_start = ""
+    for char in complex_condition:
+        if char == '(':
+            expr_in_parenth_start = ""
+        elif char == ')':
+            return expr_in_parenth_start
+        else:
+            expr_in_parenth_start += char
+
+def recursively_evaluate_parentheses(complex_condition: str, message_content: str) -> any:
+    pass
 
 
 def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool:
@@ -74,14 +86,23 @@ def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool
             return evaluate_simple_expression(complex_condition, message_content)
 
     if '(' in complex_condition or ')' in complex_condition:
-        pass
+        if valid_parentheses_amount(complex_condition):
+            return pizza_eval_read(get_lowest_depth_expression(complex_condition), message_content)
 
     for i in [' | ', ' ^ ', ' & ']:
         if i in complex_condition:
             return recursively_evaluate_two_sides_for_operator(complex_condition, message_content, i)
+
+try:
+    print(pizza_eval_read("in a & (in b | (in c))", "ac"))
+except PizzaError as e:
+    details = e.args[0]
+    print(identify_error(details['c'], details['e']))
 
 # try:
 #     print(pizza_eval_read("(is a)", "a"))
 # except PizzaError as e:
 #     details = e.args[0]
 #     print(identify_error(details['c'], details['e']))
+
+# game plan: pass everything to eval_parenth if containing parentheses. function will then call itself if it has more parentheses, and will then work bottom to top to evaluate parentheses from inside out by calling pizza_eval_read

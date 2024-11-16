@@ -6,7 +6,7 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils.PizzaEval.PizzaEvalUtils import PizzaError, identify_error
+from Utils.PizzaEval.PizzaEvalUtils import PizzaError
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
 from Utils.Utils import Utils
 
