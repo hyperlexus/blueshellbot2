@@ -35,13 +35,17 @@ def has_simple_keywords(read_string: str) -> int | bool:
     """Checks if string is allowed input for pizza type 'complex'"""
     return not all(i not in read_string for i in ['is ', 'in ', 'start ', 'end '])
 
+def is_only_simple_keyword(read_string: str) -> bool:
+    return any(i == read_string for i in ['is', 'in', 'start', 'end'])
+
 def is_complex_expression(expression: str):
     return not all(i not in expression for i in [' | ', ' ^ ', ' & ', ' (', ') ', ' not '])
 
 def is_valid_simple_expression(expression: str) -> bool:
     if expression in ("True", "False"):
         return True
-
+    if is_only_simple_keyword(expression):
+        raise PizzaError({'c': 106, 'e': expression})
     if not has_simple_keywords(expression):
         raise PizzaError({'c': 101, 'e': expression})
     if '\'' in expression:

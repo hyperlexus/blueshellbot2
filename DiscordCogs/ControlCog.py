@@ -25,7 +25,7 @@ class ControlCog(Cog):
                       'reset', 'prev', 'history', 'volume'],
             'MOD': ['restart', 'ban', 'force_embed'],
             'JP': ['convkana', 'kanagame'],
-            'PIZZA': ['pinsert', 'plist', 'premove', 'pinfo']
+            'PIZZA': ['pinsert', 'plist', 'premove', 'pinfo', 'ptestcompiler']
         }
 
     @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h', 'hjälp'])

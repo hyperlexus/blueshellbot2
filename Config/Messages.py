@@ -66,7 +66,7 @@ class Messages(Singleton):
             self.ERROR_VOLUME_NOT_SPECIFIED = f'{self.__emojis.ERROR} Please pass an argument to the volume function. Its bit unintuitive sorry xd'
             self.ERROR_PLAYING = f'{self.__emojis.ERROR} song couldnt play for some reason'
             self.COMMAND_NOT_FOUND = f'{self.__emojis.ERROR} That command doesnt exist. Run {configs.BOT_PREFIX}help for a list'
-            self.UNKNOWN_ERROR = f'{self.__emojis.ERROR} something failed lul. if its bad, run {configs.BOT_PREFIX}reset'
+            self.UNKNOWN_ERROR = f'{self.__emojis.ERROR} something failed lul.'
             self.ERROR_MISSING_ARGUMENTS = f'{self.__emojis.ERROR} You\'re missing some arguments there. Check help page for the command'
             self.NOT_PREVIOUS = f'{self.__emojis.ERROR} This is the first song you played.'
             self.PLAYER_NOT_PLAYING = f'{self.__emojis.ERROR} The player isnt even playing'

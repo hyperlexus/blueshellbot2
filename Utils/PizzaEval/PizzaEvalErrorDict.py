@@ -1,6 +1,6 @@
 error_dict = {
     # general errors
-    -1: "complex condition was successfully evaluated, but is somehow still not valid",
+    -1: "complex condition was successfully evaluated, but is somehow still not valid. <@422800248935546880>",
     0: "nothing was passed",
     1: "condition had \' as its first character, which is not allowed. did you quote the entire string instead of the expression value?",
     2: "no complex operator was passed, but the input is also not a simple expression. there is nothing to parse.",
@@ -14,6 +14,7 @@ error_dict = {
     103: "simple expression has no single quotes around the expression value, but more than 1 space",
     104: "simple expression contains a simple keyword, but 'expression_type' did not receive it correctly",
     105: "simple expression has text after or before single quotes. single quotes have to encompass the entire expression value",
+    106: "simple expression contains a type check, but no value. Did you pass both type and value ('is a')?",
 
     # evaluate_two_sides errors
     201: "couldn't evaluate two sides, as one side was not correctly evaluated to True/False",

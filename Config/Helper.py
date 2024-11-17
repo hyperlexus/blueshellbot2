@@ -109,5 +109,11 @@ class Helper(Singleton):
                                       f'(you can find them by running and filtering `{config.BOT_PREFIX}plist`), '
                                       f'enter a number after the first argument to select different ones.')
 
+            self.HELP_COMPILER = 'Tests the pizza romani compiler.'
+            self.HELP_COMPILER_LONG = ('Allows direct interaction with the pizza romani compiler.\n\n'
+                                       f'Syntax: `{config.BOT_PREFIX}ptestcompiler condition message`\n'
+                                       f'Example: `{config.BOT_PREFIX}ptestcompiler "in a & (in b | end c)" "ac"`\n\n'
+                                       f'Automatically uses complex type. Have fun maggda')
+
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
             self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'

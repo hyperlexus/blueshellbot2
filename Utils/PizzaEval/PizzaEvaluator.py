@@ -59,9 +59,9 @@ def recursively_evaluate_two_sides_for_operator(complex_condition: str, message_
             next_layer_array.pop(1)
         return next_layer_array[0]
 
-def evaluate_not_expression(not_expression: str, bool_to_flip: bool):
-    if not_expression.count(' ') != 1:
-        raise PizzaError({'c': 401, 'e': not_expression})
+def evaluate_not_expression(not_string: str, bool_to_flip: bool):  # not_string is literally just "not "
+    if not_string.count(' ') != 1:
+        raise PizzaError({'c': 401, 'e': not_string})
 
 def get_lowest_depth_expression(complex_condition: str) -> str | bool:
     stack = []
@@ -73,10 +73,7 @@ def get_lowest_depth_expression(complex_condition: str) -> str | bool:
             if stack:
                 start_index = stack.pop()  # Get the matching '('
                 return complex_condition[start_index + 1:index]  # Return contents inside parentheses
-    raise PizzaError({'c': 303, e: complex_condition})
-
-def recursively_evaluate_parentheses(complex_condition: str, message_content: str) -> any:
-    pass
+    raise PizzaError({'c': 303, 'e': complex_condition})
 
 
 def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool:
@@ -92,7 +89,6 @@ def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool
 
     if '(' in complex_condition or ')' in complex_condition:
         if valid_parentheses_amount(complex_condition):
-            # return pizza_eval_read(get_lowest_depth_expression(complex_condition), message_content)
             while '(' in complex_condition and ')' in complex_condition:
                 lowest_depth_expression = get_lowest_depth_expression(complex_condition)
                 inner_result = pizza_eval_read(lowest_depth_expression, message_content)
@@ -102,8 +98,8 @@ def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool
         if i in complex_condition:
             return recursively_evaluate_two_sides_for_operator(complex_condition, message_content, i)
 
-try:
-    print(pizza_eval_read("in a & (in b | (in c))", "ac"))
-except PizzaError as e:
-    details = e.args[0]
-    print(identify_error(details['c'], details['e']))
+# try:
+#     print(pizza_eval_read("is 'a'", "a"))
+# except PizzaError as e:
+#     details = e.args[0]
+#     print(identify_error(details['c'], details['e']))

@@ -83,7 +83,7 @@ class BlueshellBot(Bot):
             error_type = type(error).__name__
             print(f"Unhandled error: {error_type}")
             print(f'Command has thrown an error -> {error}')
-            await ctx.send(embed=self.__embeds.UNKNOWN_ERROR())
+            await ctx.send(embed=self.__embeds.UNKNOWN_ERROR(error_type))
 
     async def process_commands(self, message: Message):
         if message.author.bot:

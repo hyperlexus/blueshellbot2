@@ -17,28 +17,12 @@
             "replace": false
         },
         {
-            "time": "1731100537992",
-            "author": "422800248935546880",
-            "type": "is",
-            "read": "ping",
-            "write": "pong",
-            "replace": false
-        },
-        {
             "time": "1731150721426",
             "author": "422800248935546880",
             "type": "in",
             "read": "kill yourself",
             "write": "b.kys",
             "replace": false
-        },
-        {
-            "time": "1731150794110",
-            "author": "422800248935546880",
-            "type": "start",
-            "read": "du",
-            "write": "ne, deine mamer",
-            "replace": true
         },
         {
             "time": "1731156653584",
@@ -49,51 +33,11 @@
             "replace": false
         },
         {
-            "time": "1731162113637",
-            "author": "468786219258740756",
-            "type": "complex",
-            "read": "start abc",
-            "write": "efg",
-            "replace": false
-        },
-        {
-            "time": "1731162133920",
-            "author": "468786219258740756",
-            "type": "complex",
-            "read": "start abc & end cde",
-            "write": "idsfghsioufgpusdf",
-            "replace": false
-        },
-        {
-            "time": "1731162139756",
-            "author": "649457215564152852",
-            "type": "in",
-            "read": "dub",
-            "write": "aus australien?",
-            "replace": false
-        },
-        {
             "time": "1731710780399",
             "author": "468786219258740756",
             "type": "in",
             "read": "lachen uns einen",
             "write": "Ich lach mir einen runter ey",
-            "replace": false
-        },
-        {
-            "time": "1731710780399",
-            "author": "468786219258740756",
-            "type": "complex",
-            "read": "end 'def'",
-            "write": "Ich lach mir einen runter ey",
-            "replace": false
-        },
-        {
-            "time": "1731772547663",
-            "author": "422800248935546880",
-            "type": "complex",
-            "read": "is a",
-            "write": "a",
             "replace": false
         }
     ]

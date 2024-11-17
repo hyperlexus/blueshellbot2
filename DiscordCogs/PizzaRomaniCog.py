@@ -1,3 +1,4 @@
+import asyncio
 import json
 from copy import deepcopy
 from Music.BlueshellBot import BlueshellBot
@@ -27,7 +28,7 @@ class PizzaRomaniCog(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if message.author == self.__bot.user or message.content.lower().startswith('b.pinsert') or not message.content:
+        if message.author == self.__bot.user or message.content.lower().startswith('b.p') or not message.content:
             return
         ctx = await self.__bot.get_context(message)
 
@@ -211,13 +212,7 @@ class PizzaRomaniCog(Cog):
             await ctx.send(embed=self.__embeds.BANNED())
             return
         if len(args) not in (1, 2):
-            await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE("premove"))
-            return
-        try:
-            if len(args) == 2:
-                cmd_number = int(args[1])
-        except ValueError:
-            await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE('premove'))
+            await ctx.send(embed=self.__embeds.INVALID_ARGUMENTS())
             return
 
         valid_commands = []
@@ -226,11 +221,49 @@ class PizzaRomaniCog(Cog):
             if args[0] == current_dict['write']:
                 valid_commands.append(current_dict)
 
-        if len(valid_commands) > 1:
+        if len(valid_commands) == 1:
+            popped = data['commands'].pop(data['commands'].index(valid_commands[0]))
+            await ctx.send(embed=self.__embeds.PREMOVE_REMOVED(popped['write']))
+        elif len(valid_commands) > 1:
             if len(args) == 1:
                 await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
                 return
+            else:
+                try:
+                    cmd_number = int(args[1])
+                except ValueError:
+                    await ctx.send(embed=self.__embeds.INTEGER_ONLY_HERE(args[1]))
+                    return
+                if len(valid_commands) < int(args[1]):
+                    await ctx.send(embed=self.__embeds.PREMOVE_NUMBER_LARGER_THAN_AMOUNT_COMMANDS(args[1], len(valid_commands)))
+                popped = data['commands'].pop(data['commands'].index(valid_commands[cmd_number-1]))
+                await ctx.send(embed=self.__embeds.PREMOVE_REMOVED(popped['write'], cmd_number))
+        else:
+            await ctx.send(embed=self.__embeds.PREMOVE_NO_COMMAND_FOUND(args[0]))
 
+        with open("pizza_database.json", "w") as f2:
+            json.dump(data, f2, indent=4)
+        return
+
+    @command(name='ptestcompiler', help=helper.HELP_COMPILER, description=helper.HELP_COMPILER_LONG, aliases=['pizza_test_compiler', 'pcompiler'])
+    async def ptestcompiler(self, ctx: Context, *args) -> None:
+        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
+            await ctx.send(embed=self.__embeds.BANNED())
+            return
+        if len(args) != 2:
+            await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
+            await ctx.send("here's a tip: you need to specify a read and write value")
+            await asyncio.sleep(2)
+            await ctx.send("and you need to put a spear behind it")
+            return
+
+        try:
+            evaluated = pizza_eval_read(args[0], args[1])
+        except PizzaError as e:
+            details = e.args[0]
+            await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
+            return
+        await ctx.send(evaluated)
 
 def setup(bot):
     bot.add_cog(PizzaRomaniCog(bot))

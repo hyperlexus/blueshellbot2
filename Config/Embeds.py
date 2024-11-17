@@ -48,9 +48,9 @@ class BEmbeds:
 
     def MISSING_ARGUMENTS(self) -> Embed:
         embed = Embed(
-            title=self.__messages.ERROR_TITLE,
-            description=self.__messages.ERROR_MISSING_ARGUMENTS,
-            colour=self.__colors.BLACK
+            title="Missing some arguments",
+            description="🥶 This command did not receive the correct amount of arguments. Please try again.",
+            colour=self.__colors.RED
         )
         return embed
 
@@ -216,10 +216,11 @@ class BEmbeds:
         )
         return embed
 
-    def UNKNOWN_ERROR(self) -> Embed:
+    def UNKNOWN_ERROR(self, error_type=None) -> Embed:
+        desc_addon = f"\n\nerror type: {error_type}" if error_type else ""
         embed = Embed(
             title=self.__messages.ERROR_TITLE,
-            description=self.__messages.UNKNOWN_ERROR,
+            description=self.__messages.UNKNOWN_ERROR + desc_addon,
             colour=self.__colors.RED
         )
         return embed
@@ -640,7 +641,7 @@ class BEmbeds:
         embed = Embed(
             title='Forced embed: Error dict for complex evaluator',
             description="\n".join(f"{code}: {message}" for code, message in error_dict.items()),
-            color=self.__colors.GREY
+            color=self.__colors.BLUE
         )
         return embed
 
@@ -661,3 +662,27 @@ class BEmbeds:
         embed.set_footer(text="If that was on purpose, please do not purpose", icon_url="https://cdn.discordapp.com/emojis/1126999492131029033.webp?size=96")
         return embed
 
+    def PREMOVE_NO_COMMAND_FOUND(self, remove_str: str):
+        embed = Embed(
+            title="Nothing found when trying to remove a command",
+            description=f"Query {remove_str} matched no commands",
+            color=self.__colors.BLUE
+        )
+        return embed
+
+    def PREMOVE_REMOVED(self, command_str: str, number=None):
+        desc_addon = f", number {number}" if number else ""
+        embed = Embed(
+            title="Removed a command from Pizza Romani",
+            description=f"Removed command `{command_str}`" + desc_addon,
+            color=self.__colors.GREEN
+        )
+        return embed
+
+    def PREMOVE_NUMBER_LARGER_THAN_AMOUNT_COMMANDS(self, number: int, command_amount: int):
+        embed = Embed(
+            title="Error: Number specified was larger than the amount of matching commands",
+            description=f"Yea the title kinda says it all, you gave {number} but there are {command_amount} commands.",
+            color=self.__colors.RED
+        )
+        return embed
