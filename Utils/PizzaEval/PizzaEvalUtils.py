@@ -1,11 +1,28 @@
 import re
+
+from Utils.PizzaEval import PizzaEvalErrorDict
 from Utils.PizzaEval.PizzaEvalErrorDict import error_dict
 
 class PizzaError(Exception):
     pass
 
 def identify_error(error_code: int, expression: str) -> str:
-    return f"Error code {str(error_code)}: {error_dict[error_code]}. \nprocessing this expression: `{expression}`"
+    return f"Error code {str(error_code)}: {error_dict[error_code]} \nprocessing this expression: `{expression}`"
+
+def bool_operators_in_quotes(expression: str) -> bool:
+    return any(char in match for match in re.findall(r"'[^']*'", expression) for char in '|&^()')
+
+def is_always_true_or_false(complex_condition: str) -> bool:
+    if complex_condition.strip() in ("True", "False"):
+        raise PizzaError({'c': 5, 'e': complex_condition})
+
+    if complex_condition.strip() in ("not True", "not False") and PizzaEvalErrorDict.recursion_counter == 1:
+        raise PizzaError({'c': 6, 'e': complex_condition})
+
+    if 'True' in complex_condition or 'False' in complex_condition:
+        raise PizzaError({'c': 7, 'e': complex_condition})
+
+    return False
 
 def is_valid_complex_expression(complex_condition: str) -> bool:
     if complex_condition in ("True", "False"):
@@ -17,18 +34,22 @@ def is_valid_complex_expression(complex_condition: str) -> bool:
     if complex_condition[0] == "'":
         raise PizzaError({'c': 1, 'e': complex_condition})
 
-    if all(i not in complex_condition for i in [' | ', ' ^ ', ' & ', '(', ')']):
+    if all(i not in complex_condition for i in [' | ', ' ^ ', ' & ', '(', ')', 'not ']):
         if not is_valid_simple_expression(complex_condition):
             raise PizzaError({'c': 2, 'e': complex_condition})
 
-    if all(i not in complex_condition for i in ['in ', 'is ', 'start ', 'end ']):
+    if all(i not in complex_condition for i in ['in ', 'is ', 'start ', 'end ', 'not ']):
         raise PizzaError({'c': 3, 'e': complex_condition})
 
     if bool_operators_in_quotes(complex_condition):
         raise PizzaError({'c': 4, 'e': complex_condition})
 
-    if complex_condition.strip() in ("True", "False"):
-        raise PizzaError({'c': 5, 'e': complex_condition})
+    if 'not(' in complex_condition:
+        raise PizzaError({'c': 405, 'e': complex_condition})
+
+    if 'not' in complex_condition and not any(i in complex_condition for i in ['not (', 'not T', 'not F']):
+        raise PizzaError({'c': 406, 'e': complex_condition})
+
     return True
 
 def has_simple_keywords(read_string: str) -> int | bool:
@@ -65,16 +86,27 @@ def is_valid_simple_expression(expression: str) -> bool:
         raise PizzaError({'c': 104, 'e': expression})
     return True
 
-def is_valid_not_expression(expression: str) -> bool:
-    pass
+def is_valid_not_expression(expression: str) -> bool:  # expression should be "not True" or "not False" only
+    if is_complex_expression(expression) and 'not' in expression:
+        return False
+    if "True" not in expression and "False" not in expression:
+        raise PizzaError({'c': 402, 'e': expression})
+    if "not" not in expression:
+        raise PizzaError({'c': 404, 'e': expression})
+    if expression.count(" ") != 1:
+        raise PizzaError({'c': 401, 'e': expression})
+    if expression not in ("not True", "not False"):
+        print(expression)
+        raise PizzaError({'c': 403, 'e': expression})
+    return True
 
 def valid_parentheses_amount(expression: str) -> bool:
     if '(' not in expression or ')' not in expression:
         raise PizzaError({'c': 301, 'e': expression})
     if expression.count('(') != expression.count(')'):
         raise PizzaError({'c': 302, 'e': expression})
+    if '(True)' in expression or '(False)' in expression:
+        raise PizzaError({'c': 304, 'e': expression})
     return True
 
 
-def bool_operators_in_quotes(expression: str) -> bool:
-    return any(char in match for match in re.findall(r"'[^']*'", expression) for char in '|&^')

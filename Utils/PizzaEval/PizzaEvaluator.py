@@ -1,6 +1,6 @@
-from Utils.PizzaEval.PizzaEvalUtils import identify_error, is_complex_expression, is_valid_simple_expression, \
-    PizzaError, bool_operators_in_quotes, is_valid_complex_expression, valid_parentheses_amount
-
+from Utils.PizzaEval.PizzaEvalUtils import identify_error, is_valid_simple_expression, PizzaError, \
+    is_valid_complex_expression, valid_parentheses_amount, is_valid_not_expression, is_always_true_or_false
+from Utils.PizzaEval import PizzaEvalErrorDict
 
 def split_by_brackets_1_layer():
     pass
@@ -55,13 +55,15 @@ def recursively_evaluate_two_sides_for_operator(complex_condition: str, message_
         raise PizzaError({'c': 203, 'e': complex_condition})
     else:
         for i in range(len(next_layer_array) - 1):
+            if 'not' in next_layer_array[i]:
+                next_layer_array[i] = evaluate_not_expression(next_layer_array[i])
+        for i in range(len(next_layer_array) - 1):
             next_layer_array[0] = evaluate_two_sides(next_layer_array[0], next_layer_array[1], message_content, operator)
             next_layer_array.pop(1)
         return next_layer_array[0]
 
-def evaluate_not_expression(not_string: str, bool_to_flip: bool):  # not_string is literally just "not "
-    if not_string.count(' ') != 1:
-        raise PizzaError({'c': 401, 'e': not_string})
+def evaluate_not_expression(not_string: str):  # not_string is literally just "not True" or "not False"
+    return not eval(not_string[4:])
 
 def get_lowest_depth_expression(complex_condition: str) -> str | bool:
     stack = []
@@ -77,13 +79,18 @@ def get_lowest_depth_expression(complex_condition: str) -> str | bool:
 
 
 def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool:
+    PizzaEvalErrorDict.recursion_counter += 1
+
     if isinstance(complex_condition, bool):  # for recursion
         return complex_condition
+
+    if PizzaEvalErrorDict.recursion_counter == 1 and is_always_true_or_false(complex_condition):
+        PizzaError({'c': 8, 'e': complex_condition})
 
     if not is_valid_complex_expression(complex_condition):
         raise PizzaError({'c': -1, 'e': complex_condition})
 
-    if all(i not in complex_condition for i in [' | ', ' ^ ', ' & ', '(', ')']):
+    if all(i not in complex_condition for i in [' | ', ' ^ ', ' & ', '(', ')', 'not']):
         if is_valid_simple_expression(complex_condition):
             return evaluate_simple_expression(complex_condition, message_content)
 
@@ -94,12 +101,18 @@ def pizza_eval_read(complex_condition: str | bool, message_content: str) -> bool
                 inner_result = pizza_eval_read(lowest_depth_expression, message_content)
                 complex_condition = complex_condition.replace(f"({lowest_depth_expression})", str(inner_result))
 
+    if 'not True' in complex_condition or 'not False' in complex_condition:
+        if is_valid_not_expression(complex_condition):
+            return evaluate_not_expression(complex_condition)
+
     for i in [' | ', ' ^ ', ' & ']:
         if i in complex_condition:
             return recursively_evaluate_two_sides_for_operator(complex_condition, message_content, i)
 
-# try:
-#     print(pizza_eval_read("is 'a'", "a"))
-# except PizzaError as e:
-#     details = e.args[0]
-#     print(identify_error(details['c'], details['e']))
+    raise PizzaError({'c': -2, 'e': complex_condition + str(PizzaEvalErrorDict.recursion_counter)})
+
+try:
+    print(pizza_eval_read("is 🙂", "a"))
+except PizzaError as e:
+    details = e.args[0]
+    print(identify_error(details['c'], details['e']))

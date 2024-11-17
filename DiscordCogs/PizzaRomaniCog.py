@@ -7,15 +7,14 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils.PizzaEval.PizzaEvalUtils import PizzaError
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
+from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
 from Utils.Utils import Utils
-
 helper = Helper()
+PizzaEvalErrorDict.recursion_counter = 0
 
 with open("pizza_database.json", "r") as f:
     data = json.load(f)
-
 
 # noinspection DuplicatedCode
 class PizzaRomaniCog(Cog):
@@ -49,8 +48,9 @@ class PizzaRomaniCog(Cog):
 
             elif current_dict['type'] == 'complex':
                 try:
+                    PizzaEvalErrorDict.recursion_counter = 0
                     send = pizza_eval_read(current_dict['read'], message.content.lower())
-                except PizzaError as e:
+                except PizzaEvalUtils.PizzaError as e:
                     details = e.args[0]
                     await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
 
@@ -99,8 +99,9 @@ class PizzaRomaniCog(Cog):
         # turn replace mode off if the user set it to on
         if pizza_type == "complex":
             try:
+                PizzaEvalErrorDict.recursion_counter = 0
                 evaluated = pizza_eval_read(read, 'a')  # test an evaluation to see if complex read input is valid
-            except PizzaError as e:
+            except PizzaEvalUtils.PizzaError as e:
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
                 return
@@ -205,7 +206,6 @@ class PizzaRomaniCog(Cog):
         await ctx.send(embed=embed)
         return
 
-    # this was never finished LOL
     @command(name='premove', help=helper.HELP_PREMOVE, description=helper.HELP_PREMOVE_LONG, aliases=['pizza_remove'])
     async def premove(self, ctx: Context, *args) -> None:
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
@@ -258,8 +258,9 @@ class PizzaRomaniCog(Cog):
             return
 
         try:
+            PizzaEvalErrorDict.recursion_counter = 0
             evaluated = pizza_eval_read(args[0], args[1])
-        except PizzaError as e:
+        except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]
             await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
             return
