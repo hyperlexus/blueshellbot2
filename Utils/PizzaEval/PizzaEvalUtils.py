@@ -10,7 +10,7 @@ def identify_error(error_code: int, expression: str) -> str:
     return f"Error code {str(error_code)}: {error_dict[error_code]} \nprocessing this expression: `{expression}`"
 
 def bool_operators_in_quotes(expression: str) -> bool:
-    return any(char in match for match in re.findall(r"'[^']*'", expression) for char in '|&^()')
+    return any(char in match for match in re.findall(r"'[^']*'", expression) for char in '|&^')
 
 def is_always_true_or_false(complex_condition: str) -> bool:
     if complex_condition.strip() in ("True", "False"):
@@ -62,20 +62,36 @@ def is_only_simple_keyword(read_string: str) -> bool:
 def is_complex_expression(expression: str):
     return not all(i not in expression for i in [' | ', ' ^ ', ' & ', ' (', ') ', ' not '])
 
+def clean_brackets_inside_quotes(expression: str) -> str:
+    cleaned_expression = ""
+    inside_single_quote = False
+
+    for char in expression:
+        if char == "'":
+            inside_single_quote = not inside_single_quote
+        if char in "()":
+            if not inside_single_quote:
+                cleaned_expression += char
+        else:
+            cleaned_expression += char
+    return cleaned_expression
+
 def is_valid_simple_expression(expression: str) -> bool:
     if expression in ("True", "False"):
         return True
+    if '(' in expression or ')' in expression:
+        if all_parentheses_inside_single_quotes(expression):
+            print(expression)
+            print('b')
     if is_only_simple_keyword(expression):
         raise PizzaError({'c': 106, 'e': expression})
     if not has_simple_keywords(expression):
         raise PizzaError({'c': 101, 'e': expression})
     if '\'' in expression:
-        if expression.count('\'') % 2:
-            raise PizzaError({'c': 102, 'e': expression})
-        else:
+        if valid_single_quote_layout(expression):
             expr_array = expression.split("\'")
             if len(expr_array) > 3 or expr_array[2] != '':
-                raise PizzaError({'c': 105, 'e': expression})
+                    raise PizzaError({'c': 105, 'e': expression})
             expr_array = expr_array[:-1]
             expression_type, expression_value = expr_array[0].strip(), expr_array[1].strip()
     else:
@@ -101,6 +117,9 @@ def is_valid_not_expression(expression: str) -> bool:  # expression should be "n
     return True
 
 def valid_parentheses_amount(expression: str) -> bool:
+    if not all_parentheses_inside_single_quotes(expression):
+        expression = clean_brackets_inside_quotes(expression)
+
     if '(' not in expression or ')' not in expression:
         raise PizzaError({'c': 301, 'e': expression})
     if expression.count('(') != expression.count(')'):
@@ -109,4 +128,36 @@ def valid_parentheses_amount(expression: str) -> bool:
         raise PizzaError({'c': 304, 'e': expression})
     return True
 
+def valid_single_quote_layout(expression: str) -> bool:
+    if expression.count('\'') % 2:
+        raise PizzaError({'c': 102, 'e': expression})
+    else:
+        return True
+
+def all_parentheses_inside_single_quotes(s: str) -> bool:
+    inside_single_quote = False
+    for char in s:
+        if char == "'":
+            inside_single_quote = not inside_single_quote
+        elif char in "()":
+            if not inside_single_quote:
+                return False
+    return True
+
+def get_lowest_depth_expression(complex_condition: str) -> str | bool:
+    stack = []
+
+    if not all_parentheses_inside_single_quotes(complex_condition):
+        cleaned_complex_condition = clean_brackets_inside_quotes(complex_condition)
+
+    print('c')
+
+    for index, char in enumerate(complex_condition):
+        if char == '(':
+            stack.append(index)
+        elif char == ')':
+            if stack:
+                start_index = stack.pop()  # Get the matching '('
+                return complex_condition[start_index + 1:index]  # Return contents inside parentheses
+    raise PizzaError({'c': 303, 'e': complex_condition})
 
