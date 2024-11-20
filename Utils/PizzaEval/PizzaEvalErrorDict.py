@@ -2,7 +2,6 @@ recursion_counter = 0
 
 error_dict = {
     # general errors
-    -1: "condition raised no errors, but is somehow still not valid. <@422800248935546880>",
     0: "nothing was passed.",
     1: "odd number of single quotes. make sure to close all quotes!",
     2: "condition had `\'` as its first character, which is not allowed. did you quote the entire string instead of the expression value?",
@@ -10,7 +9,6 @@ error_dict = {
     4: "amount of opening and closing parentheses do not match. did you close all opened parentheses?",
     5: "the condition has too many spaces. please set the expression into single quotes `'<expression>'` if your desired expression contains spaces.",
     6: "your condition contains two single quotes `''` in a row. please don't do that 🍕👌",
-    8: "unreachable exception 🗿",
 
     # simple expression handler errors
     101: "simple expression doesn't contain necessary simple type check.",

@@ -52,6 +52,8 @@ def two_gaensefuesschen_in_a_row(condition):
                 last_char_gaensefuesschen = True
             else:
                 return True
+        else:
+            last_char_gaensefuesschen = False
     return False
 
 

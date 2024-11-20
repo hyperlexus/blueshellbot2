@@ -83,7 +83,7 @@ def pizza_eval_read(condition, message):
 
 
 try:
-    print(pizza_eval_read("is ''", 'is'))
+    print(pizza_eval_read("is ('(')", '('))
 except PizzaError as e:
     details = e.args[0]
     print(PizzaEvalUtils.identify_error(details['c'], details['e']))

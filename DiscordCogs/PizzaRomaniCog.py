@@ -34,27 +34,11 @@ class PizzaRomaniCog(Cog):
         for current_dict in data['p_commands']:
             send = False
 
-            if current_dict['type'] == 'in':
-                send = current_dict['read'] in message.content.lower()
-
-            elif current_dict['type'] == 'is':
-                send = message.content == current_dict['read']
-
-            elif current_dict['type'] == 'start':
-                send = message.content.startswith(current_dict['read'])
-
-            elif current_dict['type'] == 'end':
-                send = message.content.endswith(current_dict['read'])
-
-            elif current_dict['type'] == 'complex':
-                try:
-                    send = pizza_eval_read(current_dict['read'], message.content.lower())
-                except PizzaEvalUtils.PizzaError as e:
-                    details = e.args[0]
-                    await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
-
-            else:
-                return False
+            try:
+                send = pizza_eval_read(current_dict['read'], message.content.lower())
+            except PizzaEvalUtils.PizzaError as e:
+                details = e.args[0]
+                await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
             if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
                 if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
@@ -76,52 +60,37 @@ class PizzaRomaniCog(Cog):
             await ctx.send(embed=self.__embeds.BANNED())
             return
         fail_embed = self.__embeds.BAD_COMMAND_USAGE("pinsert")
-        if len(args) not in (3, 4):
+        if len(args) != 2:
             await ctx.send(embed=fail_embed)
             return
 
         # initialise all variables that will be passed to the json
         time = str(int(ctx.message.created_at.timestamp() * 1000))
         author = str(ctx.message.author.id)
-        if args[0] in ["is", "in", "start", "end", "complex"]:
-            pizza_type = args[0]
-        else:
-            await ctx.send(embed=fail_embed)
-            return
-        read = args[1]
-        write = args[2]
-        if len(args) == 4:
-            replace = True if args[3] == "replace" else False
-        else:
-            replace = False
+        read = args[0]
+        write = args[1]
 
         # turn replace mode off if the user set it to on
-        if pizza_type == "complex":
-            try:
-                PizzaEvalErrorDict.recursion_counter = 0
-                evaluated = pizza_eval_read(read, 'a')  # test an evaluation to see if complex read input is valid
-            except PizzaEvalUtils.PizzaError as e:
-                details = e.args[0]
-                await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
-                return
-            if replace:
-                await ctx.send("replace mode won't work with complex inputs, therefore it will be disabled.")
-                replace = False
+        try:
+            PizzaEvalErrorDict.recursion_counter = 0
+            evaluated = pizza_eval_read(read, 'a')  # test an evaluation to see if complex read input is valid
+        except PizzaEvalUtils.PizzaError as e:
+            details = e.args[0]
+            await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+            return
 
         new_command = {
             "time": time,
             "author": author,
-            "type": pizza_type,
             "read": read,
             "write": write,
-            "replace": replace
         }
         data['commands'].append(new_command)
 
         with open("pizza_database.json", "w") as f2:
             json.dump(data, f2, indent=4)
 
-        await ctx.send(embed=self.__embeds.PIZZA_INSERTED(read, write, replace))
+        await ctx.send(embed=self.__embeds.PIZZA_INSERTED(read, write))
         return
 
     @command(name='plist', help=helper.HELP_PLIST, description=helper.HELP_PLIST_LONG, aliases=['pizza_list'])
@@ -135,7 +104,7 @@ class PizzaRomaniCog(Cog):
         command_list = {}
         if args:
             real_args = list(args)
-            if real_args[0] not in ['time', 'author', 'read', 'write', 'type', 'replace']:
+            if real_args[0] not in ['time', 'author', 'read', 'write']:
                 await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
                 return
 
@@ -148,13 +117,9 @@ class PizzaRomaniCog(Cog):
         for current_dict in data['commands']:
             if not args:
                 command_list[current_dict['read']] = current_dict['write']
-                if current_dict['replace']:
-                    command_list[current_dict['read']] += " (replace)"
             else:
                 if real_args[1] in current_dict[args[0]]:
                     command_list[current_dict['read']] = current_dict['write']
-                    if current_dict['replace']:
-                        command_list[current_dict['read']] += " (replace)"
 
         if len(command_list) > self.__config.PIZZA_LIST_LENGTH:
             await ctx.send(embed=self.__embeds.PIZZA_LIST_TOO_LONG())
