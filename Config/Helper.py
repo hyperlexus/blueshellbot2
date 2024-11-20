@@ -75,12 +75,10 @@ class Helper(Singleton):
 
             self.HELP_PINSERT = 'Inserts a new command into pizza romani.'
             self.HELP_PINSERT_LONG = (f'Adds a new command into pizza romani.\n'
-                                      f'Syntax: `{config.BOT_PREFIX}pinsert [is/in/start/end] "to_match" "response" (replace)`\n'
-                                      f'Example: `{config.BOT_PREFIX}pinsert in test "test icles"`\n'
-                                      f'If message and/or response have spaces in it, use quotation marks.\n'
-                                      f'If you want pizza romani to instead replace the match with the response, '
-                                      f'add "replace" at the end.\n\n'
-                                      f'is = is exactly equal\nin = contains\nstart = starts with\nend = ends with')
+                                      f'Syntax: `{config.BOT_PREFIX}pinsert "to_match" "response"`\n'
+                                      f'Example: `{config.BOT_PREFIX}pinsert "in test | is bomboclaat" "test icles"`\n'
+                                      f'If message and/or response have spaces in it, use quotation marks.')
+
             self.HELP_PLIST = 'Lists pizza romani matches, with further options.'
             self.HELP_PLIST_LONG = (f'Lists all pizza romani matches. You can provide arguments to search further.\n\n'
                                     f'Syntax: `{config.BOT_PREFIX}plist (filter keyword)`\n'
@@ -89,8 +87,7 @@ class Helper(Singleton):
                                     f'author (id/ping)\n'
                                     f'read (what it matches)\n'
                                     f'write (what it replies with)\n'
-                                    f'type (which match type)\n'
-                                    f'replace (lists all with replace mode on')
+                                    f'type (which match type)\n')
 
             self.HELP_PINFO = 'Gets info about one pizza command.'
             self.HELP_PINFO_LONG = (f'Retrieves information about one pizza romani command.\n'
