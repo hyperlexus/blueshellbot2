@@ -1,163 +1,109 @@
 import re
-
-from Utils.PizzaEval import PizzaEvalErrorDict
 from Utils.PizzaEval.PizzaEvalErrorDict import error_dict
 
+
+# error handling
 class PizzaError(Exception):
     pass
+
 
 def identify_error(error_code: int, expression: str) -> str:
     return f"Error code {str(error_code)}: {error_dict[error_code]} \nprocessing this expression: `{expression}`"
 
-def bool_operators_in_quotes(expression: str) -> bool:
-    return any(char in match for match in re.findall(r"'[^']*'", expression) for char in '|&^')
 
-def is_always_true_or_false(complex_condition: str) -> bool:
-    if complex_condition.strip() in ("True", "False"):
-        raise PizzaError({'c': 5, 'e': complex_condition})
+def logical_xor(a, b):
+    return (a or b) and not (a and b)
 
-    if complex_condition.strip() in ("not True", "not False") and PizzaEvalErrorDict.recursion_counter == 1:
-        raise PizzaError({'c': 6, 'e': complex_condition})
 
-    if 'True' in complex_condition or 'False' in complex_condition:
-        raise PizzaError({'c': 7, 'e': complex_condition})
-
-    return False
-
-def is_valid_complex_expression(complex_condition: str) -> bool:
-    if complex_condition in ("True", "False"):
-        return True
-
-    if complex_condition == "":
-        raise PizzaError({'c': 0, 'e': complex_condition})
-
-    if complex_condition[0] == "'":
-        raise PizzaError({'c': 1, 'e': complex_condition})
-
-    if all(i not in complex_condition for i in [' | ', ' ^ ', ' & ', '(', ')', 'not ']):
-        if not is_valid_simple_expression(complex_condition):
-            raise PizzaError({'c': 2, 'e': complex_condition})
-
-    if all(i not in complex_condition for i in ['in ', 'is ', 'start ', 'end ', 'not ']):
-        raise PizzaError({'c': 3, 'e': complex_condition})
-
-    if bool_operators_in_quotes(complex_condition):
-        raise PizzaError({'c': 4, 'e': complex_condition})
-
-    if 'not(' in complex_condition:
-        raise PizzaError({'c': 405, 'e': complex_condition})
-
-    if 'not' in complex_condition and not any(i in complex_condition for i in ['not (', 'not T', 'not F']):
-        raise PizzaError({'c': 406, 'e': complex_condition})
-
-    return True
-
-def has_simple_keywords(read_string: str) -> int | bool:
-    """Checks if string is allowed input for pizza type 'complex'"""
-    return not all(i not in read_string for i in ['is ', 'in ', 'start ', 'end '])
-
-def is_only_simple_keyword(read_string: str) -> bool:
-    return any(i == read_string for i in ['is', 'in', 'start', 'end'])
-
-def is_complex_expression(expression: str):
-    return not all(i not in expression for i in [' | ', ' ^ ', ' & ', ' (', ') ', ' not '])
-
-def clean_brackets_inside_quotes(expression: str) -> str:
-    cleaned_expression = ""
-    inside_single_quote = False
-
+# condition validator 3000
+def remove_text_inside_gaensefuesschen(expression):  # for contains_a_check
+    out = ""
+    inside_gaensefuesschen = False
     for char in expression:
         if char == "'":
-            inside_single_quote = not inside_single_quote
-        if char in "()":
-            if not inside_single_quote:
-                cleaned_expression += char
-        else:
-            cleaned_expression += char
-    return cleaned_expression
+            out += char
+            inside_gaensefuesschen = not inside_gaensefuesschen
+            continue
+        if not inside_gaensefuesschen:
+            out += char
+    return out
 
-def is_valid_simple_expression(expression: str) -> bool:
-    if expression in ("True", "False"):
-        return True
-    if '(' in expression or ')' in expression:
-        if all_parentheses_inside_single_quotes(expression):
-            print(expression)
-            print('b')
-    if is_only_simple_keyword(expression):
-        raise PizzaError({'c': 106, 'e': expression})
-    if not has_simple_keywords(expression):
-        raise PizzaError({'c': 101, 'e': expression})
-    if '\'' in expression:
-        if valid_single_quote_layout(expression):
-            expr_array = expression.split("\'")
-            if len(expr_array) > 3 or expr_array[2] != '':
-                    raise PizzaError({'c': 105, 'e': expression})
-            expr_array = expr_array[:-1]
-            expression_type, expression_value = expr_array[0].strip(), expr_array[1].strip()
-    else:
-        if expression.count(' ') != 1:
-            raise PizzaError({'c': 103, 'e': expression})
-        expression_type, text = expression.split(" ")
-    if expression_type not in ['in', 'is', 'start', 'end']:
-        raise PizzaError({'c': 104, 'e': expression})
-    return True
 
-def is_valid_not_expression(expression: str) -> bool:  # expression should be "not True" or "not False" only
-    if is_complex_expression(expression) and 'not' in expression:
-        return False
-    if "True" not in expression and "False" not in expression:
-        raise PizzaError({'c': 402, 'e': expression})
-    if "not" not in expression:
-        raise PizzaError({'c': 404, 'e': expression})
-    if expression.count(" ") != 1:
-        raise PizzaError({'c': 401, 'e': expression})
-    if expression not in ("not True", "not False"):
-        print(expression)
-        raise PizzaError({'c': 403, 'e': expression})
-    return True
-
-def valid_parentheses_amount(expression: str) -> bool:
-    if not all_parentheses_inside_single_quotes(expression):
-        expression = clean_brackets_inside_quotes(expression)
-
-    if '(' not in expression or ')' not in expression:
-        raise PizzaError({'c': 301, 'e': expression})
-    if expression.count('(') != expression.count(')'):
-        raise PizzaError({'c': 302, 'e': expression})
-    if '(True)' in expression or '(False)' in expression:
-        raise PizzaError({'c': 304, 'e': expression})
-    return True
-
-def valid_single_quote_layout(expression: str) -> bool:
-    if expression.count('\'') % 2:
-        raise PizzaError({'c': 102, 'e': expression})
-    else:
-        return True
-
-def all_parentheses_inside_single_quotes(s: str) -> bool:
-    inside_single_quote = False
-    for char in s:
+def is_parenthese_lvl_fine(condition):
+    insideGaensefuesschen = False
+    parantheseLvl = 0
+    for char in condition:
         if char == "'":
-            inside_single_quote = not inside_single_quote
-        elif char in "()":
-            if not inside_single_quote:
-                return False
+            insideGaensefuesschen = not insideGaensefuesschen
+        if insideGaensefuesschen:
+            continue
+        if char == "(":
+            parantheseLvl += 1
+        elif char == ")":
+            parantheseLvl -= 1
+    return parantheseLvl
+
+
+def two_gaensefuesschen_in_a_row(condition):
+    last_char_gaensefuesschen = False
+    for char in condition:
+        if char == "'":
+            if not last_char_gaensefuesschen:
+                last_char_gaensefuesschen = True
+            else:
+                return True
+    return False
+
+
+def bracket_open_close_in_a_row(condition):
+    insideGaensefuesschen = False
+    last_paranthese_open = False
+    for char in condition:
+        if char == "'":
+            insideGaensefuesschen = not insideGaensefuesschen
+        if insideGaensefuesschen:
+            continue
+        if char == "(":
+            last_paranthese_open = True
+        if char == ")" and last_paranthese_open:
+            return True
+        if not char == "(":
+            last_paranthese_open = False
+
+
+def is_valid_singel_expression(singel_expression):
+    if all(check not in remove_text_inside_gaensefuesschen(singel_expression) for check in ['is ', 'in ', 'start ', 'end ']):
+        raise PizzaError({'c': 101, 'e': singel_expression})
+    if singel_expression.count("'") % 2:
+        raise PizzaError({'c': 102, 'e': singel_expression})
+    if any(check == singel_expression for check in ['is', 'in', 'start', 'end', 'is ', 'in ', 'start ', 'end ']):
+        raise PizzaError({'c': 103, 'e': singel_expression})
+
+
+def is_valid_condition(condition):
+    if not condition:
+        raise PizzaError({'c': 0, 'e': condition})
+    if condition.count("'") % 2:
+        raise PizzaError({'c': 1, 'e': condition})
+    if condition[0] == "'":
+        raise PizzaError({'c': 2, 'e': condition})
+    if all(check not in condition for check in ['is ', 'in ', 'start ', 'end ']):
+        raise PizzaError({'c': 3, 'e': condition})
+    if is_parenthese_lvl_fine(condition) > 0:
+        raise PizzaError({'c': 301, 'e': condition})
+    if is_parenthese_lvl_fine(condition) < 0:
+        raise PizzaError({'c': 302, 'e': condition})
+    if bracket_open_close_in_a_row(condition):
+        raise PizzaError({'c': 303, 'e': condition})
+    if two_gaensefuesschen_in_a_row(condition):
+        raise PizzaError({'c': 6, 'e': condition})
+    if "xandi" in condition:
+        raise PizzaError({'c': 401, 'e': condition})
     return True
 
-def get_lowest_depth_expression(complex_condition: str) -> str | bool:
-    stack = []
 
-    if not all_parentheses_inside_single_quotes(complex_condition):
-        cleaned_complex_condition = clean_brackets_inside_quotes(complex_condition)
-
-    print('c')
-
-    for index, char in enumerate(complex_condition):
-        if char == '(':
-            stack.append(index)
-        elif char == ')':
-            if stack:
-                start_index = stack.pop()  # Get the matching '('
-                return complex_condition[start_index + 1:index]  # Return contents inside parentheses
-    raise PizzaError({'c': 303, 'e': complex_condition})
-
+# try:
+#     print(is_valid_condition("is nig is"))
+# except PizzaError as e:
+#     details = e.args[0]
+#     print(identify_error(details['c'], details['e']))

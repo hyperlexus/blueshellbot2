@@ -31,7 +31,7 @@ class PizzaRomaniCog(Cog):
             return
         ctx = await self.__bot.get_context(message)
 
-        for current_dict in data['commands']:
+        for current_dict in data['p_commands']:
             send = False
 
             if current_dict['type'] == 'in':
@@ -48,11 +48,10 @@ class PizzaRomaniCog(Cog):
 
             elif current_dict['type'] == 'complex':
                 try:
-                    PizzaEvalErrorDict.recursion_counter = 0
                     send = pizza_eval_read(current_dict['read'], message.content.lower())
                 except PizzaEvalUtils.PizzaError as e:
                     details = e.args[0]
-                    await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
+                    await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
             else:
                 return False
@@ -103,7 +102,7 @@ class PizzaRomaniCog(Cog):
                 evaluated = pizza_eval_read(read, 'a')  # test an evaluation to see if complex read input is valid
             except PizzaEvalUtils.PizzaError as e:
                 details = e.args[0]
-                await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
+                await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
                 return
             if replace:
                 await ctx.send("replace mode won't work with complex inputs, therefore it will be disabled.")
@@ -262,7 +261,7 @@ class PizzaRomaniCog(Cog):
             evaluated = pizza_eval_read(args[0], args[1])
         except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]
-            await ctx.send(embed=self.__embeds.PIZZA_INVALID_COMPLEX_INPUT(details['c'], details['e']))
+            await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
             return
         await ctx.send(evaluated)
 

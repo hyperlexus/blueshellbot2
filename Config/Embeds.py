@@ -627,10 +627,10 @@ class BEmbeds:
         )
         return embed
 
-    def PIZZA_INVALID_COMPLEX_INPUT(self, error_code, expression):
+    def PIZZA_INVALID_INPUT(self, error_code, expression):
         embed = Embed(
-            title="Error: Input not valid for 'complex' type.",
-            description="The input did not satisfy requirements for type 'complex'. Problem: \n\n" + identify_error(error_code, expression),
+            title="Error: Pizza Romani input not valid.",
+            description="The input did not satisfy all requirements. Problem: \n\n" + identify_error(error_code, expression),
             color=self.__colors.RED
         )
         embed.set_footer(text="Check if you made a typo or are maybe missing a space.",
