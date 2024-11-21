@@ -85,7 +85,7 @@ class PizzaRomaniCog(Cog):
             "read": read,
             "write": write,
         }
-        data['commands'].append(new_command)
+        data['p_commands'].append(new_command)
 
         with open("pizza_database.json", "w") as f2:
             json.dump(data, f2, indent=4)
@@ -101,7 +101,7 @@ class PizzaRomaniCog(Cog):
         if len(args) not in (0, 2):
             await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE("plist"))
             return
-        command_list = {}
+        command_list = []
         if args:
             real_args = list(args)
             if real_args[0] not in ['time', 'author', 'read', 'write']:
@@ -114,12 +114,12 @@ class PizzaRomaniCog(Cog):
                     await ctx.send(embed=self.__embeds.BAD_USER_ID(args[1]))
                     return
 
-        for current_dict in data['commands']:
+        for index, current_dict in enumerate(data['p_commands']):
             if not args:
-                command_list[current_dict['read']] = current_dict['write']
+                command_list.append({current_dict['read']: current_dict['write']})
             else:
                 if real_args[1] in current_dict[args[0]]:
-                    command_list[current_dict['read']] = current_dict['write']
+                    command_list.append({current_dict['read']: current_dict['write']})
 
         if len(command_list) > self.__config.PIZZA_LIST_LENGTH:
             await ctx.send(embed=self.__embeds.PIZZA_LIST_TOO_LONG())
@@ -127,7 +127,8 @@ class PizzaRomaniCog(Cog):
         if len(command_list) == 0:
             result = "No commands found."
         else:
-            result = "\n".join(f"{key} -> {value}" for key, value in command_list.items())
+            print(command_list)
+            result = "\n".join(f"{key} -> {value}" for adict in command_list for key, value in adict.items())
 
         if not args:
             await ctx.send(embed=self.__embeds.PIZZA_LIST(result))
@@ -145,7 +146,7 @@ class PizzaRomaniCog(Cog):
             return
 
         matching_commands = []
-        for current_dict in data['commands']:
+        for current_dict in data['p_commands']:
             if current_dict['write'] == args[0]:
                 matching_commands.append(current_dict)
 
