@@ -43,6 +43,7 @@ class BlueshellInitializer:
             cogsStatus = []
 
             for root, dirs, files in os.walk(self.__config.COMMANDS_PATH):
+
                 relative_path = os.path.relpath(root, self.__config.COMMANDS_PATH)
                 path_components = relative_path.split(os.sep)
 
@@ -53,7 +54,13 @@ class BlueshellInitializer:
 
                 for file in files:
                     if file.endswith(".py"):
-                        cogPath = f'{prefix}.{file[:-3]}'.rpartition("/")[2]
+                        filePath = f'{prefix}.{file[:-3]}'
+                        if "/" in filePath:
+                            cogPath = f'{prefix}.{file[:-3]}'.rpartition("/")[2]
+                        elif "\\" in filePath:
+                            cogPath = f'{prefix}.{file[:-3]}'.rpartition("\\")[2]
+                        else:
+                            print("blud?")
                         cogsStatus.append(bot.load_extension(cogPath, store=True))
 
             if len(bot.cogs.keys()) != self.__getTotalCogs():
