@@ -41,16 +41,12 @@ class BlueshellInitializer:
     def __add_cogs(self, bot: Bot) -> None:
         try:
             cogsStatus = []
-            file_list = []
 
             for root, dirs, files in os.walk(self.__config.COMMANDS_PATH):
                 for file in files:
-                    file_list.append(file)
-
-            for filename in file_list:
-                if filename.endswith('.py'):
-                    cogPath = f'{self.__config.COMMANDS_FOLDER_NAME}.{filename[:-3]}'
-                    cogsStatus.append(bot.load_extension(cogPath, store=True))
+                    if file.endswith('.py'):
+                        cogPath = f'{self.__config.COMMANDS_FOLDER_NAME}.{file[:-3]}'
+                        cogsStatus.append(bot.load_extension(cogPath, store=True))
 
             if len(bot.cogs.keys()) != self.__getTotalCogs():
                 print(cogsStatus)
@@ -62,13 +58,10 @@ class BlueshellInitializer:
 
     def __getTotalCogs(self) -> int:
         quant = 0
-        file_list = []
 
         for root, dirs, files in os.walk(self.__config.COMMANDS_PATH):
             for file in files:
-                file_list.append(file)
+                if file.endswith('.py'):
+                    quant += 1
 
-        for filename in file_list:
-            if filename.endswith('.py'):
-                quant += 1
         return quant
