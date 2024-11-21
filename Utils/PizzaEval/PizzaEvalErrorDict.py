@@ -4,7 +4,7 @@ error_dict = {
     # general errors
     0: "nothing was passed.",
     1: "odd number of single quotes. make sure to close all quotes!",
-    2: "condition had `\'` as its first character, which is not allowed. did you quote the entire string instead of the expression value?",
+    2: "condition had `'` as its first character, which is not allowed. did you quote the entire string instead of the expression value?",
     3: "no valid simple type check contained in complex expression.",
     4: "amount of opening and closing parentheses do not match. did you close all opened parentheses?",
     5: "the condition has too many spaces. please set the expression into single quotes `'<expression>'` if your desired expression contains spaces.",

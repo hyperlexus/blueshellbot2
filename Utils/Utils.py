@@ -26,6 +26,17 @@ class Utils:
             seconds)
 
     @classmethod
+    def bool_discord_time_syntax(cls, timestamp: int, discord_format: str):
+        pass
+        # try:
+        #     format_type, formatter = discord_format.split(":")
+        #     formatter_parts = formatter.split("-")
+        #     if format_type == "during":
+        #         pass
+        # except:
+        #     return False
+
+    @classmethod
     def check_if_banned(cls, user, path) -> bool:
         banned_ids = []
         os.chdir(path)

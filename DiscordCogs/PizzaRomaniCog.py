@@ -8,10 +8,9 @@ from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
-from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
+from Utils.PizzaEval import PizzaEvalUtils, PizzaEvalErrorDict
 from Utils.Utils import Utils
 helper = Helper()
-PizzaEvalErrorDict.recursion_counter = 0
 
 with open("pizza_database.json", "r") as f:
     data = json.load(f)
@@ -25,37 +24,31 @@ class PizzaRomaniCog(Cog):
         self.__config = BConfigs()
         self.__bot: BlueshellBot = bot
 
-    @Cog.listener()
-    async def on_message(self, message):
-        if message.author == self.__bot.user or message.content.lower().startswith('b.p') or not message.content:
-            return
-        ctx = await self.__bot.get_context(message)
-
-        for current_dict in data['p_commands']:
-            send = False
-
-            try:
-                send = pizza_eval_read(current_dict['read'], message.content.lower())
-            except PizzaEvalUtils.PizzaError as e:
-                details = e.args[0]
-                await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
-
-            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
-                if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
-                    command_and_args = current_dict['write'][2:].split(" ")
-                    command_to_run = self.__bot.get_command(command_and_args[0])
-                    await ctx.invoke(command_to_run, *command_and_args[1:])
-                    continue
-                if current_dict['replace']:
-                    await message.channel.send(message.content.replace(current_dict['read'], current_dict['write']))
-                    continue
-                await message.channel.send(current_dict['write'])
+    # @Cog.listener()
+    # async def on_message(self, message):
+    #     if message.author == self.__bot.user or message.content.lower().startswith('b.p') or not message.content:
+    #         return
+    #     ctx = await self.__bot.get_context(message)
+    #
+    #     for current_dict in data['p_commands']:
+    #         send = False
+    #
+    #         try:
+    #             send = pizza_eval_read(current_dict['read'], message.content.lower())
+    #         except PizzaEvalUtils.PizzaError as e:
+    #             details = e.args[0]
+    #             await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+    #
+    #         if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
+    #             if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
+    #                 command_and_args = current_dict['write'][2:].split(" ")
+    #                 command_to_run = self.__bot.get_command(command_and_args[0])
+    #                 await ctx.invoke(command_to_run, *command_and_args[1:])
+    #                 continue
+    #             await message.channel.send(current_dict['write'])
 
     @command(name='pinsert', help=helper.HELP_PINSERT, description=helper.HELP_PINSERT_LONG, aliases=['pizza_insert'])
     async def pinsert(self, ctx: Context, *args):
-        """
-        Args: type, to_match, response, (replace)
-        """
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
@@ -70,10 +63,10 @@ class PizzaRomaniCog(Cog):
         read = args[0]
         write = args[1]
 
-        # turn replace mode off if the user set it to on
+        # test an evaluation to see if complex read input is valid
         try:
             PizzaEvalErrorDict.recursion_counter = 0
-            evaluated = pizza_eval_read(read, 'a')  # test an evaluation to see if complex read input is valid
+            pizza_eval_read(read, 'a')
         except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]
             await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
@@ -83,7 +76,7 @@ class PizzaRomaniCog(Cog):
             "time": time,
             "author": author,
             "read": read,
-            "write": write,
+            "write": write
         }
         data['p_commands'].append(new_command)
 
@@ -127,7 +120,6 @@ class PizzaRomaniCog(Cog):
         if len(command_list) == 0:
             result = "No commands found."
         else:
-            print(command_list)
             result = "\n".join(f"{key} -> {value}" for adict in command_list for key, value in adict.items())
 
         if not args:
@@ -223,7 +215,6 @@ class PizzaRomaniCog(Cog):
             return
 
         try:
-            PizzaEvalErrorDict.recursion_counter = 0
             evaluated = pizza_eval_read(args[0], args[1])
         except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]

@@ -579,10 +579,12 @@ class BEmbeds:
         )
         return embed
 
-    def PIZZA_LIST_TOO_LONG(self):
+    def PIZZA_LIST_TOO_LONG(self, command_amount, pages):
         embed = Embed(
             title="Error: list too long",
-            description="The list of commands is too long. Try narrowing down your search results!",
+            description="The list of commands is too long.\n"
+                        "Try narrowing down your search results or filtering for a page!\n\n"
+                        f"There are {command_amount} commands across {pages} page{'s' if pages > 1 else ''}.",
             color=self.__colors.RED
         )
         return embed
@@ -645,14 +647,6 @@ class BEmbeds:
         )
         return embed
 
-    def TURNED_REPLACE_OFF(self):
-        embed = Embed(
-            title='Information: replace mode turned off',
-            description="'complex' mode does not support replace mode, therefore it has been turned off.'",
-            color=self.__colors.GREY
-        )
-        return embed
-
     def NO_CLOSING_QUOTE(self):
         embed = Embed(
             title="Error: no closing quote provided",
@@ -683,6 +677,23 @@ class BEmbeds:
         embed = Embed(
             title="Error: Number specified was larger than the amount of matching commands",
             description=f"Yea the title kinda says it all, you gave {number} but there are {command_amount} commands.",
+            color=self.__colors.RED
+        )
+        return embed
+
+    def SLASH_PLIST_NOT_BOTH_OPTIONS(self):
+        embed = Embed(
+            title="Error: Incorrect slash command options for plist",
+            description=("If this slash command is provided with either `filter_category` or `string_to_match`, "
+                         "the other one has to be provided as well."),
+            color=self.__colors.RED
+        )
+        return embed
+
+    def SLASH_PLIST_PAGE_LARGER_THAN_AMOUNT_COMMANDS(self, page_amount):
+        embed = Embed(
+            title="Error: Page number given larger than amount of pages",
+            description=f"The page number you inputted is larger than the total amount of pages. There are {page_amount} pages.",
             color=self.__colors.RED
         )
         return embed

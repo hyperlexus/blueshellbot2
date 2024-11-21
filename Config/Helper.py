@@ -112,5 +112,9 @@ class Helper(Singleton):
                                        f'Example: `{config.BOT_PREFIX}ptestcompiler "in a & (in b | end c)" "ac"`\n\n'
                                        f'Automatically uses complex type. Have fun maggda')
 
+            # slash commands below
+
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
             self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'
+
+            self.SLASH_PINSERT = "Inserts a command into pizza romani"

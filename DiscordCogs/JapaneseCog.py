@@ -1,4 +1,3 @@
-import asyncio
 from Music.BlueshellBot import BlueshellBot
 from discord.ext.commands import Context, command, Cog
 from Config.Helper import Helper

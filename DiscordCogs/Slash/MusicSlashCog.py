@@ -23,10 +23,12 @@ from Config.Embeds import BEmbeds
 from Config.Helper import Helper
 import traceback
 
+from Utils.Utils import Utils
+
 helper = Helper()
 
 
-class SlashCommands(Cog):
+class MusicSlashCommands(Cog):
     """
     Class to listen to Music commands
     It'll listen for commands from discord, when triggered will create a specific Handler for the command
@@ -240,7 +242,7 @@ class SlashCommands(Cog):
 
     @slash_command(name='volume', description=helper.CHANGE_VOLUME_LONG)
     async def move(self, ctx: ApplicationContext,
-                   volume: Option(float, "The new volume of the song", min_value=1, default= 100)) -> None:
+                   volume: Option(float, "The new volume of the song", min_value=1, default=100)) -> None:
         if not self.__bot.listingSlash:
             return
         try:
@@ -283,6 +285,5 @@ class SlashCommands(Cog):
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
-
 def setup(bot):
-    bot.add_cog(SlashCommands(bot))
+    bot.add_cog(MusicSlashCommands(bot))
