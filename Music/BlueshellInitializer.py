@@ -1,3 +1,4 @@
+import os
 from random import choices
 import string
 from discord.bot import Bot
@@ -40,7 +41,13 @@ class BlueshellInitializer:
     def __add_cogs(self, bot: Bot) -> None:
         try:
             cogsStatus = []
-            for filename in listdir(self.__config.COMMANDS_PATH):
+            file_list = []
+
+            for root, dirs, files in os.walk(self.__config.COMMANDS_PATH):
+                for file in files:
+                    file_list.append(file)
+
+            for filename in file_list:
                 if filename.endswith('.py'):
                     cogPath = f'{self.__config.COMMANDS_FOLDER_NAME}.{filename[:-3]}'
                     cogsStatus.append(bot.load_extension(cogPath, store=True))
@@ -55,7 +62,13 @@ class BlueshellInitializer:
 
     def __getTotalCogs(self) -> int:
         quant = 0
-        for filename in listdir(self.__config.COMMANDS_PATH):
+        file_list = []
+
+        for root, dirs, files in os.walk(self.__config.COMMANDS_PATH):
+            for file in files:
+                file_list.append(file)
+
+        for filename in file_list:
             if filename.endswith('.py'):
                 quant += 1
         return quant

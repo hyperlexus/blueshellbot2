@@ -1,6 +1,12 @@
 # all hail test.py
-list_of_fellas = [{'in oxygen': 'hat da jemand oxygen gesagt'}, {'in oxygen': 'b.play oxygen kloudz'}, {"in 'kill yourself'": 'b.kys'}, {'spätzle mit hahn': 'end getan'}, {'Ich lach mir einen runter ey': "in 'lachen uns einen'"}]
+import os
 
-result = "\n".join(f"{key} -> {value}" for adict in list_of_fellas for key, value in adict.items())
+file_list = []
 
-print(result)
+for root, dirs, files in os.walk('../../DiscordCogs'):
+    for file in files:
+        file_list.append(file)
+
+for file in file_list:
+    if file.endswith(".py"):
+        print(file)
