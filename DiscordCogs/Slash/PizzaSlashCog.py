@@ -10,8 +10,8 @@ from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
 from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
-from Utils.PizzaEval.PizzaEvalUtils import logical_xor
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
+from Utils.PizzaEval.BoolDiscordFormatting import evaluate_discord_timestamp
 from Utils.Utils import Utils
 
 helper = Helper()
@@ -126,17 +126,18 @@ class PizzaSlashCog(Cog):
                 await ctx.respond(embed=self.__embeds.BAD_USER_ID(tempstring_if_conversion_doesnt_work))
                 return
 
-        for index, current_dict in enumerate(data['p_commands']):
+        for current_dict in data['p_commands']:
+            add_command = False
             if not filter_category:
-                command_list.append({current_dict['read']: current_dict['write']})
+                add_command = True
             else:
-                if not filter_category == "time":
-                    if string_to_match in current_dict[filter_category]:
-                        command_list.append({current_dict['read']: current_dict['write']})
-                else:
-                    if Utils.bool_discord_time_syntax('a', 'b'):
-                        pass  # LEFT OFF HERE, THIS IS TO DO NEXT
-
+                if filter_category == "time":
+                    if evaluate_discord_timestamp(int(current_dict['time']) // 1000, string_to_match):
+                        add_command = True
+                elif string_to_match in current_dict[filter_category]:
+                    add_command = True
+            if add_command:
+                command_list.append({current_dict['read']: current_dict['write']})
 
         amount_pages = math.ceil(len(command_list) / 25) - 1
 
