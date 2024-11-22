@@ -12,7 +12,7 @@ from Utils.PizzaEval import PizzaEvalUtils, PizzaEvalErrorDict
 from Utils.Utils import Utils
 helper = Helper()
 
-with open("pizza_database.json", "r") as f:
+with open("database.json", "r") as f:
     data = json.load(f)
 
 # noinspection DuplicatedCode
@@ -52,6 +52,7 @@ class PizzaRomaniCog(Cog):
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
+        await ctx.send("This command is deprecated. Please use slash commands!")
         fail_embed = self.__embeds.BAD_COMMAND_USAGE("pinsert")
         if len(args) != 2:
             await ctx.send(embed=fail_embed)
@@ -80,7 +81,7 @@ class PizzaRomaniCog(Cog):
         }
         data['p_commands'].append(new_command)
 
-        with open("pizza_database.json", "w") as f2:
+        with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
 
         await ctx.send(embed=self.__embeds.PIZZA_INSERTED(read, write))
@@ -91,6 +92,8 @@ class PizzaRomaniCog(Cog):
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
+        await ctx.send("This command is deprecated. Please use slash commands!")
+        return
         if len(args) not in (0, 2):
             await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE("plist"))
             return
@@ -198,7 +201,7 @@ class PizzaRomaniCog(Cog):
         else:
             await ctx.send(embed=self.__embeds.PREMOVE_NO_COMMAND_FOUND(args[0]))
 
-        with open("pizza_database.json", "w") as f2:
+        with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
         return
 

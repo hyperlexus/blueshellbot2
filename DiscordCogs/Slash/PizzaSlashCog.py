@@ -16,7 +16,7 @@ from Utils.Utils import Utils
 
 helper = Helper()
 
-with open("pizza_database.json", "r") as f:
+with open("database.json", "r") as f:
     data = json.load(f)
 
 class PizzaSlashCog(Cog):
@@ -88,7 +88,7 @@ class PizzaSlashCog(Cog):
 
         data['p_commands'].append(new_command)
 
-        with open("pizza_database.json", "w") as f2:
+        with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
 
         await ctx.respond(embed=self.__embeds.PIZZA_INSERTED(read, write))
@@ -158,6 +158,27 @@ class PizzaSlashCog(Cog):
         else:
             await ctx.respond(embed=self.__embeds.PIZZA_LIST_FILTERED(result, filter_category, string_to_match))
         return
+
+    @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
+    async def ptestcompiler(self, ctx: ApplicationContext,
+                            read: Option(str, "The string to match. The compiler works on this one"),
+                            write: Option(str, "What pizza romani responds with. The [] syntax goes here")):
+        if not self.__bot.listingSlash:
+            return
+        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
+            await ctx.respond(embed=self.__embeds.BANNED())
+            return
+        await ctx.defer()
+
+        try:
+            PizzaEvalErrorDict.recursion_counter = 0
+            result = pizza_eval_read(read, write)
+        except PizzaEvalUtils.PizzaError as e:
+            details = e.args[0]
+            await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+            return
+
+        await ctx.respond(result)
 
 def setup(bot):
     bot.add_cog(PizzaSlashCog(bot))

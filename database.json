@@ -1,0 +1,83 @@
+{
+    "p_commands": [
+        {
+            "time": "1731066071308",
+            "author": "422800248935546880",
+            "read": "in oxygen",
+            "write": "hat da jemand oxygen gesagt"
+        },
+        {
+            "time": "1731065160396",
+            "author": "422800248935546880",
+            "read": "in oxygen",
+            "write": "b.play oxygen kloudz"
+        },
+        {
+            "time": "1731150721426",
+            "author": "422800248935546880",
+            "read": "in 'kill yourself'",
+            "write": "b.kys"
+        },
+        {
+            "time": "1731156653584",
+            "author": "422800248935546880",
+            "read": "end getan",
+            "write": "sp\u00e4tzle mit hahn"
+        },
+        {
+            "time": "1731710780399",
+            "author": "468786219258740756",
+            "read": "in 'lachen uns einen'",
+            "write": "Ich lach mir einen runter ey"
+        },
+        {
+            "time": "1732218029729",
+            "author": "422800248935546880",
+            "read": "is a | is b | is 'be yon ce'",
+            "write": "der kanacke"
+        }
+    ],
+    "c_counters": [
+        {
+            "id": 422800248935546880,
+            "money": 0,
+            "unlocks": {
+                "bases": [
+                    10,
+                    16,
+                    12,
+                    1
+                ],
+                "rules": [
+                    "div",
+                    "root",
+                    "digsum"
+                ]
+            }
+        }
+    ],
+    "c_streaks": [
+        {
+            "channel_id": 996134553678782514,
+            "next_number": 7,
+            "rules": {
+                "div": [
+                    2,
+                    3,
+                    5,
+                    7
+                ],
+                "root": [
+                    2,
+                    3
+                ],
+                "digsum": [
+                    5,
+                    11
+                ]
+            },
+            "base": 10,
+            "last_counted": 422800248935546880
+        }
+    ]
+}
