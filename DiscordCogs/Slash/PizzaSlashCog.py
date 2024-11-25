@@ -47,8 +47,7 @@ class PizzaSlashCog(Cog):
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
-            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(
-                    role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
+            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
                 if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
                     command_and_args = current_dict['write'][2:].split(" ")
                     command_to_run = self.__bot.get_command(command_and_args[0])
@@ -77,6 +76,10 @@ class PizzaSlashCog(Cog):
         except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]
             await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+            return
+
+        if '@everyone' in write or '@here' in write:
+            await ctx.send("no lil bro")
             return
 
         new_command = {
