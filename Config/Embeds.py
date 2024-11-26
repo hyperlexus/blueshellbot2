@@ -698,7 +698,7 @@ class BEmbeds:
         )
         return embed
 
-    def SLASH_PINFO_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(self, command_id):
+    def SLASH_PIZZA_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(self, command_id):
         embed = Embed(
             title="Internal error: There was more than 1 command with the same id.",
             description=f"This should be impossible. This is not good. The id was {command_id}.",
@@ -706,7 +706,7 @@ class BEmbeds:
         )
         return embed
 
-    def SLASH_PINFO_NOTHING_FOUND(self, command_id):
+    def SLASH_PIZZA_NOTHING_FOUND(self, command_id):
         embed = Embed(
             title="No command was found.",
             description=f"Search for id {command_id} returned no results. Did you enter the right id?",
@@ -714,9 +714,9 @@ class BEmbeds:
         )
         return embed
 
-    def SLASH_PINFO_RESULT(self, time, author, read, write):
+    def SLASH_PINFO_PREMOVE_RESULT(self, time, author, read, write, mode):
         embed = Embed(
-            title="Information on a pizza command",
+            title=f"{'Information on a pizza command' if mode == 'info' else 'Command removed from Pizza Romani'}",
             description=f"Creation time: <t:{time}> \n"
                         f"Added by: {author} \n"
                         f"Read value: {read} \n"

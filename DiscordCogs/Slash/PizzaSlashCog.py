@@ -181,17 +181,56 @@ class PizzaSlashCog(Cog):
                 if valid_command is None:
                     valid_command = current_dict
                 else:
-                    await ctx.respond(embed=self.__embeds.SLASH_PINFO_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(command_id))
+                    await ctx.respond(embed=self.__embeds.SLASH_PIZZA_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(command_id))
                     return
 
         if valid_command is None:
-            await ctx.respond(embed=self.__embeds.SLASH_PINFO_NOTHING_FOUND(command_id))
+            await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
             return
         else:
             author_name = str(self.__bot.get_user(int(valid_command['author'])))[:-2]
             real_time = int(valid_command['time']) // 1000
-            await ctx.respond(embed=self.__embeds.SLASH_PINFO_RESULT(real_time, author_name, valid_command['read'], valid_command['write']))
+            await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
+                real_time, author_name, valid_command['read'], valid_command['write'], mode="info"))
             return
+
+    # noinspection DuplicatedCode
+    @slash_command(name="premove", description=helper.HELP_PREMOVE)
+    async def premove(self, ctx: ApplicationContext,
+                      command_id: Option(int, "Command id. You can get this from /plist")):
+        if not self.__bot.listingSlash:
+            return
+        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
+            await ctx.respond(embed=self.__embeds.BANNED())
+            return
+        await ctx.defer()
+
+        valid_command = None
+        for current_dict in data['p_commands']:
+            if current_dict['time'] == str(command_id):
+                if valid_command is None:
+                    valid_command = current_dict
+                else:
+                    await ctx.respond(embed=self.__embeds.SLASH_PIZZA_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(command_id))
+                    return
+
+        if valid_command is None:
+            await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
+            return
+        else:
+            author_name = str(self.__bot.get_user(int(valid_command['author'])))[:-2]
+            real_time = int(valid_command['time']) // 1000
+            await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
+                real_time, author_name, valid_command['read'], valid_command['write'], mode="remove"))
+            data['p_commands'] = [d for d in data['p_commands'] if d != valid_command]
+
+        with open("database.json", "w") as f2:
+            json.dump(data, f2, indent=4)
+        return
+
+
+
+
 
     @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
     async def ptestcompiler(self, ctx: ApplicationContext,

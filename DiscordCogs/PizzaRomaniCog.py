@@ -136,6 +136,8 @@ class PizzaRomaniCog(Cog):
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
+        await ctx.send("This command is deprecated. Please use slash commands!")
+        return
         if len(args) not in (1, 2):
             await ctx.send(embed=self.__embeds.BAD_COMMAND_USAGE("pinfo"))
             return
@@ -171,6 +173,8 @@ class PizzaRomaniCog(Cog):
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
+        await ctx.send("This command is depreacted. Please use slash commands!")
+        return
         if len(args) not in (1, 2):
             await ctx.send(embed=self.__embeds.INVALID_ARGUMENTS())
             return

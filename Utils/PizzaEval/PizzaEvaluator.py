@@ -1,4 +1,4 @@
-from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
+from Utils.PizzaEval import PizzaEvalErrorDict
 from Utils.PizzaEval.PizzaEvalUtils import is_valid_condition, PizzaError, logical_xor
 
 
