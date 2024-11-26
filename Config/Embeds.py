@@ -697,3 +697,30 @@ class BEmbeds:
             color=self.__colors.RED
         )
         return embed
+
+    def SLASH_PINFO_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(self, command_id):
+        embed = Embed(
+            title="Internal error: There was more than 1 command with the same id.",
+            description=f"This should be impossible. This is not good. The id was {command_id}.",
+            color=self.__colors.GREY
+        )
+        return embed
+
+    def SLASH_PINFO_NOTHING_FOUND(self, command_id):
+        embed = Embed(
+            title="No command was found.",
+            description=f"Search for id {command_id} returned no results. Did you enter the right id?",
+            color=self.__colors.BLACK
+        )
+        return embed
+
+    def SLASH_PINFO_RESULT(self, time, author, read, write):
+        embed = Embed(
+            title="Information on a pizza command",
+            description=f"Creation time: <t:{time}> \n"
+                        f"Added by: {author} \n"
+                        f"Read value: {read} \n"
+                        f"Write value: {write}",
+            color=self.__colors.BLUE
+        )
+        return embed

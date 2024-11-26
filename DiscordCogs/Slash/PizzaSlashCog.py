@@ -2,6 +2,8 @@ import json
 import math
 from datetime import datetime, timezone
 
+from setuptools.command.easy_install import current_umask
+
 from Music.BlueshellBot import BlueshellBot
 from discord import ApplicationContext, Option, OptionChoice, Enum
 from discord.ext.commands import slash_command, Cog
@@ -19,13 +21,13 @@ helper = Helper()
 with open("database.json", "r") as f:
     data = json.load(f)
 
+
 class PizzaSlashCog(Cog):
     """
     Class to listen to Music commands
     It'll listen for commands from discord, when triggered will create a specific Handler for the command
     Execute the handler and then create a specific View to be showed in Discord
     """
-
     def __init__(self, bot: BlueshellBot) -> None:
         self.__bot: BlueshellBot = bot
         self.__embeds = BEmbeds()
@@ -140,7 +142,7 @@ class PizzaSlashCog(Cog):
                 elif string_to_match in current_dict[filter_category]:
                     add_command = True
             if add_command:
-                command_list.append({current_dict['read']: current_dict['write']})
+                command_list.append(f"{current_dict['time']}: {current_dict['read']} -> {current_dict['write']}")
 
         amount_pages = math.ceil(len(command_list) / 25) - 1
 
@@ -153,15 +155,43 @@ class PizzaSlashCog(Cog):
                     return
                 else:
                     if page >= math.ceil(len(command_list) / 25):
-                        print("nigger")
+                        await ctx.respond(embed=self.__embeds.SLASH_PLIST_PAGE_LARGER_THAN_AMOUNT_COMMANDS(amount_pages))
                     command_list = command_list[page*25:page*25+25]
-            result = "\n".join(f"{key} -> {value}" for adict in command_list for key, value in adict.items())
+            result = "\n".join(command_list)
 
         if not filter_category:
             await ctx.respond(embed=self.__embeds.PIZZA_LIST(result))
         else:
             await ctx.respond(embed=self.__embeds.PIZZA_LIST_FILTERED(result, filter_category, string_to_match))
         return
+
+    @slash_command(name="pinfo", description=helper.HELP_PINFO)
+    async def pinfo(self, ctx: ApplicationContext,
+                    command_id: Option(int, "Command id. You can get this from /plist")):
+        if not self.__bot.listingSlash:
+            return
+        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
+            await ctx.respond(embed=self.__embeds.BANNED())
+            return
+        await ctx.defer()
+
+        valid_command = None
+        for current_dict in data['p_commands']:
+            if current_dict['time'] == str(command_id):
+                if valid_command is None:
+                    valid_command = current_dict
+                else:
+                    await ctx.respond(embed=self.__embeds.SLASH_PINFO_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(command_id))
+                    return
+
+        if valid_command is None:
+            await ctx.respond(embed=self.__embeds.SLASH_PINFO_NOTHING_FOUND(command_id))
+            return
+        else:
+            author_name = str(self.__bot.get_user(int(valid_command['author'])))[:-2]
+            real_time = int(valid_command['time']) // 1000
+            await ctx.respond(embed=self.__embeds.SLASH_PINFO_RESULT(real_time, author_name, valid_command['read'], valid_command['write']))
+            return
 
     @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
     async def ptestcompiler(self, ctx: ApplicationContext,
