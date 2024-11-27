@@ -44,10 +44,8 @@ error_dict = {
     1200: "replace statement not valid for uncaught reason.",
     1201: "replace statement doesn't both start with [replace and end with ].",
     1202: "replace statement has mismatched [ and ].",
-    1203: "another statement is opened after the replace statement closed. replace statements have to be the entire string.",
     1204: "unmatched single quote in replace statement.",
     1205: "replace statement doesn't contain exactly 2 backslashes, which is incorrect formatting.",
-    1206: "is one of the replace statement blocks empty? found \\\\ or \\]. it could also be that you forgot single quotes `''`.",
     1207: "invalid [replace\\stringa\\stringb] format. length of segments is not two.",
     1208: "could not replace. something went wrong."
 }

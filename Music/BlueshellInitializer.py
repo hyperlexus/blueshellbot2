@@ -12,7 +12,7 @@ from Config.Exceptions import BlueshellError
 class BlueshellInitializer:
     def __init__(self, willListen: bool) -> None:
         self.__config = BConfigs()
-        self.__intents = Intents.default()
+        self.__intents = Intents.all()
         self.__intents.message_content = True
         self.__intents.members = True
         self.__bot = self.__create_bot(willListen)

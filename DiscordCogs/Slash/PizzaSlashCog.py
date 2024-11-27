@@ -1,3 +1,4 @@
+import asyncio
 import json
 import math
 
@@ -21,11 +22,6 @@ with open("database.json", "r") as f:
 
 
 class PizzaSlashCog(Cog):
-    """
-    Class to listen to Music commands
-    It'll listen for commands from discord, when triggered will create a specific Handler for the command
-    Execute the handler and then create a specific View to be showed in Discord
-    """
     def __init__(self, bot: BlueshellBot) -> None:
         self.__bot: BlueshellBot = bot
         self.__embeds = BEmbeds()
@@ -53,7 +49,13 @@ class PizzaSlashCog(Cog):
                     command_to_run = self.__bot.get_command(command_and_args[0])
                     await ctx.invoke(command_to_run, *command_and_args[1:])
                     continue
+                guild = message.guild
+                bot_member = guild.get_member(self.__bot.user.id)
+                nick = bot_member.nick
+                await bot_member.edit(nick="Pizza Romani")
                 await message.channel.send(pizza_eval_write(str(message.author)[:-2], message.content, current_dict['write']))
+                await asyncio.sleep(2)
+                await bot_member.edit(nick="blueshellbot")
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
     async def pinsert(self, ctx: ApplicationContext,

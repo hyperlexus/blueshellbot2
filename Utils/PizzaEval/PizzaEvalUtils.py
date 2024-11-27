@@ -123,30 +123,8 @@ def is_valid_replace_statement(replace_statement: str):
             elif i == "]":
                 closebracketcount += 1
 
-    inquotes2 = False
-    paranthese_level = 0
-    entered_replace_statement = False
-    left_replace_statement = False
-    for i in replace_statement:
-        if i == "'":
-            inquotes2 = not inquotes2
-        elif not inquotes2:
-            if i == "[":
-                if left_replace_statement:
-                    raise PizzaError({'c': 1203, 'e': replace_statement})
-                entered_replace_statement = True
-                paranthese_level += 1
-            if i == "]":
-                paranthese_level -= 1
-                if entered_replace_statement:
-                    if paranthese_level == 0:
-                        left_replace_statement = True
-
     if openbracketcount != closebracketcount:
         raise PizzaError({'c': 1202, 'e': replace_statement})
-
-    if "\\]" in replace_statement or "\\\\" in replace_statement:
-        raise PizzaError({'c': 1206, 'e': replace_statement})
 
     return True
 

@@ -2,6 +2,7 @@ import random
 from datetime import datetime
 
 from Utils.PizzaEval.PizzaEvalUtils import is_valid_replace_statement, PizzaError, identify_error
+from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
 
 
 def pizza_eval_write(author_name: str, original_message: str, write_result: str) -> str:
@@ -29,6 +30,42 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
         else:
             return f"[{block}]"  # dont change irrelevant blocks
 
+    def separate_replace_blocks(whole_statement: str) -> list:
+        inquotes = False
+        paranthese_level = 0
+        cocks = []
+        current_statement = ""
+        for i in whole_statement:
+            if i == "'":
+                inquotes = not inquotes
+            elif not inquotes:
+                if i == "[":
+                    if paranthese_level == 0:
+                        if current_statement:
+                            cocks.append(current_statement)
+                            current_statement = ""
+                    paranthese_level += 1
+                    current_statement += "["
+
+                elif i == "]":
+                    paranthese_level -= 1
+
+                    if current_statement.startswith("[replace"):
+                        if paranthese_level == 0:
+                            cocks.append(current_statement + i)
+                            current_statement = ""
+                        else:
+                            current_statement += "]"
+                    else:
+                        current_statement += "]"
+
+                else:
+                    current_statement += i
+
+        if current_statement:
+            cocks.append(current_statement)
+        return cocks
+
     def process_replace_block(string: str) -> str:
         result = ""
         in_quotes = False
@@ -55,9 +92,9 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
 
         return result
 
-    def parse_replace(write_result: str):
-        if not is_valid_replace_statement(write_result):
-            raise PizzaError({'c': 1200, 'e': write_result})
+    def parse_one_replace(write_result: str):
+        # if not is_valid_replace_statement(write_result):
+        #     raise PizzaError({'c': 1200, 'e': write_result})
 
         content = write_result[1:-1]
         segments = []
@@ -77,20 +114,26 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
             i += 1
 
         segments.append(current_segment)
-
         if len(segments) != 3:
             raise PizzaError({'c': 1207, 'e': write_result})
 
         return segments[1], segments[2]
 
     # [replace\stringa\stringb]
-    if write_result.startswith("[replace\\") and write_result.endswith("]"):
-        try:
-            stringa, stringb = parse_replace(write_result)
+    if "[replace" in write_result:
+        # try:
+        result = ""
+        replace_blocks = separate_replace_blocks(write_result)
+        for i in replace_blocks:
+            if not i.startswith("[replace"):
+                result += pizza_eval_write(author_name, original_message, i)
+                continue
+            stringa, stringb = parse_one_replace(i)
             processed_stringb = process_replace_block(stringb)
-            return original_message.replace(stringa, processed_stringb) if stringa in original_message else original_message
-        except:
-            raise PizzaError({'c': 1208, 'e': write_result})
+            result += original_message.replace(stringa, processed_stringb) if stringa in original_message else original_message
+        return result
+        # except:
+        #     raise PizzaError({'c': 1208, 'e': write_result})
 
     result = ""
     in_quotes = False
@@ -126,8 +169,8 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
 
     return result
 
-# try:
-#     print(pizza_eval_write(422800248935546880, "siis", "[random\eiersalat-1\eierkuchen-5]"))
-# except PizzaError as e:
-#     details = e.args[0]
-#     print(identify_error(details['c'], details['e']))
+try:
+    print(pizza_eval_write(422800248935546880, "hab mel gefickt", "[random\oi-1\-1]"))
+except PizzaError as e:
+    details = e.args[0]
+    print(identify_error(details['c'], details['e']))
