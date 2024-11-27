@@ -1,6 +1,7 @@
 recursion_counter = 0
 
 error_dict = {
+    # read eval errors:
     # general errors
     0: "nothing was passed.",
     1: "odd number of single quotes. make sure to close all quotes!",
@@ -26,7 +27,29 @@ error_dict = {
     303: "input contains at least 1 empty pair of parentheses `()`, which is not allowed.",
 
     # misc
-    401: "ne sie scheiß hurensohn"
+    401: "ne sie scheiß hurensohn",
+
+    # write eval errors:
+    # general errors:
+    1000: "invalid write format, uncaught exception.",
+    1001: "unmatched single quote in entire result.",
+    1002: "entire statement has mismatched [ and ].",
+
+    # random errors:
+    1101: "invalid [random\\eventa-n\\eventb-m] format.",
+    1102: "invalid eventn-p format.",
+    1103: "probability has to be an integer indicating weight.",
+
+    # replace errors:
+    1200: "replace statement not valid for uncaught reason.",
+    1201: "replace statement doesn't both start with [replace and end with ].",
+    1202: "replace statement has mismatched [ and ].",
+    1203: "another statement is opened after the replace statement closed. replace statements have to be the entire string.",
+    1204: "unmatched single quote in replace statement.",
+    1205: "replace statement doesn't contain exactly 2 backslashes, which is incorrect formatting.",
+    1206: "is one of the replace statement blocks empty? found \\\\ or \\]. it could also be that you forgot single quotes `''`.",
+    1207: "invalid [replace\\stringa\\stringb] format. length of segments is not two.",
+    1208: "could not replace. something went wrong."
 }
 
 

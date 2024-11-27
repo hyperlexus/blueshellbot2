@@ -1,8 +1,5 @@
 import json
 import math
-from datetime import datetime, timezone
-
-from setuptools.command.easy_install import current_umask
 
 from Music.BlueshellBot import BlueshellBot
 from discord import ApplicationContext, Option, OptionChoice, Enum
@@ -13,6 +10,7 @@ from Config.Colors import BColors
 from Config.Configs import BConfigs
 from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
+from Utils.PizzaEval.PizzaEvaluatorWrite import pizza_eval_write
 from Utils.PizzaEval.BoolDiscordFormatting import evaluate_discord_timestamp
 from Utils.Utils import Utils
 
@@ -55,7 +53,7 @@ class PizzaSlashCog(Cog):
                     command_to_run = self.__bot.get_command(command_and_args[0])
                     await ctx.invoke(command_to_run, *command_and_args[1:])
                     continue
-                await message.channel.send(current_dict['write'])
+                await message.channel.send(pizza_eval_write(str(message.author)[:-2], message.content, current_dict['write']))
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
     async def pinsert(self, ctx: ApplicationContext,
@@ -71,10 +69,12 @@ class PizzaSlashCog(Cog):
         # initialise all variables that will be passed to the json
         time = str((ctx.interaction.id >> 22) + 1420070400000)
         author = str(ctx.interaction.user.id)
+        author_name = self.__bot.get_user(author)
 
         try:
             PizzaEvalErrorDict.recursion_counter = 0
             pizza_eval_read(read, 'a')
+            pizza_eval_write(author_name, 'siis', write)
         except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]
             await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
@@ -227,10 +227,6 @@ class PizzaSlashCog(Cog):
         with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
         return
-
-
-
-
 
     @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
     async def ptestcompiler(self, ctx: ApplicationContext,

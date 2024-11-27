@@ -1,4 +1,3 @@
-import re
 from Utils.PizzaEval.PizzaEvalErrorDict import error_dict
 
 
@@ -103,9 +102,56 @@ def is_valid_condition(condition):
         raise PizzaError({'c': 401, 'e': condition})
     return True
 
+def is_valid_replace_statement(replace_statement: str):
+    if not replace_statement.startswith("[replace\\") or not replace_statement.endswith("]"):
+        raise PizzaError({'c': 1201, 'e': replace_statement})
+
+    if replace_statement.count("\\") != 2:
+        raise PizzaError({'c': 1205, 'e': replace_statement})
+
+    if replace_statement.count("'") % 2:
+        raise PizzaError({'c': 1204, 'e': replace_statement})
+
+    inquotes = False
+    openbracketcount, closebracketcount = 0, 0
+    for i in replace_statement:
+        if i == "'":
+            inquotes = not inquotes
+        elif not inquotes:
+            if i == "[":
+                openbracketcount += 1
+            elif i == "]":
+                closebracketcount += 1
+
+    inquotes2 = False
+    paranthese_level = 0
+    entered_replace_statement = False
+    left_replace_statement = False
+    for i in replace_statement:
+        if i == "'":
+            inquotes2 = not inquotes2
+        elif not inquotes2:
+            if i == "[":
+                if left_replace_statement:
+                    raise PizzaError({'c': 1203, 'e': replace_statement})
+                entered_replace_statement = True
+                paranthese_level += 1
+            if i == "]":
+                paranthese_level -= 1
+                if entered_replace_statement:
+                    if paranthese_level == 0:
+                        left_replace_statement = True
+
+    if openbracketcount != closebracketcount:
+        raise PizzaError({'c': 1202, 'e': replace_statement})
+
+    if "\\]" in replace_statement or "\\\\" in replace_statement:
+        raise PizzaError({'c': 1206, 'e': replace_statement})
+
+    return True
 
 # try:
-#     print(is_valid_condition("is nig is"))
+#     print(is_valid_replace_statement("[replace\\siis\\[message], richtiger [author], der um [time] fucking '[' sagt]"))
 # except PizzaError as e:
 #     details = e.args[0]
 #     print(identify_error(details['c'], details['e']))
