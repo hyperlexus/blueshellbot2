@@ -61,6 +61,8 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
 
                 else:
                     current_statement += i
+            elif inquotes:
+                current_statement += i
 
         if current_statement:
             cocks.append(current_statement)
@@ -93,8 +95,8 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
         return result
 
     def parse_one_replace(write_result: str):
-        # if not is_valid_replace_statement(write_result):
-        #     raise PizzaError({'c': 1200, 'e': write_result})
+        if not is_valid_replace_statement(write_result):
+            raise PizzaError({'c': 1200, 'e': write_result})
 
         content = write_result[1:-1]
         segments = []
@@ -115,6 +117,7 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
 
         segments.append(current_segment)
         if len(segments) != 3:
+            print(segments)
             raise PizzaError({'c': 1207, 'e': write_result})
 
         return segments[1], segments[2]
@@ -169,8 +172,8 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
 
     return result
 
-try:
-    print(pizza_eval_write(422800248935546880, "hab mel gefickt", "[random\oi-1\-1]"))
-except PizzaError as e:
-    details = e.args[0]
-    print(identify_error(details['c'], details['e']))
+# try:
+#     print(pizza_eval_write(422800248935546880, "blud fragt david", "[replace\\david\\maggda] - wenn ich bitten darf"))
+# except PizzaError as e:
+#     details = e.args[0]
+#     print(identify_error(details['c'], details['e']))

@@ -38,7 +38,7 @@ class PizzaSlashCog(Cog):
             send = False
 
             try:
-                send = pizza_eval_read(current_dict['read'], message.content.lower())
+                send = pizza_eval_read(current_dict['read'].lower(), message.content.lower())
             except PizzaEvalUtils.PizzaError as e:
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
@@ -49,13 +49,11 @@ class PizzaSlashCog(Cog):
                     command_to_run = self.__bot.get_command(command_and_args[0])
                     await ctx.invoke(command_to_run, *command_and_args[1:])
                     continue
-                guild = message.guild
-                bot_member = guild.get_member(self.__bot.user.id)
-                nick = bot_member.nick
-                await bot_member.edit(nick="Pizza Romani")
-                await message.channel.send(pizza_eval_write(str(message.author)[:-2], message.content, current_dict['write']))
-                await asyncio.sleep(2)
-                await bot_member.edit(nick="blueshellbot")
+                try:
+                    await message.channel.send(pizza_eval_write(str(message.author)[:-2], message.content.lower(), current_dict['write'].lower()))
+                except PizzaEvalUtils.PizzaError as e:
+                    details = e.args[0]
+                    await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
     async def pinsert(self, ctx: ApplicationContext,
@@ -233,7 +231,8 @@ class PizzaSlashCog(Cog):
     @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
     async def ptestcompiler(self, ctx: ApplicationContext,
                             read: Option(str, "The string to match. The compiler works on this one"),
-                            write: Option(str, "What pizza romani responds with. The [] syntax goes here")):
+                            write: Option(str, "What pizza romani responds with. The [] syntax goes here"),
+                            message: Option(str, "test message")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -243,7 +242,8 @@ class PizzaSlashCog(Cog):
 
         try:
             PizzaEvalErrorDict.recursion_counter = 0
-            result = pizza_eval_read(read, write)
+            result = pizza_eval_read(read, message)
+            write = pizza_eval_write(str(ctx.interaction.user[:-2]), message, write)
         except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]
             await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
