@@ -2,6 +2,8 @@ import asyncio
 import json
 import math
 
+import discord
+
 from Music.BlueshellBot import BlueshellBot
 from discord import ApplicationContext, Option, OptionChoice, Enum
 from discord.ext.commands import slash_command, Cog
@@ -34,6 +36,8 @@ class PizzaSlashCog(Cog):
             return
         ctx = await self.__bot.get_context(message)
 
+        channel_desc = str(message.channel.topic) if isinstance(message.channel, discord.TextChannel) else ""
+
         for current_dict in data['p_commands']:
             send = False
 
@@ -43,14 +47,16 @@ class PizzaSlashCog(Cog):
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
-            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
+            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)) and ("nopizza" not in channel_desc):
                 if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
                     command_and_args = current_dict['write'][2:].split(" ")
                     command_to_run = self.__bot.get_command(command_and_args[0])
                     await ctx.invoke(command_to_run, *command_and_args[1:])
                     continue
                 try:
-                    await message.channel.send(pizza_eval_write(str(message.author)[:-2], message.content.lower(), current_dict['write'].lower()))
+                    to_send = pizza_eval_write(str(message.author)[:-2], message.content.lower(), current_dict['write'].lower())
+                    await message.channel.send(to_send) if to_send else await message.channel.send("\u2800")
+
                 except PizzaEvalUtils.PizzaError as e:
                     details = e.args[0]
                     await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))

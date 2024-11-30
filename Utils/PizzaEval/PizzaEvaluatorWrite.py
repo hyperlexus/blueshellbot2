@@ -1,11 +1,13 @@
 import random
 from datetime import datetime
 
-from Utils.PizzaEval.PizzaEvalUtils import is_valid_replace_statement, PizzaError, identify_error
-from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
+from Utils.PizzaEval.PizzaEvalUtils import is_valid_replace_statement, PizzaError
 
 
 def pizza_eval_write(author_name: str, original_message: str, write_result: str) -> str:
+    original_message = original_message.lower()
+    write_result = write_result.lower()
+
     def process_block(block: str) -> str:
         if block == "author":
             return str(author_name)

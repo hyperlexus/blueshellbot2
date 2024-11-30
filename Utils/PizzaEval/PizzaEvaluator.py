@@ -63,6 +63,8 @@ def eval_singel_expression(expression, message):
 
 
 def pizza_eval_read(condition, message):
+    condition = condition.lower()
+    message = message.lower()
     if PizzaEvalErrorDict.recursion_counter == 0 and not is_valid_condition(condition):
         raise PizzaError({'c': -1, 'e': condition})
 
