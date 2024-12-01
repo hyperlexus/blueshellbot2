@@ -19,7 +19,7 @@ class MiscSlashCog(Cog):
 
     @slash_command(name='uptime', description="get time since last restart")
     async def uptime(self, ctx: ApplicationContext) -> None:
-        await ctx.respond(str(datetime.now() - blueshell_entire_bot_startup_timestamp)[:-6])
+        await ctx.respond(embed=self.__embeds.UPTIME(str(datetime.now() - blueshell_entire_bot_startup_timestamp)[:-7]))
 
 def setup(bot):
     bot.add_cog(MiscSlashCog(bot))

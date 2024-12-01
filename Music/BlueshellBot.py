@@ -11,7 +11,7 @@ from Config.Messages import Messages
 from Config.Embeds import BEmbeds
 from Utils.Utils import Utils
 
-blueshell_entire_bot_startup_timestamp = 0
+blueshell_entire_bot_startup_timestamp = datetime.now()
 
 class BlueshellBot(Bot):
     def __init__(self, listingSlash: bool = False, *args, **kwargs):
@@ -59,7 +59,6 @@ class BlueshellBot(Bot):
     async def on_ready(self):
         if self.__listingSlash:
             print(self.__messages.STARTUP_MESSAGE)
-        blueshell_entire_bot_startup_timestamp = datetime.now()
         await self.change_presence(status=Status.online, activity=discord.Activity(type=discord.ActivityType.competing, name=f"prefix: '{self.__configs.BOT_PREFIX}'"))
         if self.__listingSlash:
             print(self.__messages.STARTUP_COMPLETE_MESSAGE)

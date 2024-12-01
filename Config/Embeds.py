@@ -724,3 +724,11 @@ class BEmbeds:
             color=self.__colors.BLUE
         )
         return embed
+
+    def UPTIME(self, uptime: str):
+        embed = Embed(
+            title="Time since last restart:",
+            description=uptime,
+            color=self.__colors.GREEN
+        )
+        return embed
