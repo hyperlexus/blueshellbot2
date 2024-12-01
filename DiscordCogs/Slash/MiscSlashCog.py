@@ -10,7 +10,7 @@ from Config.Configs import BConfigs
 
 helper = Helper()
 
-class PizzaSlashCog(Cog):
+class MiscSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
         self.__bot: BlueshellBot = bot
         self.__embeds = BEmbeds()
@@ -20,3 +20,6 @@ class PizzaSlashCog(Cog):
     @slash_command(name='uptime', description="get time since last restart")
     async def uptime(self, ctx: ApplicationContext) -> None:
         await ctx.respond(str(datetime.now() - blueshell_entire_bot_startup_timestamp)[:-6])
+
+def setup(bot):
+    bot.add_cog(MiscSlashCog(bot))
