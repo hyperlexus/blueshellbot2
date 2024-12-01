@@ -19,22 +19,7 @@ class Utils:
         minutes = duration // 60 % 60
         seconds = duration % 60
 
-        return "{}{}{:02d}:{:02d}".format(
-            hours if hours else "",
-            ":" if hours else "",
-            minutes,
-            seconds)
-
-    @classmethod
-    def bool_discord_time_syntax(cls, timestamp: int, discord_format: str):
-        pass
-        # try:
-        #     format_type, formatter = discord_format.split(":")
-        #     formatter_parts = formatter.split("-")
-        #     if format_type == "during":
-        #         pass
-        # except:
-        #     return False
+        return "{}{}{:02d}:{:02d}".format(hours if hours else "", ":" if hours else "", minutes, seconds)
 
     @classmethod
     def check_if_banned(cls, user, path) -> bool:

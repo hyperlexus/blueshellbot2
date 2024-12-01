@@ -4,7 +4,6 @@ import string
 from discord.bot import Bot
 from discord import Intents
 from Music.BlueshellBot import BlueshellBot
-from os import listdir
 from Config.Configs import BConfigs
 from Config.Exceptions import BlueshellError
 
