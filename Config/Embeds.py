@@ -716,12 +716,21 @@ class BEmbeds:
         return embed
 
     def SLASH_PINFO_PREMOVE_RESULT(self, time, author, read, write, mode):
+        description = (f"Creation time: <t:{time}> \n"
+                       f"Added by: {author} \n"
+                       f"Read value: {read} \n"
+                       f"Write value: {write}")
+        if len(description) > 3000:
+            read = read[:1000]
+            write = write[:1000]
+            description = (f"Creation time: <t:{time}> \n"
+                           f"Added by: {author} \n"
+                           f"Read value: {read} \n"
+                           f"Write value: {write}")
+            description += "\nThis command was too long, so its read and write were trimmed to 1k characters each."
         embed = Embed(
             title=f"{'Information on a pizza command' if mode == 'info' else 'Command removed from Pizza Romani'}",
-            description=f"Creation time: <t:{time}> \n"
-                        f"Added by: {author} \n"
-                        f"Read value: {read} \n"
-                        f"Write value: {write}",
+            description=description,
             color=self.__colors.BLUE
         )
         return embed

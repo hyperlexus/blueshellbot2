@@ -145,9 +145,12 @@ class PizzaSlashCog(Cog):
                 elif string_to_match in current_dict[filter_category]:
                     add_command = True
             if add_command:
-                command_list.append(f"{current_dict['time']}: {current_dict['read']} -> {current_dict['write']}")
+                if len(current_dict['write']) > 2000 or len(current_dict['read']) > 2000:
+                    command_list.append(f"{current_dict['time']}: this command is longer than 2k characters, so it won't be included. it's probably the wahlkommission command.")
+                else:
+                    command_list.append(f"{current_dict['time']}: {current_dict['read']} -> {current_dict['write']}")
 
-        amount_pages = math.ceil(len(command_list) / 25) - 1
+        amount_pages = math.ceil(len(command_list) / 25)
 
         if len(command_list) == 0:
             result = "No commands found."
@@ -159,8 +162,14 @@ class PizzaSlashCog(Cog):
                 else:
                     if page >= math.ceil(len(command_list) / 25):
                         await ctx.respond(embed=self.__embeds.SLASH_PLIST_PAGE_LARGER_THAN_AMOUNT_COMMANDS(amount_pages))
+                        return
                     command_list = command_list[page*25:page*25+25]
             result = "\n".join(command_list)
+            if len(result) > 4096:
+                longest = ""
+                for i in result.split("\n"):
+                    longest = i if len(i) > len(longest) else longest
+                result = f"command list was too long. length was {len(result)}.\nlongest command (first 1k characters):\n{longest[:1000]}"
 
         if not filter_category:
             await ctx.respond(embed=self.__embeds.PIZZA_LIST(result))
