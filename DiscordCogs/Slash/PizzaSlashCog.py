@@ -31,27 +31,24 @@ class PizzaSlashCog(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
+        if self.__bot.voice_clients:
+            return
         if message.author == self.__bot.user or message.content.lower().startswith('b.p') or not message.content:
             return
         ctx = await self.__bot.get_context(message)
 
-        channel_desc = str(message.channel.topic) if isinstance(message.channel, discord.TextChannel) else ""
+        if "nopizza" in (str(message.channel.topic) if isinstance(message.channel, discord.TextChannel) else ""):
+            return
 
         for current_dict in data['p_commands']:
             send = False
-
             try:
                 send = pizza_eval_read(current_dict['read'].lower(), message.content.lower())
             except PizzaEvalUtils.PizzaError as e:
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
-            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)) and ("nopizza" not in channel_desc):
-                # if current_dict['write'].startswith('b.'):  # make it be able to eval its own commands :)
-                #     command_and_args = current_dict['write'][2:].split(" ")
-                #     command_to_run = self.__bot.get_command(command_and_args[0])
-                #     await ctx.invoke(command_to_run, *command_and_args[1:])
-                #     continue
+            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
                 try:
                     to_send = pizza_eval_write(str(message.author)[:-2], message.content.lower(), current_dict['write'].lower())
                     await message.channel.send(to_send) if to_send else await message.channel.send("\u2800")
@@ -59,6 +56,7 @@ class PizzaSlashCog(Cog):
                 except PizzaEvalUtils.PizzaError as e:
                     details = e.args[0]
                     await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+        return
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
     async def pinsert(self, ctx: ApplicationContext,
@@ -78,7 +76,7 @@ class PizzaSlashCog(Cog):
 
         try:
             PizzaEvalErrorDict.recursion_counter = 0
-            pizza_eval_read(read, 'a')
+            pizza_eval_read(read, 'soos')
             pizza_eval_write(author_name, 'siis', write)
         except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]

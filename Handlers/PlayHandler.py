@@ -117,7 +117,7 @@ class PlayHandler(AbstractHandler):
                 task = asyncio.create_task(self.__down.download_song(song))
                 tasks.append(task)
 
-            for index, task, in enumerate(tasks):
+            for index, task in enumerate(tasks):
                 await task
                 song = songsInBatch[index]
                 if not song.problematic:  # If downloaded add to the playlist and send play command
