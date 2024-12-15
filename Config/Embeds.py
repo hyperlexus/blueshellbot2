@@ -1,3 +1,4 @@
+import math
 from random import random
 from datetime import timedelta
 from discord import Embed
@@ -730,5 +731,13 @@ class BEmbeds:
             title="Time since last restart:",
             description=uptime,
             color=self.__colors.GREEN
+        )
+        return embed
+
+    def FESTGELEGTE_VERTREGE_EMBED(self, geld, rate, zinsen, betrag):
+        embed = Embed(
+            title=f"bei {geld} geld mit {rate}% rate zahlen Sie {zinsen}% zinsen und rückzahlen Sie {betrag} geld",
+            description=f"```~tradeoffer <@1317900136327680070> you_get: contract: perc: {rate}%; limit: {betrag} I_get: money: {geld}```",
+            color=self.__colors.BLUE
         )
         return embed
