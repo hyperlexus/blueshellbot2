@@ -101,6 +101,29 @@ class Utils:
         minutes = (total_seconds % 3600) // 60
         return f"{int(days):02d}d {int(hours):02d}h {int(minutes):02d}m"
 
+    @classmethod
+    def convert_rules_to_list(cls, rules: str | None, mode: str) -> list:
+        if rules is None:
+            return []
+        if rules.count(",") == 0:
+            try:
+                rules = [int(rules)]
+                if rules[0] < 1 or mode == "div" and rules[0] < 2:
+                    return -1
+                return rules
+            except ValueError:
+                return -1
+        rules = rules.split(",")
+        if rules == ['']:
+            return []
+        for i in range(len(rules)):
+            try:
+                rules[i] = int(rules[i])
+                if rules[i] < 1 or mode == "div" and rules[i] < 2:
+                    return -1
+            except ValueError:
+                return -1
+        return rules
 
 def run_async(func):
     @wraps(func)
