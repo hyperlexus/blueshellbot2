@@ -68,7 +68,6 @@ class MiscSlashCog(Cog):
 
             sum_no_rules = goal_money
             vanilla_number_goal = math.ceil((-1 + math.sqrt(1 + 8 * goal_money)) / 2)
-            print(vanilla_number_goal)
             if vanilla_number is not None:
                 sum_no_rules = vanilla_number * (vanilla_number + 1) // 2
 
@@ -90,11 +89,9 @@ class MiscSlashCog(Cog):
                     continue
                 amount_numbers += 1
                 sum_rules += number
-            print(amount_numbers)
 
-            print(vanilla_number_goal/amount_numbers)
             efficiency = vanilla_number_goal / amount_numbers - 1
-            efficiency = int(efficiency*10000) / 100
+            efficiency = int(efficiency*10000) / 100  # disgusting rounding because floats are stupid
 
             answer_string = f"you would need to count up to number {number} to get more than "
             answer_string += f"the equivalent of {vanilla_number} in vanilla" if goal_money is None else f"{goal_money} money"
