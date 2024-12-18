@@ -1,5 +1,6 @@
 import json
 import math
+import random
 
 import discord
 
@@ -40,22 +41,27 @@ class PizzaSlashCog(Cog):
         if "nopizza" in (str(message.channel.topic) if isinstance(message.channel, discord.TextChannel) else ""):
             return
 
+        pizza_messages = []
         for current_dict in data['p_commands']:
-            send = False
+            if_send = False
             try:
-                send = pizza_eval_read(current_dict['read'].lower(), message.content.lower())
+                if_send = pizza_eval_read(current_dict['read'].lower(), message.content.lower())
             except PizzaEvalUtils.PizzaError as e:
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
-            if send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
+            if if_send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
                 try:
-                    to_send = pizza_eval_write(str(message.author)[:-2], message.content.lower(), current_dict['write'].lower())
-                    await message.channel.send(to_send) if to_send else await message.channel.send("\u2800")
+                    pizza_messages.append(pizza_eval_write(str(message.author)[:-2], message.content.lower(), current_dict['write'].lower()))
 
                 except PizzaEvalUtils.PizzaError as e:
                     details = e.args[0]
                     await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+
+        if not pizza_messages:
+            return
+        to_send = random.choice(pizza_messages)
+        await message.channel.send(to_send) if to_send else await message.channel.send("\u2800")
         return
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
