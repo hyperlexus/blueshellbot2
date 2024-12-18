@@ -52,6 +52,8 @@ class PizzaSlashCog(Cog):
 
             if if_send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
                 try:
+                    if "[replace\\" in current_dict['write'] and len(message.content) > 50:
+                        continue
                     pizza_messages.append(pizza_eval_write(str(message.author)[:-2], message.content.lower(), current_dict['write'].lower()))
 
                 except PizzaEvalUtils.PizzaError as e:
