@@ -22,6 +22,7 @@ helper = Helper()
 with open("database.json", "r") as f:
     data = json.load(f)
 
+last_10_messages = []
 
 class PizzaSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
@@ -32,6 +33,7 @@ class PizzaSlashCog(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
+        global last_10_messages
         if self.__bot.voice_clients:
             return
         if message.author == self.__bot.user or message.content.lower().startswith('b.p') or not message.content:
@@ -63,6 +65,11 @@ class PizzaSlashCog(Cog):
         if not pizza_messages:
             return
         to_send = random.choice(pizza_messages)
+        if to_send in last_10_messages:
+            return
+        last_10_messages.append(to_send)
+        if len(last_10_messages) == 11:
+            last_10_messages.pop(0)
         await message.channel.send(to_send) if to_send else await message.channel.send("\u2800")
         return
 
