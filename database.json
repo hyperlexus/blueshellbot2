@@ -631,12 +631,6 @@
             "write": "Na ne, einlich garnicht"
         },
         {
-            "time": "1420070400105",
-            "author": "0",
-            "read": "is y | is 69",
-            "write": "HA NIGGA YOU GAY DU HAST DIE SCHNIINSCHJAAJGD GEFUNDEN. SCHREIB HINWEIS 2 F\u00dcR DEN ZWEITEN HINWEIS"
-        },
-        {
             "time": "1420070400106",
             "author": "0",
             "read": "start nein | is ne | is n\u00f6 | start 'a ne' | start 'na ne'",
@@ -695,12 +689,6 @@
             "author": "0",
             "read": "in entscheiden | in entschieden",
             "write": "\"Ich habe mich entschieden: 42\""
-        },
-        {
-            "time": "1420070400117",
-            "author": "0",
-            "read": "in maggd | in david | in dajabe | in jabeda | in jadabe",
-            "write": "<@!468786219258740756>"
         },
         {
             "time": "1420070400118",
@@ -773,12 +761,6 @@
             "author": "0",
             "read": "in AFD & in SS & in ILLUMINATI",
             "write": "DIE ILLUMINATEN WURDEN VON HITLER GEGR\u00dcNDET"
-        },
-        {
-            "time": "1420070400130",
-            "author": "0",
-            "read": "end es & not is 'spast wie viel uhr ist es'",
-            "write": "sees"
         },
         {
             "time": "1420070400131",
@@ -967,12 +949,6 @@
             "write": "[replace\\keine\\HUNAD] sogar"
         },
         {
-            "time": "1420070400162",
-            "author": "0",
-            "read": "in ' sie'",
-            "write": "Und wieso hei\u00dft es nicht [replace\\ sie\\ er], du schei\u00df Sexist???"
-        },
-        {
             "time": "1420070400163",
             "author": "0",
             "read": "in 'hurensohn'",
@@ -1019,12 +995,6 @@
             "author": "0",
             "read": "in 'n8'",
             "write": "[replace\\n8\\88]"
-        },
-        {
-            "time": "1420070400172",
-            "author": "0",
-            "read": "in ' er'",
-            "write": "Und wieso hei\u00dft es nicht [replace\\ er\\ sie] du schei\u00df Sexist???"
         },
         {
             "time": "1420070400173",
@@ -1183,12 +1153,6 @@
             "write": "das reicht aber nicht blud"
         },
         {
-            "time": "1732740224996",
-            "author": "422800248935546880",
-            "read": "is blud",
-            "write": "ne, gar nicht actually."
-        },
-        {
             "time": "1732740224997",
             "author": "422800248935546880",
             "read": "is 'ss reicht'",
@@ -1303,12 +1267,6 @@
             "write": "du spast"
         },
         {
-            "time": "1734120025390",
-            "author": "422800248935546880",
-            "read": "end en",
-            "write": "neen"
-        },
-        {
             "time": "1734120033696",
             "author": "422800248935546880",
             "read": "end ig",
@@ -1349,6 +1307,66 @@
             "author": "422800248935546880",
             "read": "in 'ich werd'",
             "write": "das da oben ist nichtmals ein schwertfisch aber den gibbs nich"
+        },
+        {
+            "time": "1734354709191",
+            "author": "649457215564152852",
+            "read": "in google",
+            "write": "holy hell!"
+        },
+        {
+            "time": "1734356111375",
+            "author": "422800248935546880",
+            "read": "in 'es nervt'",
+            "write": "snarf"
+        },
+        {
+            "time": "1734432358380",
+            "author": "422800248935546880",
+            "read": "in 'point proven'",
+            "write": "[replace\\point proven\\proint poven]"
+        },
+        {
+            "time": "1734432402939",
+            "author": "468786219258740756",
+            "read": "is blud",
+            "write": "[random\\ne eigentlich garnicht-5\\bludi laal edudi-10\\bludorange-5\\bludeedle bludoodle-1\\blundeur-2\\bluderm\u00fchlstra\u00dfer-2\\dulb-3\\blud-10\\blonk-3]"
+        },
+        {
+            "time": "1734439839235",
+            "author": "422800248935546880",
+            "read": "is 110",
+            "write": "https://open.spotify.com/track/1Ksnat4epLaI7OzO3qVqHh?si=01b0587c874a419b"
+        },
+        {
+            "time": "1734474562758",
+            "author": "422800248935546880",
+            "read": "end es & not is 'spast wie viel uhr ist es' & not is 'yes' & not end 'sees'",
+            "write": "sees"
+        },
+        {
+            "time": "1734507194502",
+            "author": "422800248935546880",
+            "read": "in aus",
+            "write": "[replace\\aus\\asu]"
+        },
+        {
+            "time": "1734514551901",
+            "author": "649457215564152852",
+            "read": "in schach",
+            "write": "zwerge!"
+        },
+        {
+            "time": "1734532534737",
+            "author": "422800248935546880",
+            "read": "end un & not end uhn",
+            "write": "es gibt huhn???"
+        },
+        {
+            "time": "1734532558043",
+            "author": "422800248935546880",
+            "read": "end achen & not end rachen",
+            "write": "es gibt rachen"
         }
     ],
     "c_counters": [
