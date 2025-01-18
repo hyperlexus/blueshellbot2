@@ -1,4 +1,5 @@
 import asyncio
+import os
 from typing import List
 from Config.Configs import BConfigs
 from yt_dlp import YoutubeDL, DownloadError
@@ -16,7 +17,11 @@ class Downloader:
                      'extract_flat': False,
                      'playlistend': config.MAX_PLAYLIST_LENGTH,
                      'quiet': True,
-                     'ignore_no_formats_error': True
+                     'ignore_no_formats_error': True,
+                     'cookies': './cookies.txt',
+                     'http_headers:': {
+                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+                     }
                      }
     __YDL_OPTIONS_EXTRACT = {'format': 'bestaudio/best',
                              'default_search': 'auto',
@@ -24,7 +29,11 @@ class Downloader:
                              'extract_flat': True,
                              'playlistend': config.MAX_PLAYLIST_LENGTH,
                              'quiet': True,
-                             'ignore_no_formats_error': True
+                             'ignore_no_formats_error': True,
+                             'cookies': './cookies.txt',
+                             'http_headers:': {
+                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+                             }
                              }
     __YDL_OPTIONS_FORCE_EXTRACT = {'format': 'bestaudio/best',
                                    'default_search': 'auto',
@@ -32,7 +41,11 @@ class Downloader:
                                    'extract_flat': False,
                                    'playlistend': config.MAX_PLAYLIST_LENGTH,
                                    'quiet': True,
-                                   'ignore_no_formats_error': True
+                                   'ignore_no_formats_error': True,
+                                   'cookies': './cookies.txt',
+                                   'http_headers:': {
+                                       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+                                   }
                                    }
     __BASE_URL = 'https://www.youtube.com/watch?v={}'
 
