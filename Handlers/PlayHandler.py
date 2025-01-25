@@ -60,7 +60,7 @@ class PlayHandler(AbstractHandler):
                     response = HandlerResponse(self.ctx, embed)
                 else:  # If already playing
                     pos = len(playlist.getSongs())
-                    embed = self.embeds.SONG_ADDED_TWO(song.info, pos)
+                    embed = self.embeds.SONG_ADDED_TWO(song.info, pos+1)
                     response = HandlerResponse(self.ctx, embed)
 
                 # Add the unique song to the playlist and send a command to player

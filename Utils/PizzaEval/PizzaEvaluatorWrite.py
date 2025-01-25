@@ -175,7 +175,7 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
     return result
 
 # try:
-#     print(pizza_eval_write(422800248935546880, "blud fragt david", "[replace\\david\\maggda] - wenn ich bitten darf"))
+#     print(pizza_eval_write(422800248935546880, "ich gebe mein bestes", "[replace\\best\\sst]"))
 # except PizzaError as e:
 #     details = e.args[0]
-#     print(identify_error(details['c'], details['e']))
+#     print(details)

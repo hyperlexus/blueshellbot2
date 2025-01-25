@@ -269,14 +269,16 @@ class PizzaSlashCog(Cog):
 
         try:
             PizzaEvalErrorDict.recursion_counter = 0
-            result = pizza_eval_read(read, message)
-            write = pizza_eval_write(str(ctx.interaction.user[:-2]), message, write)
+            if not pizza_eval_read(read, message):
+                await ctx.respond("read check didn't pass.")
+                return
+            write = pizza_eval_write(str(ctx.interaction.user)[:-2], message, write)
         except PizzaEvalUtils.PizzaError as e:
             details = e.args[0]
             await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
             return
 
-        await ctx.respond(result)
+        await ctx.respond(write)
 
 def setup(bot):
     bot.add_cog(PizzaSlashCog(bot))

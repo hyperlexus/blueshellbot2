@@ -14,37 +14,56 @@ class Downloader:
     __YDL_OPTIONS = {'format': 'bestaudio/best',
                      'default_search': 'auto',
                      'playliststart': 0,
+                     'limit_rate': '250K',
+                     'rm_cache_dir': True,
                      'extract_flat': False,
                      'playlistend': config.MAX_PLAYLIST_LENGTH,
                      'quiet': True,
+                     'nocheckcertificate': True,
                      'ignore_no_formats_error': True,
                      'cookies': './cookies.txt',
-                     'http_headers:': {
-                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+                     'verbose': True,
+                     'http_headers': {
+                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+                         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                         'Accept-Language': 'en-US,en;q=0.9',
+                         'Sec-Fetch-Mode': 'navigate',
                      }
                      }
     __YDL_OPTIONS_EXTRACT = {'format': 'bestaudio/best',
                              'default_search': 'auto',
                              'playliststart': 0,
-                             'extract_flat': True,
+                             'limit_rate': '250K',
+                             'rm_cache_dir': True,
+                             'extract_flat': False,
                              'playlistend': config.MAX_PLAYLIST_LENGTH,
                              'quiet': True,
+                             'nocheckcertificate': True,
                              'ignore_no_formats_error': True,
                              'cookies': './cookies.txt',
-                             'http_headers:': {
-                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+                             'http_headers': {
+                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+                                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                 'Accept-Language': 'en-US,en;q=0.9',
+                                 'Sec-Fetch-Mode': 'navigate',
                              }
                              }
     __YDL_OPTIONS_FORCE_EXTRACT = {'format': 'bestaudio/best',
                                    'default_search': 'auto',
                                    'playliststart': 0,
+                                   'limit_rate': '250K',
+                                   'rm_cache_dir': True,
                                    'extract_flat': False,
                                    'playlistend': config.MAX_PLAYLIST_LENGTH,
                                    'quiet': True,
+                                   'nocheckcertificate': True,
                                    'ignore_no_formats_error': True,
                                    'cookies': './cookies.txt',
-                                   'http_headers:': {
-                                       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36'
+                                   'http_headers': {
+                                       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+                                       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                       'Accept-Language': 'en-US,en;q=0.9',
+                                       'Sec-Fetch-Mode': 'navigate',
                                    }
                                    }
     __BASE_URL = 'https://www.youtube.com/watch?v={}'

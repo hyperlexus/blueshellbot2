@@ -102,7 +102,7 @@ class BEmbeds:
             colour=self.__colors.BLUE)
         return embed
 
-    def SONG_INFO(self, info: dict, title: str, position='0') -> Embed:
+    def SONG_INFO(self, info: dict, title: str, position='1') -> Embed:
         embedvc = Embed(
             title=title,
             description=f"[{info['title']}]({info['original_url']})",
