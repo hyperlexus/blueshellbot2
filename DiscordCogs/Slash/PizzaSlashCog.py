@@ -52,7 +52,7 @@ class PizzaSlashCog(Cog):
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
-            if if_send and (message.guild is None or message.guild.id != self.__config.PIZZA_SERVER or any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles)):
+            if if_send and (message.guild is None or (message.guild.id == self.__config.PIZZA_SERVER and any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles))):
                 try:
                     if "[replace\\" in current_dict['write'] and len(message.content) > 50:
                         continue
