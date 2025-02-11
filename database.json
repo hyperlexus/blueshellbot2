@@ -1367,6 +1367,12 @@
             "author": "422800248935546880",
             "read": "end achen & not end rachen",
             "write": "es gibt rachen"
+        },
+        {
+            "time": "1737806372449",
+            "author": "422800248935546880",
+            "read": "in best",
+            "write": "[replace\\best\\sst]"
         }
     ],
     "c_counters": [
