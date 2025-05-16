@@ -105,5 +105,15 @@ class MiscSlashCog(Cog):
             await ctx.respond(e)
             return
 
+    @slash_command(name='trophy_chance_calculator', description='check how likely you are to win a trophy')
+    async def trophy_chance_calculator(self, ctx: ApplicationContext, number: Option(int, "number to calculate rate for")) -> None:
+        if 1 < number < 10000000000:
+            await ctx.respond("zahl von 1 bis 10000000000 bitte")
+            return
+        def formula(n):
+            return 1.0 / (200.0 + 600.0 * math.exp(-0.0045 * n) + 225.0 * math.exp(-0.0015 * n))
+        await ctx.respond(formula(number))
+
+
 def setup(bot):
     bot.add_cog(MiscSlashCog(bot))
