@@ -1,7 +1,6 @@
 import math
 from datetime import datetime
-from pydoc import describe
-
+from mpmath import mp, mpf, exp
 from Music.BlueshellBot import BlueshellBot
 from Music.BlueshellBot import blueshell_entire_bot_startup_timestamp
 from discord import ApplicationContext, Option, OptionChoice
@@ -107,19 +106,47 @@ class MiscSlashCog(Cog):
 
     @slash_command(name='trophy_chance_calculator', description='check how likely you are to win a trophy')
     async def trophy_chance_calculator(self, ctx: ApplicationContext, number: Option(int, "number to calculate rate for")) -> None:
-        if number < 1 or number > 10000000000:
-            await ctx.respond("zahl von 1 bis 10000000000 bitte")
+        if number < 1 or number > 25000000:
+            await ctx.respond("zahl von 1 bis 2.5e7 bitte")
             return
-        def formula(n):
-            return 1.0 / (200.0 + 600.0 * math.exp(-0.0045 * n) + 225.0 * math.exp(-0.0015 * n))
-        if number < 8679:
-            await ctx.respond(f"chance for a trophy for number {number} is {round(formula(number), 7)}% or 1 in {round(1/formula(number), 3)}. sie scheiß hurensohn.")
-	    return
-	else:
-	    output = f"the numbers get very small here so you get an unrounded, possibly incorrect result:\n"
-	    output += f"chance for a trophy for number {number} is {formula(number)}% or 1 in {1/formula(number)}"
-	    await ctx.respond(output)
+
+        def formula(n, precision, inverse):
+            mp.dps = precision
+            result = (
+                    mpf('200') +
+                    mpf('600') * exp(mpf('-0.045') * mpf(n)) +
+                    mpf('225') * exp(mpf('-0.0015') * mpf(n))
+            )
+            return 1 / result if inverse else result
+
+        def get_trophy_chance(n, inverse):
+            precision = 1500
+            value = formula(n, precision, inverse)
+            value_string = mp.nstr(value, precision)
+            for i, digit in enumerate(value_string):
+                if i < 4 and not inverse or i < 5 and inverse:
+                    continue
+                else:
+                    if not inverse:
+                        if digit != "0":
+                            return i + 5, str(formula(n, i + 5, inverse))
+                    else:
+                        if digit != "9":
+                            return i + 5, str(formula(n, i + 5, inverse))
+            return -1, 200 if inverse else 0.005
+
+        result = get_trophy_chance(number, False)
+        result_inverse = get_trophy_chance(number, True)
+        if result[0] == -1:
+            await ctx.respond("this is so precise, 1500 digits of precision couldn't handle it, the message would've been too long")
             return
+
+        output_string = f"chance for a trophy for number {number} is {result_inverse[1]}%, or 1 in {result[1]} with precision of {result[0]} digits"
+        if number > 10000:
+            output_string = "This is a big number so the numbers can get very huge and long. Be careful\n" + output_string
+        await ctx.respond(output_string)
+
+
 
 
 def setup(bot):
