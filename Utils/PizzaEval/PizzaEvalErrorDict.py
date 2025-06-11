@@ -26,9 +26,6 @@ error_dict = {
     302: "input contains more closing parentheses than opening parentheses.",
     303: "input contains at least 1 empty pair of parentheses `()`, which is not allowed.",
 
-    # misc
-    401: "ne sie scheiß hurensohn",
-
     # write eval errors:
     # general errors:
     1000: "invalid write format, uncaught exception.",
@@ -47,7 +44,6 @@ error_dict = {
     1204: "unmatched single quote in replace statement.",
     1205: "replace statement doesn't contain exactly 2 backslashes, which is incorrect formatting.",
     1207: "invalid [replace\\stringa\\stringb] format. length of segments is not two.",
-    1208: "could not replace. something went wrong."
 }
 
 

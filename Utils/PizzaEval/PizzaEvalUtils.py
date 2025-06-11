@@ -98,8 +98,6 @@ def is_valid_condition(condition):
         raise PizzaError({'c': 303, 'e': condition})
     if two_gaensefuesschen_in_a_row(condition):
         raise PizzaError({'c': 6, 'e': condition})
-    if "xandi" in condition:
-        raise PizzaError({'c': 401, 'e': condition})
     return True
 
 def is_valid_replace_statement(replace_statement: str):

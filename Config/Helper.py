@@ -111,6 +111,7 @@ class Helper(Singleton):
                                        f'Syntax: `{config.BOT_PREFIX}ptestcompiler condition message`\n'
                                        f'Example: `{config.BOT_PREFIX}ptestcompiler "in a & (in b | end c)" "ac"`\n\n'
                                        f'Automatically uses complex type. Have fun maggda')
+            self.HELP_PMUTE = 'Mutes pizza romani globally.'
 
             # slash commands below
 

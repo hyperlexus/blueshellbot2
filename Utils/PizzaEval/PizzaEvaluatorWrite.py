@@ -5,9 +5,6 @@ from Utils.PizzaEval.PizzaEvalUtils import is_valid_replace_statement, PizzaErro
 
 
 def pizza_eval_write(author_name: str, original_message: str, write_result: str) -> str:
-    original_message = original_message.lower()
-    write_result = write_result.lower()
-
     def process_block(block: str) -> str:
         if block == "author":
             return str(author_name)
@@ -126,7 +123,6 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
 
     # [replace\stringa\stringb]
     if "[replace" in write_result:
-        # try:
         result = ""
         replace_blocks = separate_replace_blocks(write_result)
         for i in replace_blocks:
@@ -137,8 +133,6 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
             processed_stringb = process_replace_block(stringb)
             result += original_message.replace(stringa, processed_stringb) if stringa in original_message else original_message
         return result
-        # except:
-        #     raise PizzaError({'c': 1208, 'e': write_result})
 
     result = ""
     in_quotes = False
@@ -174,8 +168,3 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
 
     return result
 
-# try:
-#     print(pizza_eval_write(422800248935546880, "ich gebe mein bestes", "[replace\\best\\sst]"))
-# except PizzaError as e:
-#     details = e.args[0]
-#     print(details)

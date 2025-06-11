@@ -1,6 +1,7 @@
 import json
 import math
 import random
+from pydoc import describe
 
 import discord
 
@@ -15,7 +16,7 @@ from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
 from Utils.PizzaEval.PizzaEvaluatorWrite import pizza_eval_write
 from Utils.PizzaEval.BoolDiscordFormatting import evaluate_discord_timestamp
-from Utils.Utils import Utils
+from Utils.Utils import Utils, config
 
 helper = Helper()
 
@@ -23,6 +24,7 @@ with open("database.json", "r") as f:
     data = json.load(f)
 
 last_10_messages = []
+is_muted = False
 
 class PizzaSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
@@ -33,10 +35,11 @@ class PizzaSlashCog(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
+        global is_muted
         global last_10_messages
         if self.__bot.voice_clients:
             return
-        if message.author == self.__bot.user or message.content.lower().startswith('b.p') or not message.content:
+        if is_muted or message.author == self.__bot.user or not message.content:
             return
         ctx = await self.__bot.get_context(message)
 
@@ -47,7 +50,7 @@ class PizzaSlashCog(Cog):
         for current_dict in data['p_commands']:
             if_send = False
             try:
-                if_send = pizza_eval_read(current_dict['read'].lower(), message.content.lower())
+                if_send = pizza_eval_read(current_dict['read'], message.content)
             except PizzaEvalUtils.PizzaError as e:
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
@@ -56,7 +59,7 @@ class PizzaSlashCog(Cog):
                 try:
                     if "[replace\\" in current_dict['write'] and len(message.content) > 50:
                         continue
-                    pizza_messages.append(pizza_eval_write(str(message.author)[:-2], message.content.lower(), current_dict['write'].lower()))
+                    pizza_messages.append(pizza_eval_write(str(message.author)[:-2], message.content, current_dict['write']))
 
                 except PizzaEvalUtils.PizzaError as e:
                     details = e.args[0]
@@ -99,7 +102,7 @@ class PizzaSlashCog(Cog):
             return
 
         if '@everyone' in write or '@here' in write:
-            await ctx.send("no lil bro")
+            await ctx.send("please do not attempt to make pizza ping everyone!")
             return
 
         new_command = {
@@ -279,6 +282,21 @@ class PizzaSlashCog(Cog):
             return
 
         await ctx.respond(write)
+
+    @slash_command(name="pmute", description=helper.HELP_PMUTE)
+    async def pmute(self, ctx: ApplicationContext):
+        global is_muted
+        bot_admins = self.__config.BOT_ADMINS.split(",")
+        print(bot_admins, ctx.interaction.user.id)
+        if str(ctx.interaction.user.id) not in bot_admins:
+            await ctx.respond("You must be a bot admin to mute/unmute pizza romani!")
+            return
+        is_muted = not is_muted
+        if is_muted:
+            await ctx.respond("Pizza Romani has been muted. :( Please unmute him soon or he will be sad.")
+        else:
+            await ctx.respond("Hooray, Pizza Romani is able to participate in conversation again! Yippie.")
+
 
 def setup(bot):
     bot.add_cog(PizzaSlashCog(bot))
