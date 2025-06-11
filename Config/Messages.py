@@ -94,7 +94,7 @@ class Messages(Singleton):
 class SearchMessages(Singleton):
     def __init__(self) -> None:
         if not super().created:
-            self.UNKNOWN_INPUT = 'Weird ass input, even I dunno what happened.'
+            self.UNKNOWN_INPUT = 'Unknown Provider (not plaintext, not youtube, spotify or deezer).'
             self.UNKNOWN_INPUT_TITLE = 'Nothing Found'
             self.GENERIC_TITLE = 'URL didnt work.'
             self.SPOTIFY_NOT_FOUND = 'Spotify didn\'t find any songs.'
