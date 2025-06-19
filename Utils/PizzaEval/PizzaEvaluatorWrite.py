@@ -1,4 +1,5 @@
 import random
+import re
 from datetime import datetime
 
 from Utils.PizzaEval.PizzaEvalUtils import is_valid_replace_statement, PizzaError
@@ -131,7 +132,10 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
                 continue
             stringa, stringb = parse_one_replace(i)
             processed_stringb = process_replace_block(stringb)
-            result += original_message.replace(stringa, processed_stringb) if stringa in original_message else original_message
+            if stringa.lower() in original_message.lower():
+                result += re.sub(stringa, processed_stringb, original_message, flags=re.IGNORECASE)
+            else:
+                result += original_message
         return result
 
     result = ""

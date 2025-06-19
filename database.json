@@ -855,8 +855,8 @@
         {
             "time": "1420070400147",
             "author": "0",
-            "read": "start 'ich bin'",
-            "write": "[replace\\ich bin\\hallo, ]. Ich bin Pizza Romani."
+            "read": "start 'ich bin '",
+            "write": "[replace\\ich bin \\hallo, ]. Ich bin Pizza Romani."
         },
         {
             "time": "1420070400148",
