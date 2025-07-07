@@ -74,44 +74,30 @@ class Helper(Singleton):
                                         f'Letter meanings: hiragana, katakana, both | to, from, both')
 
             self.HELP_PINSERT = 'Inserts a new command into pizza romani.'
-            self.HELP_PINSERT_LONG = (f'Adds a new command into pizza romani.\n'
-                                      f'Syntax: `{config.BOT_PREFIX}pinsert "to_match" "response"`\n'
-                                      f'Example: `{config.BOT_PREFIX}pinsert "in test | is bomboclaat" "test icles"`\n'
-                                      f'If message and/or response have spaces in it, use quotation marks.')
 
             self.HELP_PLIST = 'Lists pizza romani matches, with further options.'
             self.HELP_PLIST_LONG = (f'Lists all pizza romani matches. You can provide arguments to search further.\n\n'
-                                    f'Syntax: `{config.BOT_PREFIX}plist (filter keyword)`\n'
-                                    f'Example: `{config.BOT_PREFIX}plist write "test icles"`\n\n'
-                                    f'Possible search filters are:\n'
-                                    f'author (id/ping)\n'
-                                    f'read (what it matches)\n'
-                                    f'write (what it replies with)\n'
-                                    f'type (which match type)\n')
+                                    f'If you provide either filter_category or string_to_match, you HAVE to pass the other one too.'
+                                    f'Choose one of the options for filter_category and start listing :)')
 
             self.HELP_PINFO = 'Gets info about one pizza command.'
             self.HELP_PINFO_LONG = (f'Retrieves information about one pizza romani command.\n'
-                                    f'You can find this command by searching for its write value.\n\n'
-                                    f'Syntax: `{config.BOT_PREFIX}pinfo write_value (number)`\n'
-                                    f'Example: `{config.BOT_PREFIX}pinfo "test icles" 2\n\n'
-                                    f'If there are 2 or more commands with the same write value '
-                                    f'(you can find them by running and filtering `{config.BOT_PREFIX}plist`), '
-                                    f'enter a number after the first argument to select different ones.')
+                                    f'You need the command\'s ID to find the command.\n'
+                                    f'This can be found via filtered search with /plist.')
 
             self.HELP_PREMOVE = 'Removes a command from pizza romani.'
-            self.HELP_PREMOVE_LONG = ('Remove a command.\n\n'
-                                      f'Syntax: `{config.BOT_PREFIX}premove write_value (number)`'
-                                      f'Example: `{config.BOT_PREFIX}premove "test icles" 2`\n\n'
-                                      f'If there are 2 or more commands with the same write value '
-                                      f'(you can find them by running and filtering `{config.BOT_PREFIX}plist`), '
-                                      f'enter a number after the first argument to select different ones.')
+            self.HELP_PREMOVE_LONG = (f'Removes about one pizza romani command.\n'
+                                      f'You need the command\'s ID to find the command.\n'
+                                      f'This can be found via filtered search with /plist.')
 
             self.HELP_COMPILER = 'Tests the pizza romani compiler.'
-            self.HELP_COMPILER_LONG = ('Allows direct interaction with the pizza romani compiler.\n\n'
-                                       f'Syntax: `{config.BOT_PREFIX}ptestcompiler condition message`\n'
-                                       f'Example: `{config.BOT_PREFIX}ptestcompiler "in a & (in b | end c)" "ac"`\n\n'
+            self.HELP_COMPILER_LONG = ('Allows direct interaction with the pizza romani compiler.\n'
+                                       'It needs a message to operate on for triggering purposes, so make sure it matches. (or not)\n\n'
+                                       f'Syntax: `/ptestcompiler read:condition write:message message:message_to_operate_on`\n'
+                                       f'Example: `/ptestcompiler read:"in a & (in b | end c)" write:"ac" message:abba`\n\n'
                                        f'Automatically uses complex type. Have fun maggda')
             self.HELP_PMUTE = 'Mutes pizza romani globally.'
+            self.HELP_PHELP = 'Sends various help messages.'
 
             # slash commands below
 

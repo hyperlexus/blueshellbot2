@@ -297,6 +297,34 @@ class PizzaSlashCog(Cog):
         else:
             await ctx.respond("Hooray, Pizza Romani is able to participate in conversation again! Yippie.")
 
+    @slash_command(name="phelp", description=helper.HELP_PHELP)
+    async def phelp(self, interaction: discord.Interaction,
+                    command: Option(str, choices=[
+                        OptionChoice(name='pinsert', value='pinsert'),
+                        OptionChoice(name='plist', value='plist'),
+                        OptionChoice(name='pinfo', value='pinfo'),
+                        OptionChoice(name='premove', value='premove'),
+                        OptionChoice(name='ptestcompiler', value='compiler')])):
+        output = f"# {command} help"
+        await interaction.response.defer()
+        match command:
+            case "plist":
+                output = helper.HELP_PLIST_LONG
+            case "pinfo":
+                output = helper.HELP_PINFO_LONG
+            case "premove":
+                output = helper.HELP_PREMOVE_LONG
+            case "compiler":
+                output = helper.HELP_COMPILER_LONG
+            case "pinsert":
+                with open("Utils/PizzaEval/pizza_help_read") as f3:
+                    output = f3.read()
+                with open("Utils/PizzaEval/pizza_help_write") as f4:
+                    output_write = f4.read()
+        await interaction.followup.send(output)
+        if command == "pinsert":
+            await interaction.followup.send(output_write)
+
 
 def setup(bot):
     bot.add_cog(PizzaSlashCog(bot))

@@ -1,0 +1,21 @@
+# pinsert help
+do /pinsert to insert a new command
+there's 2 sections, read and write. read is the message that it should react to, and write is what it reacts with.
+
+## read
+checks are written in the following way:
+<check type> <text>, like `in maggdeur`. if the message contains 'maggdeur', it is triggered and set as true. checks always evaluate to boolean true or false.
+possible check types are `in` (contains), `is` (matches exactly), `start` and `end` (self explanatory).
+
+if your message to check contains spaces, you must put the entire message in SINGLE quotes: `in 'daan ist ein kek'`. the message SHOULD NOT CONTAIN A COLON because that is the old outdated syntax.
+read messages are case **in**sensitive.
+
+furthermore, you may chain conditions as many times as you want, with the operators and (`&`), or (`|`), xor (`^`). for example, a message can look like this: `in maggda | in daan | in alex`, and it will trigger whenever maggda, daan or alex are in the message.
+
+`&` is prioritised over `|`, meaning `in a | in b & in c` will evaluate to true if and only if:
+\- a is in the message
+\- b AND c are both in the message.
+to circumvent this, you must use brackets: `(in a | in b) & in c`. xor has the same priority as or.
+
+additionally, there is a `not` expression that goes before the <check type>, inverting the check: `not in a` triggers whenever a is *not* in the message. this should be used carefully as you might end up with an expression that triggers 100% of the time: `not in a | in a`. this should be avoided.
+

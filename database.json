@@ -1410,48 +1410,5 @@
             "read": "in 'bin doch kein' | in 'bin doch nicht'",
             "write": "https://tenor.com/view/doch-oh-doch-mein-freund-freund-mein-freund-oh-doch-gif-7193632"
         }
-    ],
-    "c_counters": [
-        {
-            "id": 422800248935546880,
-            "money": 0,
-            "unlocks": {
-                "bases": [
-                    10,
-                    16,
-                    12,
-                    1
-                ],
-                "rules": [
-                    "div",
-                    "root",
-                    "digsum"
-                ]
-            }
-        }
-    ],
-    "c_streaks": [
-        {
-            "channel_id": 996134553678782514,
-            "next_number": 7,
-            "rules": {
-                "div": [
-                    2,
-                    3,
-                    5,
-                    7
-                ],
-                "root": [
-                    2,
-                    3
-                ],
-                "digsum": [
-                    5,
-                    11
-                ]
-            },
-            "base": 10,
-            "last_counted": 422800248935546880
-        }
     ]
 }
