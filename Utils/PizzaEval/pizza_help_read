@@ -14,8 +14,9 @@ furthermore, you may chain conditions as many times as you want, with the operat
 
 `&` is prioritised over `|`, meaning `in a | in b & in c` will evaluate to true if and only if:
 \- a is in the message
+OR
 \- b AND c are both in the message.
-to circumvent this, you must use brackets: `(in a | in b) & in c`. xor has the same priority as or.
+to circumvent this, you must use brackets: `(in a | in b) & in c`. xor has the same priority as or, but it is handled in order from left to right.
 
 additionally, there is a `not` expression that goes before the <check type>, inverting the check: `not in a` triggers whenever a is *not* in the message. this should be used carefully as you might end up with an expression that triggers 100% of the time: `not in a | in a`. this should be avoided.
 
