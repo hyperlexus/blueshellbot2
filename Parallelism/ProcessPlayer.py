@@ -147,22 +147,17 @@ class ProcessPlayer(Process):
                 self.__loop.create_task(self.__playSong(song), name=f'Song {song.identifier}')
                 self.__playing = True
 
-    # CHANGE 1: Create a synchronous wrapper for the 'after' callback
     def _after_playback(self, error):
-        """A thread-safe wrapper to schedule the next song."""
         if error:
             print(f'[PROCESS PLAYER -> ERROR PLAYING SONG] -> {error}')
 
-        # Schedule the __playNext coroutine safely on the event loop
         future = asyncio.run_coroutine_threadsafe(self.__playNext(), self.__loop)
         try:
-            # It's good practice to get the result to propagate exceptions
             future.result()
         except Exception as e:
             print(f'[PROCESS PLAYER -> ERROR SCHEDULING NEXT SONG] -> {e}')
 
     async def __playSong(self, song: Song) -> None:
-        """Function that will trigger the player to play the song"""
         try:
             self.__playerLock.acquire()
             if song is None:
@@ -171,11 +166,10 @@ class ProcessPlayer(Process):
             if song.source is None:
                 return self.__playNext(None)
 
-            # If not connected, connect to bind channel
             if self.__voiceClient is None:
                 await self.__connectToVoiceChannel()
 
-            # If the voice channel disconnect for some reason
+            # If the voice channel disconnects for some reason
             if not self.__voiceClient.is_connected():
                 print('[PROCESS PLAYER -> VOICE CHANNEL NOT NULL BUT DISCONNECTED, CONNECTING AGAIN]')
                 await self.__connectToVoiceChannel()
@@ -187,7 +181,7 @@ class ProcessPlayer(Process):
 
             songStillAvailable = self.__verifyIfSongAvailable(song)
             if not songStillAvailable:
-                print('[PROCESS PLAYER -> SONG NOT AVAILABLE ANYMORE, DOWNLOADING AGAIN]')
+                print(f'[PROCESS PLAYER -> SONG {song.title} NOT AVAILABLE ANYMORE, DOWNLOADING AGAIN]')
                 song = self.__downloadSongAgain(song)
 
             self.__playing = True
@@ -228,7 +222,7 @@ class ProcessPlayer(Process):
                     self.__playing = False
                     # Send a command to the main process and put this one to sleep
                     sleepCommand = BCommands(BCommandsType.SLEEPING)
-                    await self.__queueSend.put(sleepCommand)
+                    self.__queueSend.put(sleepCommand)
                     # Release the semaphore to finish the process
                     self.__semStopPlaying.release()
 

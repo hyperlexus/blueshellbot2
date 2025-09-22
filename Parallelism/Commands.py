@@ -15,6 +15,7 @@ class BCommandsType(Enum):
     TERMINATE = 'Terminate'
     VOLUME = 'Volume'
     SLEEPING = 'Sleeping'
+    REDOWNLOAD_SONG = 'Redownload'
 
 
 class BCommands:
