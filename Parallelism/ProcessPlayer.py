@@ -147,6 +147,20 @@ class ProcessPlayer(Process):
                 self.__loop.create_task(self.__playSong(song), name=f'Song {song.identifier}')
                 self.__playing = True
 
+    # CHANGE 1: Create a synchronous wrapper for the 'after' callback
+    def _after_playback(self, error):
+        """A thread-safe wrapper to schedule the next song."""
+        if error:
+            print(f'[PROCESS PLAYER -> ERROR PLAYING SONG] -> {error}')
+
+        # Schedule the __playNext coroutine safely on the event loop
+        future = asyncio.run_coroutine_threadsafe(self.__playNext(), self.__loop)
+        try:
+            # It's good practice to get the result to propagate exceptions
+            future.result()
+        except Exception as e:
+            print(f'[PROCESS PLAYER -> ERROR SCHEDULING NEXT SONG] -> {e}')
+
     async def __playSong(self, song: Song) -> None:
         """Function that will trigger the player to play the song"""
         try:
@@ -180,11 +194,9 @@ class ProcessPlayer(Process):
             self.__songPlaying = song
 
             player = FFmpegPCMAudio(song.source, **self.FFMPEG_OPTIONS)
-            if not player.is_opus():
-                player = PCMVolumeTransformer(player, self.__songVolumeUsing)
-                self.__currentSongChangeVolume = True
+            player_with_volume = PCMVolumeTransformer(player, self.__songVolumeUsing)
 
-            self.__voiceClient.play(player, after=lambda e: self.__playNext(e))
+            self.__voiceClient.play(player_with_volume, after=self._after_playback)
 
             self.__timer.cancel()
             self.__timer = TimeoutClock(self.__timeoutHandler, self.__loop)
@@ -193,13 +205,11 @@ class ProcessPlayer(Process):
             self.__queueSend.put(nowPlayingCommand)
         except Exception as e:
             print(f'[PROCESS PLAYER -> ERROR IN PLAY SONG FUNCTION] -> {e}, {type(e)}')
-            self.__playNext(None)
+            self._after_playback(e)
         finally:
             self.__playerLock.release()
 
-    def __playNext(self, error) -> None:
-        if error is not None:
-            print(f'[PROCESS PLAYER -> ERROR PLAYING SONG] -> {error}')
+    async def __playNext(self) -> None:
         with self.__playlistLock:
             with self.__playerLock:
                 self.__currentSongChangeVolume = False
@@ -216,9 +226,9 @@ class ProcessPlayer(Process):
                     self.__playlist.loop_off()
                     self.__songPlaying = None
                     self.__playing = False
-                    # Send a command to the main process put this one to sleep
+                    # Send a command to the main process and put this one to sleep
                     sleepCommand = BCommands(BCommandsType.SLEEPING)
-                    self.__queueSend.put(sleepCommand)
+                    await self.__queueSend.put(sleepCommand)
                     # Release the semaphore to finish the process
                     self.__semStopPlaying.release()
 
@@ -449,23 +459,22 @@ class ProcessPlayer(Process):
 
     async def __connectToVoiceChannel(self) -> bool:
         try:
-            print('[PROCESS PLAYER -> CONNECTING TO VOICE CHANNEL]')
-            # If the voiceChannel is not defined yet, like if the Bot is still loading, wait until we get the voiceChannel
-            if self.__voiceChannel is None:
-                while True:
-                    self.__voiceChannel = self.__bot.get_channel(self.__voiceChannelID)
-                    if self.__voiceChannel is None:
-                        await asyncio.sleep(0.2)
-                    else:
-                        break
+            if self.__voiceClient and self.__voiceClient.is_connected() and self.__voiceClient.channel.id == self.__voiceChannelID:
+                print('[PROCESS PLAYER -> ALREADY CONNECTED TO THE CORRECT VC]')
+                return True
 
-            if self.__voiceClient is not None:
-                try:
-                    await self.__voiceClient.disconnect(force=True)
-                except Exception as e:
-                    print(f'[PROCESS PLAYER -> ERROR FORCING DISCONNECT] -> {e}')
+            if self.__voiceClient and self.__voiceClient.is_connected():
+                print(f'[PROCESS PLAYER -> MOVING TO CHANNEL {self.__voiceChannel.name}]')
+                await self.__voiceClient.move_to(self.__voiceChannel)
+                return True
+
+            print(f'[PROCESS PLAYER -> CONNECTING TO CHANNEL {self.__voiceChannel.name}]')
             self.__voiceClient = await self.__voiceChannel.connect(reconnect=True, timeout=None)
             return True
+
         except Exception as e:
             print(f'[PROCESS PLAYER -> ERROR CONNECTING TO VC] -> {e}')
+            if self.__voiceClient:
+                await self.__voiceClient.disconnect(force=True)
+            self.__voiceClient = None
             return False

@@ -1,8 +1,6 @@
 import json
 import math
 import random
-from pydoc import describe
-
 import discord
 
 from Music.BlueshellBot import BlueshellBot
@@ -25,6 +23,7 @@ with open("database.json", "r") as f:
 
 last_10_messages = []
 is_muted = False
+
 
 class PizzaSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
@@ -55,11 +54,13 @@ class PizzaSlashCog(Cog):
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
-            if if_send and (message.guild is None or (message.guild.id == self.__config.PIZZA_SERVER and any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles))):
+            if if_send and (message.guild is None or (message.guild.id == self.__config.PIZZA_SERVER and any(
+                    role.id == self.__config.PIZZA_ROLE for role in message.author.roles))):
                 try:
                     if "[replace\\" in current_dict['write'] and len(message.content) > 50:
                         continue
-                    pizza_messages.append(pizza_eval_write(str(message.author)[:-2], message.content, current_dict['write']))
+                    pizza_messages.append(
+                        pizza_eval_write(str(message.author)[:-2], message.content, current_dict['write']))
 
                 except PizzaEvalUtils.PizzaError as e:
                     details = e.args[0]
@@ -127,9 +128,11 @@ class PizzaSlashCog(Cog):
                         OptionChoice(name='author', value='author'),
                         OptionChoice(name='read', value='read'),
                         OptionChoice(name='write', value='write')],
-                        description="What type to filter by. Requires string_to_match to be passed as well.") = None,
-                    string_to_match: Option(str, "String to filter by. Requires command_filter to be passed as well.") = None,
-                    page: Option(int, "which page of list to show. may be required if output is longer than 25 lines") = None
+                                            description="What type to filter by. Requires string_to_match to be passed as well.") = None,
+                    string_to_match: Option(str,
+                                            "String to filter by. Requires command_filter to be passed as well.") = None,
+                    page: Option(int,
+                                 "which page of list to show. may be required if output is longer than 25 lines") = None
                     ):
         if not self.__bot.listingSlash:
             return
@@ -164,7 +167,8 @@ class PizzaSlashCog(Cog):
                     add_command = True
             if add_command:
                 if len(current_dict['write']) > 2000 or len(current_dict['read']) > 2000:
-                    command_list.append(f"{current_dict['time']}: this command is longer than 2k characters, so it won't be included. it's probably the wahlkommission command.")
+                    command_list.append(
+                        f"{current_dict['time']}: this command is longer than 2k characters, so it won't be included. it's probably the wahlkommission command.")
                 else:
                     command_list.append(f"{current_dict['time']}: {current_dict['read']} -> {current_dict['write']}")
 
@@ -179,9 +183,10 @@ class PizzaSlashCog(Cog):
                     return
                 else:
                     if page >= math.ceil(len(command_list) / 25):
-                        await ctx.respond(embed=self.__embeds.SLASH_PLIST_PAGE_LARGER_THAN_AMOUNT_COMMANDS(amount_pages))
+                        await ctx.respond(
+                            embed=self.__embeds.SLASH_PLIST_PAGE_LARGER_THAN_AMOUNT_COMMANDS(amount_pages))
                         return
-                    command_list = command_list[page*25:page*25+25]
+                    command_list = command_list[page * 25:page * 25 + 25]
             result = "\n".join(command_list)
             if len(result) > 4096:
                 longest = ""
@@ -298,7 +303,7 @@ class PizzaSlashCog(Cog):
             await ctx.respond("Hooray, Pizza Romani is able to participate in conversation again! Yippie.")
 
     @slash_command(name="phelp", description=helper.HELP_PHELP)
-    async def phelp(self, interaction: discord.Interaction,
+    async def phelp(self, ctx: ApplicationContext,
                     command: Option(str, choices=[
                         OptionChoice(name='pinsert', value='pinsert'),
                         OptionChoice(name='plist', value='plist'),
@@ -306,7 +311,7 @@ class PizzaSlashCog(Cog):
                         OptionChoice(name='premove', value='premove'),
                         OptionChoice(name='ptestcompiler', value='compiler')])):
         output = f"# {command} help"
-        await interaction.response.defer()
+        await ctx.interaction.response.defer()
         match command:
             case "plist":
                 output = helper.HELP_PLIST_LONG
@@ -321,9 +326,9 @@ class PizzaSlashCog(Cog):
                     output = f3.read()
                 with open("Utils/PizzaEval/pizza_help_write") as f4:
                     output_write = f4.read()
-        await interaction.followup.send(output)
+        await ctx.interaction.followup.send(output)
         if command == "pinsert":
-            await interaction.followup.send(output_write)
+            await ctx.interaction.followup.send(output_write)
 
 
 def setup(bot):
