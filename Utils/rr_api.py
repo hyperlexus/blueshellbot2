@@ -54,4 +54,48 @@ def readable_average_vr(vr_data):
 
     return "\n".join(formatted_vr_data)
 
-print(readable_average_vr(calculate_average_vr()))
+def get_average_room_vr(room):
+    players = room.get('players', {})
+
+    sum_vr = 0
+    players_with_vr = 0
+    for player_data in players.values():
+        if 'ev' in player_data:
+            try:
+                if player_data['ev'] == "-1":
+                    continue
+                sum_vr += int(player_data['ev'])
+                players_with_vr += 1
+            except (ValueError, TypeError):
+                continue
+
+    if players_with_vr > 0:
+        average_vr = sum_vr / players_with_vr
+        return average_vr
+    else:
+        return -1
+
+def get_room_player_count(room):
+    return len(room.get('players', {}))
+
+def get_room_by_id(room_id):
+    api_data = fetch_api_data()
+    for room in api_data.get('rooms', []):
+        if room.get('id') == room_id:
+            highest_room = room
+            break
+    return highest_room
+
+def get_highest_room_id():
+    avg_vr = calculate_average_vr()
+    return max(avg_vr, key=lambda room_id: avg_vr[room_id][0])
+
+def get_all_openhost_fcs_by_room(room):
+    players = room.get('players', {})
+    open_host_fcs = []
+
+    for pinfo in players.values():
+        if pinfo.get('openhost') == 'true':
+            if 'fc' in pinfo:
+                open_host_fcs.append(pinfo['fc'])
+    return open_host_fcs

@@ -10,7 +10,8 @@ from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
 from Utils.Utils import Utils
-from Utils.rr_api import calculate_average_vr, readable_average_vr
+from Utils import rr_api
+from Utils.rr_api import get_room_by_id
 
 helper = Helper()
 
@@ -147,10 +148,32 @@ class MiscSlashCog(Cog):
             output_string = "This is a big number so the numbers can get very huge and long. Be careful\n" + output_string
         await ctx.respond(output_string)
 
-    @slash_command(name='good_rooms', description='returns good rr rooms')
+    @slash_command(name='rr_rooms', description='returns good rr rooms')
     async def good_rooms(self, ctx: ApplicationContext):
-        vr_data = readable_average_vr(calculate_average_vr())
+        vr_data = rr_api.readable_average_vr(rr_api.calculate_average_vr())
         await ctx.respond(vr_data)
+
+    @slash_command(name='join_best_room', description='provides all fcs of the best room with open host on')
+    async def join_best_room(self, ctx: ApplicationContext):
+        best_room = rr_api.get_room_by_id(rr_api.get_highest_room_id())
+        openhost_codes = rr_api.get_all_openhost_fcs_by_room(best_room)
+        best_room_vr_count = rr_api.get_average_room_vr(best_room)
+        best_room_player_count = rr_api.get_room_player_count(best_room)
+        output_string = f"fcs in the room (Avg VR: {round(best_room_vr_count)}, {best_room_player_count} players) with openhost on:\n"
+        output_string += "\n".join(openhost_codes) if openhost_codes else "no codes have openhost on in this room."
+        await ctx.respond(output_string)
+        return
+
+    @slash_command(name='join_a_room', description='lists all fcs with openhost on in a specific room')
+    async def join_a_room(self, ctx: ApplicationContext, room_id: Option(str, "Room ID (6 digits)")):
+        room = rr_api.get_room_by_id(room_id)
+        openhost_codes = rr_api.get_all_openhost_fcs_by_room(room)
+        room_vr_count = rr_api.get_average_room_vr(room)
+        room_player_count = rr_api.get_room_player_count(room)
+        output_string = f"fcs in the room (Avg VR: {round(room_vr_count)}, {room_player_count} players) with openhost on:\n"
+        output_string += "\n".join(openhost_codes) if openhost_codes else "no codes have openhost on in this room."
+        await ctx.respond(output_string)
+        return
 
 
 def setup(bot):
