@@ -10,6 +10,7 @@ from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
 from Utils.Utils import Utils
+from Utils.rr_api import calculate_average_vr, readable_average_vr
 
 helper = Helper()
 
@@ -146,7 +147,10 @@ class MiscSlashCog(Cog):
             output_string = "This is a big number so the numbers can get very huge and long. Be careful\n" + output_string
         await ctx.respond(output_string)
 
-
+    @slash_command(name='good_rooms', description='returns good rr rooms')
+    async def good_rooms(self, ctx: ApplicationContext):
+        vr_data = readable_average_vr(calculate_average_vr())
+        await ctx.respond(vr_data)
 
 
 def setup(bot):
