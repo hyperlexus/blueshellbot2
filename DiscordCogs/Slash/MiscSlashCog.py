@@ -177,7 +177,7 @@ class MiscSlashCog(Cog):
         output_string = f"fcs in the room (Avg VR: {round(room_vr_count)}, {room_player_count} players) with openhost on:\n"
         output_string += "\n".join(openhost_codes) if openhost_codes else "no codes have openhost on in this room."
         if is_private_room:
-            output_string += "\n note that this is a private room and maybe a mogi!"
+            output_string += "\nnote that this is a private room and maybe a mogi!"
         await ctx.respond(output_string)
         return
 
