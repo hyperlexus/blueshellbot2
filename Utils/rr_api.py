@@ -21,6 +21,8 @@ def fetch_api_data():
 def calculate_average_vr():
     api_data = fetch_api_data()
     rooms = api_data.get('rooms', [])
+    if not rooms:
+        return False
     final_vr_averages = {}
 
     for room in rooms:
@@ -88,6 +90,8 @@ def get_room_by_id(room_id):
 
 def get_highest_room_id():
     avg_vr = calculate_average_vr()
+    if not avg_vr:
+        return False
     return max(avg_vr, key=lambda room_id: avg_vr[room_id][0])
 
 def get_all_openhost_fcs_by_room(room):

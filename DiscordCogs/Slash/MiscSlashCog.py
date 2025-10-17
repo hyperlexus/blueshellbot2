@@ -156,6 +156,9 @@ class MiscSlashCog(Cog):
     @slash_command(name='join_best_room', description='provides all fcs of the best room with open host on')
     async def join_best_room(self, ctx: ApplicationContext):
         best_room = rr_api.get_room_by_id(rr_api.get_highest_room_id())
+        if not best_room:
+            await ctx.respond("the api seems to be down or there are no players at the moment, please start a room!")
+            return
         openhost_codes = rr_api.get_all_openhost_fcs_by_room(best_room)
         best_room_vr_count = rr_api.get_average_room_vr(best_room)
         best_room_player_count = rr_api.get_room_player_count(best_room)
@@ -169,9 +172,12 @@ class MiscSlashCog(Cog):
         room = rr_api.get_room_by_id(room_id)
         openhost_codes = rr_api.get_all_openhost_fcs_by_room(room)
         room_vr_count = rr_api.get_average_room_vr(room)
+        is_private_room = True if room_vr_count == -1 else False
         room_player_count = rr_api.get_room_player_count(room)
         output_string = f"fcs in the room (Avg VR: {round(room_vr_count)}, {room_player_count} players) with openhost on:\n"
         output_string += "\n".join(openhost_codes) if openhost_codes else "no codes have openhost on in this room."
+        if is_private_room:
+            output_string += "\n note that this is a private room and maybe a mogi!"
         await ctx.respond(output_string)
         return
 
