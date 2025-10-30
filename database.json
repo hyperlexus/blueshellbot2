@@ -733,12 +733,6 @@
             "write": "pingas"
         },
         {
-            "time": "1420070400126",
-            "author": "0",
-            "read": "(end el) & (not end iel)",
-            "write": "leel"
-        },
-        {
             "time": "1420070400127",
             "author": "0",
             "read": "in fresse & not end fresse",
@@ -1433,6 +1427,72 @@
             "author": "422800248935546880",
             "read": "in frage",
             "write": "[replace\\frage\\fragage]"
+        },
+        {
+            "time": "1759577883146",
+            "author": "422800248935546880",
+            "read": "in pipi|in kaka",
+            "write": "darf man mit dem pipimann auch kaka machen oder ist er daf\u00fcr noch zu klein"
+        },
+        {
+            "time": "1759915492966",
+            "author": "422800248935546880",
+            "read": "in daniel",
+            "write": "[replace\\daniel\\bananiel]"
+        },
+        {
+            "time": "1759916503391",
+            "author": "422800248935546880",
+            "read": "is 88",
+            "write": "heil hitler"
+        },
+        {
+            "time": "1759916576858",
+            "author": "422800248935546880",
+            "read": "in 67",
+            "write": "67676767676767 \ud83e\uddde\ud83e\udd6d\ud83e\udef4\ud83e\udef4"
+        },
+        {
+            "time": "1759918272833",
+            "author": "422800248935546880",
+            "read": "end el & not end iel & not is leel",
+            "write": "leel"
+        },
+        {
+            "time": "1760548030352",
+            "author": "422800248935546880",
+            "read": "in anyone",
+            "write": "https://de.wikipedia.org/wiki/Anyon"
+        },
+        {
+            "time": "1760552764839",
+            "author": "468786219258740756",
+            "read": "in 'dis'",
+            "write": "[replace\\dis\\piss]"
+        },
+        {
+            "time": "1760618839884",
+            "author": "422800248935546880",
+            "read": "in 187",
+            "write": "\u00fcberall"
+        },
+        {
+            "time": "1760690835827",
+            "author": "422800248935546880",
+            "read": "in bombo",
+            "write": "[random\\MIBOMBO-10\\bomb omb-10\\bomboclaaaaat....-10\\which bomboclaat dog i am-10\\gimme a good bloodclaat dog-10\\b-10\\bomb fact: this bomboclaat has a bomb bombo of bombeering-1]"
+        },
+        {
+            "time": "1761737620328",
+            "author": "422800248935546880",
+            "read": "in spiel",
+            "write": "[replace\\spiel\\sp\u00fcl]*"
+        },
+        {
+            "time": "1761841325993",
+            "author": "468786219258740756",
+            "read": "in ' 41 ' | start '41 ' | end ' 41' | is '41'",
+            "write": "Did unc snap??"
         }
     ]
 }
