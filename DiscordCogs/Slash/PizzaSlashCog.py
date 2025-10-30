@@ -60,7 +60,7 @@ class PizzaSlashCog(Cog):
                     if "[replace\\" in current_dict['write'] and len(message.content) > 50:
                         continue
                     pizza_messages.append(
-                        pizza_eval_write(str(message.author)[:-2], message.content, current_dict['write']))
+                        pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write']))
 
                 except PizzaEvalUtils.PizzaError as e:
                     details = e.args[0]
@@ -118,7 +118,7 @@ class PizzaSlashCog(Cog):
         with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
 
-        await ctx.respond(embed=self.__embeds.PIZZA_INSERTED(read, write))
+        await ctx.respond(embed=self.__embeds.PIZZA_INSERTED(read, write, time))
         return
 
     @slash_command(name="plist", description=helper.HELP_PLIST)
@@ -223,7 +223,7 @@ class PizzaSlashCog(Cog):
             await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
             return
         else:
-            author_name = str(self.__bot.get_user(int(valid_command['author'])))[:-2]
+            author_name = str(self.__bot.get_user(int(valid_command['author']))).split(' ')[0]
             real_time = int(valid_command['time']) // 1000
             await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
                 real_time, author_name, valid_command['read'], valid_command['write'], mode="info"))
@@ -253,7 +253,7 @@ class PizzaSlashCog(Cog):
             await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
             return
         else:
-            author_name = str(self.__bot.get_user(int(valid_command['author'])))[:-2]
+            author_name = str(self.__bot.get_user(int(valid_command['author']))).split(' ')[0]
             real_time = int(valid_command['time']) // 1000
             await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
                 real_time, author_name, valid_command['read'], valid_command['write'], mode="remove"))

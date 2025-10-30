@@ -572,10 +572,10 @@ class BEmbeds:
         )
         return embed
 
-    def PIZZA_INSERTED(self, read, write):
+    def PIZZA_INSERTED(self, read, write, time):
         embed = Embed(
             title="Successfully inserted a new command into pizza romani!",
-            description=f"{read} -> {write}",
+            description=f"{read} -> {write}\nid: {time}",
             color=self.__colors.BLUE
         )
         return embed
