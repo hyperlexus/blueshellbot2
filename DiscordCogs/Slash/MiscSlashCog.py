@@ -1,3 +1,4 @@
+import asyncio
 import math
 from datetime import datetime
 from mpmath import mp, mpf, exp
@@ -33,10 +34,13 @@ class MiscSlashCog(Cog):
                        ) -> None:
         if rate > 100 or rate < 1:
             await ctx.respond("prozent von 1 bis 100")
+            return
         if geld < 1000:
             await ctx.respond("1000 ist untergrenze für geld bratan")
+            return
         if geld > 1000000:
             await ctx.respond("du kannst dir nicht mehr als 1e6 geld leihen")
+            return
 
         def regerplatz(geld2, rate2):
             return math.ceil(geld2 ** 0.5 / 10) / (4 * rate2)
@@ -179,6 +183,63 @@ class MiscSlashCog(Cog):
         if is_private_room:
             output_string += "\nnote that this is a private room and maybe a mogi!"
         await ctx.respond(output_string)
+        return
+
+    @slash_command(name='clean', description=helper.HELP_CLEAN)
+    async def clean(self, ctx: ApplicationContext,
+                    limit: Option(int, "How many messages to delete?", default=20),
+                    who: Option(str, "whose messages to clean?", choices=["all", "bot", "user", "saul", "any"], default="all")):
+        if Utils.check_if_banned(ctx.author.id, self.__config.PROJECT_PATH):
+            await ctx.respond(embed=self.__embeds.BANNED())
+            return
+
+        if limit > self.__config.CLEAN_AMOUNT:
+            await ctx.respond(embed=self.__embeds.TOO_MANY_CLEAN_QUERIES(limit))
+            return
+
+        await ctx.defer(ephemeral=True)
+
+        def should_delete(msg):
+            if who == "any":
+                return True
+            if who == "saul" and msg.author.id == 1012755944846938163:
+                return True
+
+            # Only delete messages from THIS bot instance
+            if who in ("bot", "all") and msg.author.id == ctx.bot.user.id:
+                return True
+
+            if who in ("user", "all") and msg.content.startswith(self.__config.BOT_PREFIX):
+                return True
+            return False
+
+        inspect_amount = limit if who == "any" else self.__config.CLEAN_AMOUNT
+        to_delete = []
+
+        async for message in ctx.channel.history(limit=inspect_amount):
+            if len(to_delete) >= limit:
+                break
+            if should_delete(message):
+                to_delete.append(message)
+
+        if to_delete:
+            from datetime import datetime, timedelta, timezone
+            two_weeks_ago = datetime.now(timezone.utc) - timedelta(days=14)
+
+            bulk_deletable = [m for m in to_delete if m.created_at > two_weeks_ago]
+            manual_deletable = [m for m in to_delete if m.created_at <= two_weeks_ago]
+
+            if bulk_deletable:
+                await ctx.channel.delete_messages(bulk_deletable)
+
+            if manual_deletable:
+                for i, msg in enumerate(manual_deletable):
+                    await msg.delete()
+                    if (i + 1) % 5 == 0:
+                        await asyncio.sleep(1)
+
+        await ctx.channel.send(embed=self.__embeds.CLEANED(limit, len(to_delete), who, inspect_amount), delete_after=10)
+        await ctx.respond("messages cleaned.")
         return
 
 

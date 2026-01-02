@@ -1,4 +1,5 @@
 import asyncio
+from encodings.utf_7 import encode
 from random import random
 from Music.BlueshellBot import BlueshellBot
 from discord.ext.commands import Context, command, Cog
@@ -71,67 +72,68 @@ class MiscCog(Cog):
 
     @command(name='feet', help=helper.HELP_FEET, description=helper.HELP_FEET_LONG)
     async def feet(self, ctx: Context) -> None:
-        await ctx.send('I love feet🦶')
+        await ctx.author.send('I love feet🦶')
 
     @command(name='clean', help=helper.HELP_CLEAN, description=helper.HELP_CLEAN_LONG)
     async def clean(self, ctx: Context, *args: str) -> None:
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
-        number_set, limit, c, who = False, 20, 0, "all"  # innit bruv
-        if not args == ():
-            for i in args:
-                try:
-                    limit = int(i)
-                    number_set = True
-                except ValueError:
-                    pass
-                if not number_set:
-                    if type(i) == str and i in ("all", "bot", "user", "saul", "any"):
-                        who = i
-                    else:
-                        await ctx.send(embed=self.__embeds.BAD_CLEAN_INPUT(args))
-                        return
+        limit = 20
+        who = "all"
+        valid_targets = ("all", "bot", "user", "saul", "any")
+        if args:
+            for arg in args:
+                if arg.isdigit():
+                    limit = int(arg)
+                elif arg.lower() in valid_targets:
+                    who = arg.lower()
+                else:
+                    await ctx.send(embed=self.__embeds.BAD_CLEAN_INPUT(arg))
 
         if limit > self.__config.CLEAN_AMOUNT:
             await ctx.send(embed=self.__embeds.TOO_MANY_CLEAN_QUERIES(limit))
             return
 
-        if who == "any":
-            inspect_amount = limit
-        else:
-            inspect_amount = self.__config.CLEAN_AMOUNT
+        def should_delete(msg_to_delete):
+            if who == "any":
+                return True
+            if who == "saul" and message.author.id == 1012755944846938163:
+                return True
+            if who in ("bot", "all") and message.author.id == ctx.bot.user.id:
+                return True
+            if who in ("user", "all") and msg_to_delete.content.startswith(self.__config.BOT_PREFIX):
+                return True
+            return False
+
+        inspect_amount = limit if who == "any" else self.__config.CLEAN_AMOUNT
+        to_delete: list = []
 
         async for message in ctx.channel.history(limit=inspect_amount):
-            if c-1 >= limit:
+            if len(to_delete) >= limit:
                 break
-            deleted = False
-            if who == "any":
-                await message.delete()
-                deleted = True
-            if who == "saul" and not deleted:
-                if message.author.id == 1012755944846938163:
-                    await message.delete()
-                    deleted = True
-            if who in ("bot", "all") and not deleted:
-                if message.author.bot:
-                    await message.delete()
-                    deleted = True
-            if who in ("user", "all") and not deleted:
-                if message.content.startswith(f"{self.__config.BOT_PREFIX}"):
-                    await message.delete()
-                    deleted = True
-            if not deleted:
-                continue
-            c += 1
 
-            if c % 5 == 0:
-                await asyncio.sleep(1)
+            if should_delete(message):
+                to_delete.append(message)
 
-        if c == 0:
-            c = 1
+        if to_delete:
+            from datetime import datetime, timedelta, timezone
 
-        await ctx.send(embed=self.__embeds.CLEANED(limit, c-1, who, inspect_amount), delete_after=10)
+            two_weeks_ago = datetime.now(timezone.utc) - timedelta(days=14)
+
+            bulk_deletable = [m for m in to_delete if m.created_at > two_weeks_ago]
+            manual_deletable = [m for m in to_delete if m.created_at <= two_weeks_ago]
+
+            if bulk_deletable:
+                await ctx.channel.delete_messages(bulk_deletable, reason="b.clean")
+
+            if manual_deletable:
+                for i, msg in enumerate(manual_deletable):
+                    await msg.delete()
+                    if (i+1) % 5 == 0:
+                        await asyncio.sleep(1)
+
+        await ctx.send(embed=self.__embeds.CLEANED(limit, len(to_delete), who, inspect_amount), delete_after=10)
 
 def setup(bot):
     bot.add_cog(MiscCog(bot))
