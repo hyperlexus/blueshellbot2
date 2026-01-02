@@ -1,5 +1,5 @@
 import asyncio
-import os
+import shutil
 from typing import List
 from Config.Configs import BConfigs
 from yt_dlp import YoutubeDL, DownloadError
@@ -11,6 +11,9 @@ from Config.Exceptions import DownloadingError
 
 class Downloader:
     config = BConfigs()
+    # hihi raspberry pi
+    node_path = shutil.which('node') or "C:\\Program Files\\nodejs\\node.exe"
+    deno_path = shutil.which('deno') or "C:\\Users\\HyperLexus\\.deno\\bin\\deno.exe"
     __YDL_OPTIONS = {'format': 'bestaudio/best',
                      'default_search': 'auto',
                      'playliststart': 0,
@@ -27,7 +30,9 @@ class Downloader:
                          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                          'Accept-Language': 'en-US,en;q=0.9',
                          'Sec-Fetch-Mode': 'navigate',
-                     }
+                     },
+                     'js_runtimes': {'deno': {'args': deno_path}, 'node': {'args': deno_path}},
+                     'remote_components': ['ejs:github'],
                      }
     __YDL_OPTIONS_EXTRACT = {'format': 'bestaudio/best',
                              'default_search': 'auto',
@@ -63,7 +68,7 @@ class Downloader:
                                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                                        'Accept-Language': 'en-US,en;q=0.9',
                                        'Sec-Fetch-Mode': 'navigate',
-                                   }
+                                   },
                                    }
     __BASE_URL = 'https://www.youtube.com/watch?v={}'
 
