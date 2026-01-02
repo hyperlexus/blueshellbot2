@@ -37,7 +37,7 @@ class BConfigs(Singleton):
             self.COMMANDS_PATH = f'{Folder().rootFolder}{self.COMMANDS_FOLDER_NAME}'
             self.VC_TIMEOUT = int(os.getenv('VC_TIMEOUT', 300))
             self.CHANCE_SHOW_TEXT = int(os.getenv('CHANCE_SHOW_TEXT', 1))
-            self.MAX_PLAYLIST_LENGTH = int(os.getenv('MAX_PLAYLIST_LENGTH', 50))
+            self.MAX_PLAYLIST_LENGTH = int(os.getenv('MAX_PLAYLIST_LENGTH', 100))
             self.MAX_PLAYLIST_FORCED_LENGTH = int(os.getenv('MAX_PLAYLIST_FORCED_LENGTH', 5))
             self.MAX_SONGS_IN_PAGE = int(os.getenv('MAX_SONGS_IN_PAGE', 10))
             self.MAX_PRELOAD_SONGS = int(os.getenv('MAX_PRELOAD_SONGS', 15))

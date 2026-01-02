@@ -31,7 +31,7 @@ class Downloader:
                          'Accept-Language': 'en-US,en;q=0.9',
                          'Sec-Fetch-Mode': 'navigate',
                      },
-                     'js_runtimes': {'deno': {'args': deno_path}, 'node': {'args': deno_path}},
+                     'js_runtimes': {'deno': {'args': deno_path}, 'node': {'args': node_path}},
                      'remote_components': ['ejs:github'],
                      }
     __YDL_OPTIONS_EXTRACT = {'format': 'bestaudio/best',
