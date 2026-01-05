@@ -4,7 +4,7 @@ from datetime import datetime
 from mpmath import mp, mpf, exp
 from Music.BlueshellBot import BlueshellBot
 from Music.BlueshellBot import blueshell_entire_bot_startup_timestamp
-from discord import ApplicationContext, Option, OptionChoice
+from discord import ApplicationContext, Option
 from discord.ext.commands import slash_command, Cog
 from Config.Helper import Helper
 from Config.Embeds import BEmbeds
@@ -12,7 +12,6 @@ from Config.Colors import BColors
 from Config.Configs import BConfigs
 from Utils.Utils import Utils
 from Utils import rr_api
-from Utils.rr_api import get_room_by_id
 
 helper = Helper()
 

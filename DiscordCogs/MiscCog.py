@@ -1,5 +1,4 @@
 import asyncio
-from encodings.utf_7 import encode
 from random import random
 from Music.BlueshellBot import BlueshellBot
 from discord.ext.commands import Context, command, Cog
@@ -134,6 +133,16 @@ class MiscCog(Cog):
                         await asyncio.sleep(1)
 
         await ctx.send(embed=self.__embeds.CLEANED(limit, len(to_delete), who, inspect_amount), delete_after=10)
+
+    @command(name="blud", help=helper.HELP_BLUD)
+    async def blud(self, ctx: Context, *args):
+        await ctx.send("blud")
+
+    # this command only exists to generate a help function for it
+    @command(name='riichi_hand', help=helper.HELP_RIICHI, description=helper.HELP_RIICHI_LONG)
+    async def riichi_hand(self, ctx: Context):
+        await ctx.send("this command only exists to create a help function. please use the slash command with the same name")
+
 
 def setup(bot):
     bot.add_cog(MiscCog(bot))

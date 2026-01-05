@@ -38,9 +38,6 @@ class JapaneseCog(Cog):
             return
         pass
 
-    @command(name="blud")
-    async def blud(self, ctx: Context, *args):
-        await ctx.send("blud")
 
 def setup(bot):
     bot.add_cog(JapaneseCog(bot))

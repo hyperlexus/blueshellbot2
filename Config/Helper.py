@@ -62,6 +62,7 @@ class Helper(Singleton):
             self.HELP_FORCE_EMBED_LONG = (f'Run `{config.BOT_PREFIX}force_embed list` to display all available embeds.'
                                           f'Run `{config.BOT_PREFIX}force_embed <embed>` to show any embed. This command is admin only.')
             self.HELP_FEET = 'laal.'
+            self.HELP_BLUD = 'blud'
             self.HELP_FEET_LONG = 'Maggda loves feets and loves briar imagine he had brier feets aka YOU CANT PLURALS YOU CAKE SNAKE SKIBIDI SEVERUS SNAPE'
             self.HELP_CONVKANA = 'Converts kana into romaji or the other way around.'
             self.HELP_CONVKANA_LONG = (f'Converts between hiragana/katakana and romaji.\n'
@@ -98,10 +99,17 @@ class Helper(Singleton):
                                        f'Automatically uses complex type. Have fun maggda')
             self.HELP_PMUTE = 'Mutes pizza romani globally.'
             self.HELP_PHELP = 'Sends various help messages.'
-
-            # slash commands below
+            self.HELP_RIICHI = 'Makes an image out of a riichi hand string.'
+            self.HELP_RIICHI_LONG = ('Takes a string of a riichi hand as an input, and generates an image. The syntax is:\n'
+                                     'basically the same as on tenhou, input tiles by colour and then put a colour splitter.\n'
+                                     'like this: 444m345s888p would be a 4 pon of man, a 345 chi of sou and an 8 pon of pin.\n'
+                                     'you can also put a dora indicator like so: \'345!m\'. that would be a 5 with akadora.\n'
+                                     'lastly, the wind and dragon number codes are below, \'w\' is for winds and \'d\' for dragons.\n\n'
+                                     + """
+                                     colour codes: m = man, s = sou, p = pin, d = dragons, w = winds
+                                     dragon codes: 0 = white, 1 = green, 2 = red (reverse italy)
+                                     wind codes: 0 = east, 1 = south, 2 = west, 3 = north
+                                     dora indicator: !
+                                     """)
 
             self.SLASH_QUEUE_DESCRIPTION = f'Number of queue page, there are only {config.MAX_SONGS_IN_PAGE} songs by page'
-            self.SLASH_MOVE_HELP = 'Moves a song from position pos1 to pos2 in queue.'
-
-            self.SLASH_PINSERT = "Inserts a command into pizza romani"

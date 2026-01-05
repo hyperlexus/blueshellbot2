@@ -59,7 +59,7 @@ class MusicSlashCommands(Cog):
 
     @slash_command(name="queue", description=helper.HELP_QUEUE)
     async def queue(self, ctx: ApplicationContext,
-                    page_number: Option(int, helper.SLASH_QUEUE_DESCRIPTION, min_value=1, default=1)) -> None:
+                    page_number: Option(int, helper.HELP_QUEUE_LONG, min_value=1, default=1)) -> None:
         if not self.__bot.listingSlash:
             return
         try:
@@ -221,7 +221,7 @@ class MusicSlashCommands(Cog):
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
-    @slash_command(name='move_song', description=helper.SLASH_MOVE_HELP)
+    @slash_command(name='move_song', description=helper.HELP_MOVE)
     async def move(self, ctx: ApplicationContext,
                    from_pos: Option(int, "The position of song to move", min_value=1),
                    to_pos: Option(int, "The position to put the song, default 1", min_value=1, default=1)) -> None:

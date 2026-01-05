@@ -25,7 +25,7 @@ class ControlCog(Cog):
                       'reset', 'prev', 'history', 'volume'],
             'MOD': ['restart', 'ban', 'force_embed'],
             'JP': ['convkana', 'kanagame'],
-            'PIZZA': ['pinsert', 'plist', 'premove', 'pinfo', 'ptestcompiler']
+            'RANDOMSHIT': ['wahl', 'feet', 'blud']
         }
 
     @command(name="help", help=helper.HELP_HELP, description=helper.HELP_HELP_LONG, aliases=['h', 'hjälp'])
@@ -59,7 +59,7 @@ class ControlCog(Cog):
             help_misc = '🗿 `MISC`\n'
             help_mod = '🎩 `MOD`\n'
             help_jp = '🇯🇵 `JP`\n'
-            help_pizza = '🍕 `PIZZA`\n'
+            help_pizza = '🥀 `random shit xd`\n'
 
             for cmd in self.__bot.commands:
                 if cmd.name in self.__commands['MUSIC']:
@@ -71,7 +71,7 @@ class ControlCog(Cog):
                 elif cmd.name in self.__commands['JP']:
                     help_jp += f'**{cmd}** - {cmd.help}\n'
 
-                elif cmd.name in self.__commands['PIZZA']:
+                elif cmd.name in self.__commands['RANDOMSHIT']:
                     help_pizza += f'**{cmd}** - {cmd.help}\n'
 
                 else:

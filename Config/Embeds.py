@@ -1,4 +1,5 @@
 import math
+from pydoc import describe
 from random import random
 from datetime import timedelta
 from discord import Embed
@@ -748,5 +749,20 @@ class BEmbeds:
             title=f"bei {geld} geld mit {rate}% rate zahlen Sie {zinsen}% zinsen und rückzahlen Sie {betrag} geld",
             description=f"```~tradeoffer <@1317900136327680070> you_get: contract: perc: {rate}%; limit: {betrag} I_get: money: {geld}```",
             color=self.__colors.BLUE
+        )
+        return embed
+
+    def RIICHI_HAND_EMBED(self):
+        embed = Embed(
+            title=f"Your riichi hand:",
+            color=self.__colors.BLUE
+        )
+        return embed
+
+    def RIICHI_HAND_ERROR(self, error_message):
+        embed = Embed(
+            title=f"There was an error displaying your riichi hand.",
+            description=error_message,
+            color=self.__colors.RED
         )
         return embed
