@@ -20,7 +20,7 @@ class MahjongCog(Cog):
         self.__config = BConfigs()
 
     @slash_command(name="riichi_hand", description="takes a custom input and makes a riichi hand with it. check b.help riichi_hand for more info")
-    async def riichi_hand(self, ctx: ApplicationContext, hand: Option(str, "input your hand string here. no spaces and no commas!")):
+    async def riichi_hand(self, ctx: ApplicationContext, hand: Option(str, "input your hand string here. no spaces and no commas! wgr123, eswn1234")):
         try:
             image_bytes = get_tiles_from_hand_string(hand)
         except RiichiError as error:
@@ -34,6 +34,7 @@ class MahjongCog(Cog):
         embed.set_image(url=f"attachment://{filename}")
 
         await ctx.respond(file=discord_file, embed=embed)
+        return
 
 
 def setup(bot):

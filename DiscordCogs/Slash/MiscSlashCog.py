@@ -25,6 +25,7 @@ class MiscSlashCog(Cog):
     @slash_command(name='uptime', description="get time since last restart")
     async def uptime(self, ctx: ApplicationContext) -> None:
         await ctx.respond(embed=self.__embeds.UPTIME(str(datetime.now() - blueshell_entire_bot_startup_timestamp)[:-7]))
+        return
 
     @slash_command(name='festgelegte_vertrege', description='vertrag mit der bank ausrechnen')
     async def vertrege(self, ctx: ApplicationContext,
@@ -155,6 +156,7 @@ class MiscSlashCog(Cog):
     async def good_rooms(self, ctx: ApplicationContext):
         vr_data = rr_api.readable_average_vr(rr_api.calculate_average_vr())
         await ctx.respond(vr_data)
+        return
 
     @slash_command(name='join_best_room', description='provides all fcs of the best room with open host on')
     async def join_best_room(self, ctx: ApplicationContext):

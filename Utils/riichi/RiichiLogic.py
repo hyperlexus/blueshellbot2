@@ -3,8 +3,8 @@ from Utils.riichi import PictureCombiner
 
 """
 colour codes: m = man, s = sou, p = pin, d = dragons, w = winds
-dragon codes: 0 = white, 1 = green, 2 = red (reverse italy)
-wind codes: 0 = east, 1 = south, 2 = west, 3 = north
+dragon codes: 1 = white, 2 = green, 3 = red (reverse italy)
+wind codes: 1 = east, 2 = south, 3 = west, 4 = north
 dora indicator: !
 """
 
