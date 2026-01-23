@@ -21,6 +21,7 @@ class MahjongCog(Cog):
 
     @slash_command(name="riichi_hand", description="takes a custom input and makes a riichi hand with it. check b.help riichi_hand for more info")
     async def riichi_hand(self, ctx: ApplicationContext, hand: Option(str, "input your hand string here. no spaces and no commas! wgr123, eswn1234")):
+        # todo sort hand option
         try:
             image_bytes = get_tiles_from_hand_string(hand)
         except RiichiError as error:

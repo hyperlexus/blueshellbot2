@@ -18,6 +18,7 @@ from Handlers.StopHandler import StopHandler
 from Handlers.ResumeHandler import ResumeHandler
 from Handlers.LoopHandler import LoopHandler
 from Handlers.QueueHandler import QueueHandler
+from Handlers.ShuffleHandler import ShuffleHandler
 
 
 class ProcessCommandsExecutor:
@@ -49,7 +50,7 @@ class ProcessCommandsExecutor:
         message = await channel.send(embed=embed, view=view)
         await cls.MSG_MANAGER.addMessageAndClearPrevious(guild.id, MessagesCategory.NOW_PLAYING, message, view)
 
-        # Set in the view the message witch contains the view
+        # Set in the view the message which contains the view
         view.set_message(message=message)
 
     @classmethod
@@ -71,14 +72,14 @@ class ProcessCommandsExecutor:
                                                textChannel, guildID, MessagesCategory.PLAYER, "Stop"),
                                  HandlerButton(bot, SkipHandler, cls.EMOJIS.SKIP,
                                                textChannel, guildID, MessagesCategory.PLAYER, "Skip"),
-                                 HandlerButton(bot, QueueHandler, cls.EMOJIS.QUEUE,
-                                               textChannel, guildID, MessagesCategory.QUEUE, "Queue"),
+                                 HandlerButton(bot, ShuffleHandler, cls.EMOJIS.SHUFFLE,  # todo this doesnt work xD
+                                               textChannel, guildID, MessagesCategory.PLAYER, "Shuffle"),
                                  HandlerButton(bot, LoopHandler, cls.EMOJIS.LOOP_ONE,
                                                textChannel, guildID, MessagesCategory.LOOP, "Loop One", 'One'),
-                                 HandlerButton(bot, LoopHandler, cls.EMOJIS.LOOP_OFF,
-                                               textChannel, guildID, MessagesCategory.LOOP, "Loop Off", 'Off'),
                                  HandlerButton(bot, LoopHandler, cls.EMOJIS.LOOP_ALL,
-                                               textChannel, guildID, MessagesCategory.LOOP, "Loop All", 'All')]
+                                               textChannel, guildID, MessagesCategory.LOOP, "Loop All", 'All'),
+                                 HandlerButton(bot, LoopHandler, cls.EMOJIS.LOOP_OFF,
+                                               textChannel, guildID, MessagesCategory.LOOP, "Loop Off", 'Off')]
 
         return buttons
 

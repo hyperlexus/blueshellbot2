@@ -50,8 +50,6 @@ class RiichiUtils:
                     raise RiichiError(f"there are only a maximum of 4 copies of a tile.")
                 elif count == 4:
                     kan_amount += 1
-        if kan_amount > 3:
-            raise RiichiError(f"Four Quads Draw triggered, you cannot have four or more kans in your hand or you will end the game.")
         return kan_amount
 
     @classmethod
@@ -106,9 +104,9 @@ class RiichiUtils:
             if k in ("d", "w") and "!" in "".join(v):
                 raise RiichiError(f"there can be no red dora tiles for dragons or winds!")
             if k == "d" and not all(int(x) <= 3 for x in v):
-                raise RiichiError(f"there are no dragon tiles higher than 2.")
+                raise RiichiError(f"there are no dragon tiles higher than 3.")
             if k == "w" and not all(int(x) <= 4 for x in v):
-                raise RiichiError(f"there are no wind tiles higher than 3.")
+                raise RiichiError(f"there are no wind tiles higher than 4.")
             for n in cls.numbers:
                 if v.count(n) > 4:
                     raise RiichiError(f"there are only a maximum of 4 copies of a tile. problem: \"{n*v.count(n)+k}\" (this is a failsafe and should never happen)")
@@ -156,6 +154,12 @@ class RiichiUtils:
             link_list.append(base_link.format(tile))
         return link_list
 
+    @classmethod
+    def sort_hand_tiles(cls, hand_tiles: dict) -> dict:
+        copy_dict = copy.deepcopy(hand_tiles)
+        for k, v in copy_dict.items():
+            copy_dict[k] = sorted(v)
+        return copy_dict
 
 class RiichiError(Exception):
     pass
