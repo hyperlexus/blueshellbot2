@@ -5,10 +5,10 @@ responses are normal text and do not need to be put into quotes. there are howev
 to use replace effectively, make sure that the thing to replace is checked for in the read part, else nothing will be replaced. replacing is also case **in**sensitive.
 
 there is also a random keyword:
-`[random\result_a-weight_a\result_b\weight_b]`, like `[random\apple-4\pear-5]`, which gives apple 44.4% of the time and pear 55.6% of the time
+`[random\result_a-weight_a\result_b-weight_b]`, like `[random\apple-4\pear-5]`, which gives apple 44.4% of the time and pear 55.6% of the time
 -# furthermore, this lets you compare apples with pears.
 
-random and replace can also be chained:
+random and replace can also be chained together, but random itself cannot (since it doesn't make sense):
 `[replace\your mom\[random\your dad-99\ambatakamoooooimbatakaaaaaaaam-1]]`
 
 have fun!

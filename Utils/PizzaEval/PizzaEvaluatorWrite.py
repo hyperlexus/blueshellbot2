@@ -14,6 +14,8 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
         elif block == "message":
             return original_message
         elif block.startswith("random\\"):
+            if block.count("random") > 1:
+                raise PizzaError({'c': 1104, 'e': block})
             options = block[7:].split('\\')
             weighted_options = {}
             for option in options:
@@ -102,23 +104,33 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
         segments = []
         current_segment = ""
         in_quotes = False
+        block_statement_level = 0
         i = 0
         while i < len(content):
             char = content[i]
-            if char == "\\" and not in_quotes:
+            if char == "\\" and not in_quotes and block_statement_level == 0:
                 segments.append(current_segment)
                 current_segment = ""
             elif char == "'":
                 in_quotes = not in_quotes
                 current_segment += char
+            elif char == "[" and not in_quotes:
+                block_statement_level += 1
+                current_segment += char
+            elif char == "]" and not in_quotes:
+                current_segment += char
+                if block_statement_level == 1:
+                    segments.append(current_segment)
+                    block_statement_level = 0
+                else:
+                    block_statement_level -= 1
             else:
                 current_segment += char
             i += 1
 
         segments.append(current_segment)
-        if len(segments) != 3:
-            print(segments)
-            raise PizzaError({'c': 1207, 'e': write_result})
+        if "[" in segments[1]:
+            segments[1] = parse_one_replace(segments[1])
 
         return segments[1], segments[2]
 
@@ -131,6 +143,8 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
                 result += pizza_eval_write(author_name, original_message, i)
                 continue
             stringa, stringb = parse_one_replace(i)
+            if stringb.startswith("[replace"):
+                raise PizzaError({'c': 1207, 'e': stringb})
             processed_stringb = process_replace_block(stringb)
             if stringa.lower() in original_message.lower():
                 result += re.sub(stringa, processed_stringb, original_message, flags=re.IGNORECASE)
@@ -172,3 +186,7 @@ def pizza_eval_write(author_name: str, original_message: str, write_result: str)
 
     return result
 
+if __name__ == "__main__":
+    for i in range(5):
+        spast = pizza_eval_write("hyperlexus", "up", "'[replace\\up\\[random\\down-3\\strange-2\\charm-2\\bottom-1\\top-1]]")
+        print(spast)

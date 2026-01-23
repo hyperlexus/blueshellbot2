@@ -104,24 +104,36 @@ def is_valid_replace_statement(replace_statement: str):
     if not replace_statement.startswith("[replace\\") or not replace_statement.endswith("]"):
         raise PizzaError({'c': 1201, 'e': replace_statement})
 
-    if replace_statement.count("\\") != 2:
-        raise PizzaError({'c': 1205, 'e': replace_statement})
-
     if replace_statement.count("'") % 2:
         raise PizzaError({'c': 1204, 'e': replace_statement})
 
     inquotes = False
     openbracketcount, closebracketcount = 0, 0
+    bracket_level = 0
+    backslashcount = 0
+    checked_valid_stringb_block = False  # (for performance)
     for i in replace_statement:
         if i == "'":
             inquotes = not inquotes
         elif not inquotes:
+            if i == "\\" and bracket_level == 1:
+                backslashcount += 1
             if i == "[":
                 openbracketcount += 1
+                bracket_level += 1
             elif i == "]":
                 closebracketcount += 1
+                bracket_level -= 1
+            if backslashcount == 2 and not checked_valid_stringb_block:  # valid block but not random
+                stringb_to_check = replace_statement.split("\\")[2]
+                if stringb_to_check.startswith("[") and not stringb_to_check.startswith("[random"):
+                    raise PizzaError({'c': 1208, 'e': replace_statement})
+                checked_valid_stringb_block = True
 
-    if openbracketcount != closebracketcount:
+    if backslashcount != 2:
+        raise PizzaError({'c': 1205, 'e': replace_statement})
+
+    if openbracketcount != closebracketcount or bracket_level != 0:
         raise PizzaError({'c': 1202, 'e': replace_statement})
 
     return True
