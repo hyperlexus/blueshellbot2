@@ -14,8 +14,8 @@ from UI.PizzaViews import PizzaUndoView, PizzaSingleResultView
 from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
 from Utils.PizzaEval.PizzaEvaluatorWrite import pizza_eval_write
-from Utils.PizzaEval.BoolDiscordFormatting import evaluate_discord_timestamp
-from Utils.Utils import Utils, config
+from Utils.BoolDiscordFormatting import evaluate_discord_timestamp
+from Utils.Utils import Utils
 
 helper = Helper()
 
