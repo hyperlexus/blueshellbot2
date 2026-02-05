@@ -10,6 +10,7 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
+from UI.PizzaViews import PizzaUndoView, PizzaSingleResultView
 from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
 from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
 from Utils.PizzaEval.PizzaEvaluatorWrite import pizza_eval_write
@@ -118,7 +119,16 @@ class PizzaSlashCog(Cog):
         with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
 
-        await ctx.respond(embed=self.__embeds.PIZZA_INSERTED(read, write, time))
+        view = PizzaUndoView(
+            command_id=time,
+            data_ref=data,
+            author_ref=author,
+            config_path=self.__config.PROJECT_PATH,
+            embeds_ref=self.__embeds
+        )
+
+        await ctx.respond(embed=self.__embeds.PIZZA_INSERTED(read, write, time),
+                          view=view)
         return
 
     @slash_command(name="plist", description=helper.HELP_PLIST)
@@ -140,11 +150,13 @@ class PizzaSlashCog(Cog):
             await ctx.respond(embed=self.__embeds.BANNED())
             return
         await ctx.defer()
+        author = str(ctx.interaction.user.id)
 
         if bool(filter_category) ^ bool(string_to_match):  # first ever use of xor recorded in humanity
             await ctx.respond(embed=self.__embeds.SLASH_PLIST_NOT_BOTH_OPTIONS())
 
         command_list = []
+        button_list = []
         if page:
             page = page - 1 if page > 0 else 1
 
@@ -166,6 +178,7 @@ class PizzaSlashCog(Cog):
                 elif string_to_match in current_dict[filter_category]:
                     add_command = True
             if add_command:
+                button_list.append(current_dict)
                 if len(current_dict['write']) > 2000 or len(current_dict['read']) > 2000:
                     command_list.append(
                         f"{current_dict['time']}: this command is longer than 2k characters, so it won't be included. it's probably the wahlkommission command.")
@@ -194,10 +207,20 @@ class PizzaSlashCog(Cog):
                     longest = i if len(i) > len(longest) else longest
                 result = f"command list was too long. length was {len(result)}.\nlongest command (first 1k characters):\n{longest[:1000]}"
 
+        view = None
+        if len(button_list) == 1:
+            view = PizzaSingleResultView(
+                command_dict=button_list[0],
+                bot=self.__bot,
+                data_ref=data,
+                embeds_ref=self.__embeds,
+                author_ref=author
+            )
+
         if not filter_category:
-            await ctx.respond(embed=self.__embeds.PIZZA_LIST(result))
+            await ctx.respond(embed=self.__embeds.PIZZA_LIST(result), view=view)
         else:
-            await ctx.respond(embed=self.__embeds.PIZZA_LIST_FILTERED(result, filter_category, string_to_match))
+            await ctx.respond(embed=self.__embeds.PIZZA_LIST_FILTERED(result, filter_category, string_to_match), view=view)
         return
 
     @slash_command(name="pinfo", description=helper.HELP_PINFO)
