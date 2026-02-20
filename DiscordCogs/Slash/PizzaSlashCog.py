@@ -1,6 +1,8 @@
 import json
 import math
 import random
+from collections import deque
+
 import discord
 
 from Music.BlueshellBot import BlueshellBot
@@ -22,9 +24,6 @@ helper = Helper()
 with open("database.json", "r") as f:
     data = json.load(f)
 
-last_10_messages = []
-is_muted = False
-
 
 class PizzaSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
@@ -32,50 +31,47 @@ class PizzaSlashCog(Cog):
         self.__embeds = BEmbeds()
         self.__colors = BColors()
         self.__config = BConfigs()
+        self.is_muted = False
+        self.last_10_messages = deque(maxlen=10)
 
     @Cog.listener()
     async def on_message(self, message):
-        global is_muted
-        global last_10_messages
         if self.__bot.voice_clients:
             return
-        if is_muted or message.author == self.__bot.user or not message.content:
+        if self.is_muted or message.author == self.__bot.user or not message.content:
             return
-        ctx = await self.__bot.get_context(message)
-
         if "nopizza" in (str(message.channel.topic) if isinstance(message.channel, discord.TextChannel) else ""):
             return
 
         pizza_messages = []
+        is_a_dm = message.guild is None
+        is_okay_server = (not is_a_dm and message.guild.id == self.__config.PIZZA_SERVER and any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles))
+        if not (is_a_dm or is_okay_server):
+            return
         for current_dict in data['p_commands']:
-            if_send = False
             try:
-                if_send = pizza_eval_read(current_dict['read'], message.content)
+                if not pizza_eval_read(current_dict['read'], message.content):
+                    continue
+
+                if "[replace\\" in current_dict['write'] and len(message.content) > 50:
+                    continue
+                pizza_messages.append(pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write']))
             except PizzaEvalUtils.PizzaError as e:
+                ctx = await self.__bot.get_context(message)
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
-            if if_send and (message.guild is None or (message.guild.id == self.__config.PIZZA_SERVER and any(
-                    role.id == self.__config.PIZZA_ROLE for role in message.author.roles))):
-                try:
-                    if "[replace\\" in current_dict['write'] and len(message.content) > 50:
-                        continue
-                    pizza_messages.append(
-                        pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write']))
-
-                except PizzaEvalUtils.PizzaError as e:
-                    details = e.args[0]
-                    await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
-
         if not pizza_messages:
             return
-        to_send = random.choice(pizza_messages)
-        if to_send in last_10_messages:
+
+        # 過去10件にないメッセージを選んで送ってください。
+        possible = [m for m in pizza_messages if m not in self.last_10_messages]
+        if not possible:
             return
-        last_10_messages.append(to_send)
-        if len(last_10_messages) == 11:
-            last_10_messages.pop(0)
-        await message.channel.send(to_send) if to_send else await message.channel.send("\u2800")
+        to_send = random.choice(possible)
+        self.last_10_messages.append(to_send)
+        content = to_send if to_send else "\u2800"
+        await message.channel.send(content)
         return
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
@@ -313,14 +309,13 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="pmute", description=helper.HELP_PMUTE)
     async def pmute(self, ctx: ApplicationContext):
-        global is_muted
         bot_admins = self.__config.BOT_ADMINS.split(",")
         print(bot_admins, ctx.interaction.user.id)
         if str(ctx.interaction.user.id) not in bot_admins:
             await ctx.respond("You must be a bot admin to mute/unmute pizza romani!")
             return
-        is_muted = not is_muted
-        if is_muted:
+        self.is_muted = not self.is_muted
+        if self.is_muted:
             await ctx.respond("Pizza Romani has been muted. :( Please unmute him soon or he will be sad.")
         else:
             await ctx.respond("Hooray, Pizza Romani is able to participate in conversation again! Yippie.")
