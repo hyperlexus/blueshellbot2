@@ -1,10 +1,14 @@
 import asyncio
+import json
 import math
+import os
+import time
 from datetime import datetime
 from mpmath import mp, mpf, exp
 from Music.BlueshellBot import BlueshellBot
 from Music.BlueshellBot import blueshell_entire_bot_startup_timestamp
-from discord import ApplicationContext, Option
+from discord import ApplicationContext, Option, Member
+from discord.ext import tasks
 from discord.ext.commands import slash_command, Cog
 from Config.Helper import Helper
 from Config.Embeds import BEmbeds
@@ -15,17 +19,60 @@ from Utils import rr_api
 
 helper = Helper()
 
+def save_alerts(alerts_list):
+    file_path = "alerts.json"
+    with open(file_path, "w") as f:
+        json.dump(alerts_list, f, indent=4)
+
+def get_alerts():
+    file_path = "alerts.json"
+    if not os.path.exists(file_path):
+        return []
+    with open(file_path, "r") as f:
+        return json.load(f)
+
+
 class MiscSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
         self.__bot: BlueshellBot = bot
         self.__embeds = BEmbeds()
         self.__colors = BColors()
         self.__config = BConfigs()
+        self.check_alerts.start()
 
     @slash_command(name='uptime', description="get time since last restart")
     async def uptime(self, ctx: ApplicationContext) -> None:
         await ctx.respond(embed=self.__embeds.UPTIME(str(datetime.now() - blueshell_entire_bot_startup_timestamp)[:-7]))
         return
+
+    @slash_command(name='alert', description="set a reminder for yourself or others")
+    async def alert(self, ctx: ApplicationContext, time_input: str = Option(description="time (10m, 1h, t20:00, etc.)",),
+                    message: str = Option(description="alert description"),
+                    target_user: Member = Option(Member, description="target user", default=None)):
+        await ctx.defer()
+
+        time_str = Utils.seconds_until(time_input[1:]) if time_input.startswith('t') else time_input
+        seconds = Utils.convert_to_s(time_str)
+
+        if seconds is None:
+            return await ctx.respond(embed=self.__embeds.BAD_ALERT(time_input))
+
+        send_at = time.time() + seconds
+        target_id = target_user.id if target_user else ctx.author.id
+
+        alerts = get_alerts()
+        alerts.append({
+            "user_id": target_id,
+            "author_id": ctx.author.id,
+            "channel_id": ctx.channel_id,
+            "text": message,
+            "send_at": send_at,
+            "original_time": time_str
+        })
+        save_alerts(alerts)
+
+        return await ctx.respond(embed=self.__embeds.ALERT_SET(time_str))
+
 
     @slash_command(name='festgelegte_vertrege', description='vertrag mit der bank ausrechnen')
     async def vertrege(self, ctx: ApplicationContext,
@@ -243,6 +290,42 @@ class MiscSlashCog(Cog):
         await ctx.respond("messages cleaned.")
         return
 
+    @tasks.loop(seconds=10)
+    async def check_alerts(self):
+        now = time.time()
+        alerts = get_alerts()
+        if not alerts: return
+
+        updated_alerts = []
+        if_sent_alerts = False
+
+        for alert in alerts:
+            print(now - alert['send_at'])
+            if now >= alert['send_at']:
+                if_sent_alerts = True
+                channel = self.__bot.get_channel(alert['channel_id'])
+
+                if channel:
+                    mention = f"<@{alert['user_id']}>"
+                    other_user = alert['user_id'] != alert['author_id']
+                    embed = self.__embeds.ALERT_DONE(
+                        time_str=alert['original_time'],
+                        message=alert['text'],
+                    )
+                    try:
+                        await channel.send(content=mention, embed=embed)
+                    except:
+                        pass  # leel, maybe she was right and i really shouldn't code
+
+            else:
+                updated_alerts.append(alert)
+
+        if if_sent_alerts:
+            save_alerts(updated_alerts)
+
+    @check_alerts.before_loop
+    async def before_check_alerts(self):
+        await self.__bot.wait_until_ready()
 
 def setup(bot):
     bot.add_cog(MiscSlashCog(bot))

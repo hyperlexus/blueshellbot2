@@ -29,6 +29,9 @@ this .env file also has to be included when you build the docker image.\
 if you use a web portal instead of docker desktop to run the image, you have to pass the variables one by one.\
 if you do that, i recommend changing the default values so you have to pass less variables manually :)
 
+you should clear alerts.json, database.json and banlist.txt,
+i commit these because i have to transfer between my raspberry and my pc when coding
+
 ### known issues and other small bits:
 1. ~~if someone runs `b.alert "`, the bot returns an error. why this happens is sorta known but
 it's sort of a running gag among my friends to make it produce a 🥶 emoji this easily, so i didnt fix it yet~~
@@ -46,5 +49,8 @@ The reason I'm adding this is that new commands will automatically be added to t
     &ensp;&ensp;&ensp;- The user has the role defined in the config<br>
     &ensp;&ensp;&ensp;- The user is sending a dm (currently broken)
 7. "Pizza Romani"'s compiler and syntax is a little finnicky.
+8. you need a cookies.txt for the music functions to work. you can google how to get this (i forgot)
+9. you have to additionally point the script to your deno/node path (should work automatically)
 
-Enjoy! :D
+Enjoy! :D\
+credits to cyna for some help.
