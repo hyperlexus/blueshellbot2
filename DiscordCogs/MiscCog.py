@@ -42,32 +42,33 @@ class MiscCog(Cog):
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
+        await ctx.send("this command has been decommissioned. please use /alert!")
+        async def decommissioned():
+            other_user, text = False, None
+            if args:
+                text = " ".join(args[1:]) if len(args) > 1 else None
+                user_id = Utils.ping_to_id(args[0])
+                if not user_id:
+                    await ctx.send(embed=self.__embeds.BAD_USER_ID(args[0]))
+                    return
+                if user_id != args[0]:
+                    other_user = True
 
-        other_user, text = False, None
-        if args:
-            text = " ".join(args[1:]) if len(args) > 1 else None
-            user_id = Utils.ping_to_id(args[0])
-            if not user_id:
-                await ctx.send(embed=self.__embeds.BAD_USER_ID(args[0]))
+            new_time_str = Utils.seconds_until(time_str[1:]) if time_str.startswith('t') else time_str
+            seconds = Utils.convert_to_s(new_time_str)
+            if seconds is None:
+                await ctx.send(embed=self.__embeds.BAD_ALERT(time_str))
                 return
-            if user_id != args[0]:
-                other_user = True
 
-        new_time_str = Utils.seconds_until(time_str[1:]) if time_str.startswith('t') else time_str
-        seconds = Utils.convert_to_s(new_time_str)
-        if seconds is None:
-            await ctx.send(embed=self.__embeds.BAD_ALERT(time_str))
-            return
+            await ctx.send(embed=self.__embeds.ALERT_SET(new_time_str))
 
-        await ctx.send(embed=self.__embeds.ALERT_SET(new_time_str))
+            await asyncio.sleep(seconds)
 
-        await asyncio.sleep(seconds)
-
-        if other_user:
-            await ctx.send(f'<@{user_id}>')
-            await ctx.send(embed=self.__embeds.ALERT_DONE(new_time_str, text or "", other_user))
-        else:
-            await ctx.reply(embed=self.__embeds.ALERT_DONE(new_time_str, text or "", other_user))
+            if other_user:
+                await ctx.send(f'<@{user_id}>')
+                await ctx.send(embed=self.__embeds.ALERT_DONE(new_time_str, text or "", other_user))
+            else:
+                await ctx.reply(embed=self.__embeds.ALERT_DONE(new_time_str, text or "", other_user))
 
     @command(name='feet', help=helper.HELP_FEET, description=helper.HELP_FEET_LONG)
     async def feet(self, ctx: Context) -> None:
@@ -78,61 +79,64 @@ class MiscCog(Cog):
         if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
             await ctx.send(embed=self.__embeds.BANNED())
             return
-        limit = 20
-        who = "all"
-        valid_targets = ("all", "bot", "user", "saul", "any")
-        if args:
-            for arg in args:
-                if arg.isdigit():
-                    limit = int(arg)
-                elif arg.lower() in valid_targets:
-                    who = arg.lower()
-                else:
-                    await ctx.send(embed=self.__embeds.BAD_CLEAN_INPUT(arg))
+        await ctx.send("this command has been decommissioned. please use /clean!")
+        return
+        async def decommissioned():
+            limit = 20
+            who = "all"
+            valid_targets = ("all", "bot", "user", "saul", "any")
+            if args:
+                for arg in args:
+                    if arg.isdigit():
+                        limit = int(arg)
+                    elif arg.lower() in valid_targets:
+                        who = arg.lower()
+                    else:
+                        await ctx.send(embed=self.__embeds.BAD_CLEAN_INPUT(arg))
 
-        if limit > self.__config.CLEAN_AMOUNT:
-            await ctx.send(embed=self.__embeds.TOO_MANY_CLEAN_QUERIES(limit))
-            return
+            if limit > self.__config.CLEAN_AMOUNT:
+                await ctx.send(embed=self.__embeds.TOO_MANY_CLEAN_QUERIES(limit))
+                return
 
-        def should_delete(msg_to_delete):
-            if who == "any":
-                return True
-            if who == "saul" and message.author.id == 1012755944846938163:
-                return True
-            if who in ("bot", "all") and message.author.id == ctx.bot.user.id:
-                return True
-            if who in ("user", "all") and msg_to_delete.content.startswith(self.__config.BOT_PREFIX):
-                return True
-            return False
+            def should_delete(msg_to_delete):
+                if who == "any":
+                    return True
+                if who == "saul" and message.author.id == 1012755944846938163:
+                    return True
+                if who in ("bot", "all") and message.author.id == ctx.bot.user.id:
+                    return True
+                if who in ("user", "all") and msg_to_delete.content.startswith(self.__config.BOT_PREFIX):
+                    return True
+                return False
 
-        inspect_amount = limit if who == "any" else self.__config.CLEAN_AMOUNT
-        to_delete: list = []
+            inspect_amount = limit if who == "any" else self.__config.CLEAN_AMOUNT
+            to_delete: list = []
 
-        async for message in ctx.channel.history(limit=inspect_amount):
-            if len(to_delete) >= limit:
-                break
+            async for message in ctx.channel.history(limit=inspect_amount):
+                if len(to_delete) >= limit:
+                    break
 
-            if should_delete(message):
-                to_delete.append(message)
+                if should_delete(message):
+                    to_delete.append(message)
 
-        if to_delete:
-            from datetime import datetime, timedelta, timezone
+            if to_delete:
+                from datetime import datetime, timedelta, timezone
 
-            two_weeks_ago = datetime.now(timezone.utc) - timedelta(days=14)
+                two_weeks_ago = datetime.now(timezone.utc) - timedelta(days=14)
 
-            bulk_deletable = [m for m in to_delete if m.created_at > two_weeks_ago]
-            manual_deletable = [m for m in to_delete if m.created_at <= two_weeks_ago]
+                bulk_deletable = [m for m in to_delete if m.created_at > two_weeks_ago]
+                manual_deletable = [m for m in to_delete if m.created_at <= two_weeks_ago]
 
-            if bulk_deletable:
-                await ctx.channel.delete_messages(bulk_deletable, reason="b.clean")
+                if bulk_deletable:
+                    await ctx.channel.delete_messages(bulk_deletable, reason="b.clean")
 
-            if manual_deletable:
-                for i, msg in enumerate(manual_deletable):
-                    await msg.delete()
-                    if (i+1) % 5 == 0:
-                        await asyncio.sleep(1)
+                if manual_deletable:
+                    for i, msg in enumerate(manual_deletable):
+                        await msg.delete()
+                        if (i+1) % 5 == 0:
+                            await asyncio.sleep(1)
 
-        await ctx.send(embed=self.__embeds.CLEANED(limit, len(to_delete), who, inspect_amount), delete_after=10)
+            await ctx.send(embed=self.__embeds.CLEANED(limit, len(to_delete), who, inspect_amount), delete_after=10)
 
     @command(name="blud", help=helper.HELP_BLUD)
     async def blud(self, ctx: Context, *args):
