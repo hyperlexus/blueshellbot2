@@ -1,6 +1,7 @@
 import json
 import math
 import random
+from collections import deque
 import discord
 
 from Music.BlueshellBot import BlueshellBot
@@ -22,9 +23,6 @@ helper = Helper()
 with open("database.json", "r") as f:
     data = json.load(f)
 
-last_10_messages = []
-is_muted = False
-
 
 class PizzaSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
@@ -32,56 +30,53 @@ class PizzaSlashCog(Cog):
         self.__embeds = BEmbeds()
         self.__colors = BColors()
         self.__config = BConfigs()
+        self.is_muted = False
+        self.last_10_messages = deque(maxlen=10)
 
     @Cog.listener()
     async def on_message(self, message):
-        global is_muted
-        global last_10_messages
         if self.__bot.voice_clients:
             return
-        if is_muted or message.author == self.__bot.user or not message.content:
+        if self.is_muted or message.author == self.__bot.user or not message.content:
             return
-        ctx = await self.__bot.get_context(message)
-
         if "nopizza" in (str(message.channel.topic) if isinstance(message.channel, discord.TextChannel) else ""):
             return
 
         pizza_messages = []
+        is_a_dm = message.guild is None
+        is_okay_server = (not is_a_dm and message.guild.id == self.__config.PIZZA_SERVER and any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles))
+        if not (is_a_dm or is_okay_server):
+            return
         for current_dict in data['p_commands']:
-            if_send = False
             try:
-                if_send = pizza_eval_read(current_dict['read'], message.content)
+                if not pizza_eval_read(current_dict['read'], message.content):
+                    continue
+
+                if "[replace\\" in current_dict['write'] and len(message.content) > 50:
+                    continue
+                pizza_messages.append(pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write']))
             except PizzaEvalUtils.PizzaError as e:
+                ctx = await self.__bot.get_context(message)
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
-            if if_send and (message.guild is None or (message.guild.id == self.__config.PIZZA_SERVER and any(
-                    role.id == self.__config.PIZZA_ROLE for role in message.author.roles))):
-                try:
-                    if "[replace\\" in current_dict['write'] and len(message.content) > 50:
-                        continue
-                    pizza_messages.append(
-                        pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write']))
-
-                except PizzaEvalUtils.PizzaError as e:
-                    details = e.args[0]
-                    await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
-
         if not pizza_messages:
             return
-        to_send = random.choice(pizza_messages)
-        if to_send in last_10_messages:
+
+        # 過去10件にないメッセージを選んで送ってください。
+        possible = [m for m in pizza_messages if m not in self.last_10_messages]
+        if not possible:
             return
-        last_10_messages.append(to_send)
-        if len(last_10_messages) == 11:
-            last_10_messages.pop(0)
-        await message.channel.send(to_send) if to_send else await message.channel.send("\u2800")
+        to_send = random.choice(possible)
+        self.last_10_messages.append(to_send)
+        content = to_send if to_send else "\u2800"
+        await message.channel.send(content)
         return
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
     async def pinsert(self, ctx: ApplicationContext,
-                      read: Option(str, "The string to match. The compiler works on this one"),
-                      write: Option(str, "What pizza romani responds with. The [] syntax goes here")):
+                      read: str = Option(str, "The string to match. The compiler works on this one"),
+                      write: str = Option(str, "What pizza romani responds with. The [] syntax goes here")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -133,99 +128,86 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="plist", description=helper.HELP_PLIST)
     async def plist(self, ctx: ApplicationContext,
-                    filter_category: Option(str, choices=[
+                    filter_category: str = Option(str, choices=[
                         OptionChoice(name='time', value='time'),
                         OptionChoice(name='author', value='author'),
                         OptionChoice(name='read', value='read'),
                         OptionChoice(name='write', value='write')],
-                                            description="What type to filter by. Requires string_to_match to be passed as well.") = None,
-                    string_to_match: Option(str,
-                                            "String to filter by. Requires command_filter to be passed as well.") = None,
-                    page: Option(int,
-                                 "which page of list to show. may be required if output is longer than 25 lines") = None
+                                            description="What type to filter by. Requires string_to_match to be passed as well.",
+                                            default=None),
+                    string_to_match: str = Option(str,
+                                            "String to filter by. Requires command_filter to be passed as well.", default=None),
+                    page: int = Option(int,
+                                 "which page of list to show. may be required if output is longer than 25 lines", default=None)
                     ):
-        if not self.__bot.listingSlash:
-            return
+        if not self.__bot.listingSlash: return None
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            await ctx.respond(embed=self.__embeds.BANNED())
-            return
-        await ctx.defer()
-        author = str(ctx.interaction.user.id)
+            return await ctx.respond(embed=self.__embeds.BANNED())
 
         if bool(filter_category) ^ bool(string_to_match):  # first ever use of xor recorded in humanity
-            await ctx.respond(embed=self.__embeds.SLASH_PLIST_NOT_BOTH_OPTIONS())
+            return await ctx.respond(embed=self.__embeds.SLASH_PLIST_NOT_BOTH_OPTIONS())
+        await ctx.defer()
 
-        command_list = []
-        button_list = []
-        if page:
-            page = page - 1 if page > 0 else 1
+        current_page = (page - 1) if page and page > 0 else 0
 
         if filter_category == "author":
-            tempstring_if_conversion_doesnt_work = string_to_match
+            raw_match = string_to_match
             string_to_match = str(Utils.ping_to_id(string_to_match))
-            if string_to_match == 'False':
-                await ctx.respond(embed=self.__embeds.BAD_USER_ID(tempstring_if_conversion_doesnt_work))
-                return
-
-        for current_dict in data['p_commands']:
-            add_command = False
-            if not filter_category:
-                add_command = True
-            else:
-                if filter_category == "time":
-                    if evaluate_discord_timestamp(int(current_dict['time']) // 1000, string_to_match):
-                        add_command = True
-                elif string_to_match in current_dict[filter_category]:
-                    add_command = True
-            if add_command:
-                button_list.append(current_dict)
-                if len(current_dict['write']) > 2000 or len(current_dict['read']) > 2000:
-                    command_list.append(
-                        f"{current_dict['time']}: this command is longer than 2k characters, so it won't be included. it's probably the wahlkommission command.")
-                else:
-                    command_list.append(f"{current_dict['time']}: {current_dict['read']} -> {current_dict['write']}")
-
-        amount_pages = math.ceil(len(command_list) / 25)
-
-        if len(command_list) == 0:
-            result = "No commands found."
-        else:
-            if len(command_list) > 25:
-                if page is None:
-                    await ctx.respond(embed=self.__embeds.PIZZA_LIST_TOO_LONG(len(command_list), amount_pages))
-                    return
-                else:
-                    if page >= math.ceil(len(command_list) / 25):
-                        await ctx.respond(
-                            embed=self.__embeds.SLASH_PLIST_PAGE_LARGER_THAN_AMOUNT_COMMANDS(amount_pages))
-                        return
-                    command_list = command_list[page * 25:page * 25 + 25]
-            result = "\n".join(command_list)
-            if len(result) > 4096:
-                longest = ""
-                for i in result.split("\n"):
-                    longest = i if len(i) > len(longest) else longest
-                result = f"command list was too long. length was {len(result)}.\nlongest command (first 1k characters):\n{longest[:1000]}"
-
-        view = None
-        if len(button_list) == 1:
-            view = PizzaSingleResultView(
-                command_dict=button_list[0],
-                bot=self.__bot,
-                data_ref=data,
-                embeds_ref=self.__embeds,
-                author_ref=author
-            )
+            if string_to_match == 'False':  # なんでこうなってるのか謎だし微妙だなって思ってますが、いじるのはやめておきますね
+                return await ctx.respond(embed=self.__embeds.BAD_USER_ID(raw_match))
 
         if not filter_category:
-            await ctx.respond(embed=self.__embeds.PIZZA_LIST(result), view=view)
+            filtered = data['p_commands']
+        elif filter_category == "time":
+            filtered = [d for d in data['p_commands'] if evaluate_discord_timestamp(int(d['time']) // 1000, string_to_match)]
         else:
-            await ctx.respond(embed=self.__embeds.PIZZA_LIST_FILTERED(result, filter_category, string_to_match), view=view)
-        return
+            filtered = [d for d in data['p_commands'] if string_to_match.lower() in d.get(filter_category, "").lower()]
+
+        total_amount = len(filtered)
+        if total_amount == 0:
+            return await ctx.respond(embed=self.__embeds.PIZZA_LIST("No commands found."))
+
+        items_per_page = 25
+        amount_pages = math.ceil(total_amount / items_per_page)
+
+        if total_amount > items_per_page:
+            if page is None:
+                return await ctx.respond(embed=self.__embeds.PIZZA_LIST_TOO_LONG(total_amount, amount_pages))
+            if current_page >= amount_pages:
+                return await ctx.respond(embed=self.__embeds.SLASH_PLIST_PAGE_LARGER_THAN_AMOUNT_COMMANDS(amount_pages))
+
+        start = current_page * items_per_page
+        end = start + items_per_page
+        page_items = filtered[start:end]
+
+        command_list = []
+
+        for d in page_items:
+            if len(d['write']) > 2000 or len(d['read']) > 2000:
+                command_list.append(f"{d['time']}: command too long to display.")
+            else:
+                command_list.append(f"{d['time']}: {d['read']} -> {d['write']}")
+
+        result = "\n".join(command_list)
+        if len(result) > 4096:
+            longest = max(result.splitlines(), key=len)
+            result = f"command list was too long. length was {len(result)}.\nlongest command (first 1k characters):\n{longest[:1000]}"
+
+        view = None
+        if total_amount == 1:
+            view = PizzaSingleResultView(
+                command_dict=filtered[0],
+                bot=self.__bot, data_ref=data,
+                embeds_ref=self.__embeds, author_ref=str(ctx.interaction.user.id)
+            )
+
+        embed = (self.__embeds.PIZZA_LIST_FILTERED(result, filter_category, string_to_match)
+                 if filter_category else self.__embeds.PIZZA_LIST(result))
+        return await ctx.respond(embed=embed, view=view)
 
     @slash_command(name="pinfo", description=helper.HELP_PINFO)
     async def pinfo(self, ctx: ApplicationContext,
-                    command_id: Option(int, "Command id. You can get this from /plist")):
+                    command_id: int = Option(int, "Command id. You can get this from /plist")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -255,7 +237,7 @@ class PizzaSlashCog(Cog):
     # noinspection DuplicatedCode
     @slash_command(name="premove", description=helper.HELP_PREMOVE)
     async def premove(self, ctx: ApplicationContext,
-                      command_id: Option(int, "Command id. You can get this from /plist")):
+                      command_id: int = Option(int, "Command id. You can get this from /plist")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -288,9 +270,9 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
     async def ptestcompiler(self, ctx: ApplicationContext,
-                            read: Option(str, "The string to match. The compiler works on this one"),
-                            write: Option(str, "What pizza romani responds with. The [] syntax goes here"),
-                            message: Option(str, "test message")):
+                            read: str = Option(str, "The string to match. The compiler works on this one"),
+                            write: str = Option(str, "What pizza romani responds with. The [] syntax goes here"),
+                            message: str = Option(str, "test message")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -313,21 +295,20 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="pmute", description=helper.HELP_PMUTE)
     async def pmute(self, ctx: ApplicationContext):
-        global is_muted
         bot_admins = self.__config.BOT_ADMINS.split(",")
         print(bot_admins, ctx.interaction.user.id)
         if str(ctx.interaction.user.id) not in bot_admins:
             await ctx.respond("You must be a bot admin to mute/unmute pizza romani!")
             return
-        is_muted = not is_muted
-        if is_muted:
+        self.is_muted = not self.is_muted
+        if self.is_muted:
             await ctx.respond("Pizza Romani has been muted. :( Please unmute him soon or he will be sad.")
         else:
             await ctx.respond("Hooray, Pizza Romani is able to participate in conversation again! Yippie.")
 
     @slash_command(name="phelp", description=helper.HELP_PHELP)
     async def phelp(self, ctx: ApplicationContext,
-                    command: Option(str, choices=[
+                    command: str = Option(str, choices=[
                         OptionChoice(name='pinsert', value='pinsert'),
                         OptionChoice(name='plist', value='plist'),
                         OptionChoice(name='pinfo', value='pinfo'),
