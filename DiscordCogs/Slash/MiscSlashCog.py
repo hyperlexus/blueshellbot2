@@ -300,14 +300,12 @@ class MiscSlashCog(Cog):
         if_sent_alerts = False
 
         for alert in alerts:
-            print(now - alert['send_at'])
             if now >= alert['send_at']:
                 if_sent_alerts = True
                 channel = self.__bot.get_channel(alert['channel_id'])
 
                 if channel:
                     mention = f"<@{alert['user_id']}>"
-                    other_user = alert['user_id'] != alert['author_id']
                     embed = self.__embeds.ALERT_DONE(
                         time_str=alert['original_time'],
                         message=alert['text'],

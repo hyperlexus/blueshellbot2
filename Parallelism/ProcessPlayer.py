@@ -64,7 +64,7 @@ class ProcessPlayer(Process):
                                'options': '-vn'}
 
     def run(self) -> None:
-        """Method called by process.start(), this will exec the actual _run method in a event loop"""
+        """Method called by process.start(), this will exec the actual _run method in an event loop"""
         try:
             print(f'Starting Player Process for Guild {self.name}')
             self.__playerLock = RLock()
@@ -264,7 +264,7 @@ class ProcessPlayer(Process):
 
                     # If already playing, stop the current play
                     if self.__verifyIfIsPlaying():
-                        # Will forbidden next_song to execute after stopping current player
+                        # Will forbid next_song to execute after stopping current player
                         self.__forceStop = True
                         self.__voiceClient.stop()
                         self.__playing = False
@@ -282,7 +282,7 @@ class ProcessPlayer(Process):
 
     def __commandsReceiver(self) -> None:
         # Forces the Thread that listen to the commands to await this bot instance
-        # to stablish the connection with discord, may delay when running bots in several servers
+        # to establish the connection with discord, may delay when running bots in several servers
         while True:
             if self.__botCompletedLoad:
                 break
@@ -458,12 +458,16 @@ class ProcessPlayer(Process):
                 return True
 
             if self.__voiceClient and self.__voiceClient.is_connected():
+                if self.__voiceClient.ws and self.__voiceClient.ws.open:
+                    return True
+                else:
+                    await self.__voiceClient.disconnect(force=True)
                 print(f'[PROCESS PLAYER -> MOVING TO CHANNEL {self.__voiceChannel.name}]')
                 await self.__voiceClient.move_to(self.__voiceChannel)
                 return True
 
             print(f'[PROCESS PLAYER -> CONNECTING TO CHANNEL {self.__voiceChannel.name}]')
-            self.__voiceClient = await self.__voiceChannel.connect(reconnect=True, timeout=None)
+            self.__voiceClient = await self.__voiceChannel.connect(reconnect=True, timeout=20.0)
             return True
 
         except Exception as e:
@@ -471,4 +475,10 @@ class ProcessPlayer(Process):
             if self.__voiceClient:
                 await self.__voiceClient.disconnect(force=True)
             self.__voiceClient = None
+            # try again if it didnt work
+            if "Already connected" in str(e):
+                actual_vc = self.__guild.voice_client
+                if actual_vc:
+                    await actual_vc.disconnect(force=True)
+                    await asyncio.sleep(0.8)
             return False

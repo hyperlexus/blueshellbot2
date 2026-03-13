@@ -95,18 +95,29 @@ class Downloader:
         except DownloadError as e:
             raise DownloadingError(e.msg)
 
+    def finish_one_song_with_retry(self, song: Song, retries=2) -> Song:
+        for attempt in range(retries):
+            try:
+                return self.finish_one_song(song)
+            except DownloadingError:
+                if attempt < retries - 1:
+                    self.__reinitialize_extractor_session()
+
     @run_async
     def extract_info(self, url: str) -> List[dict]:
         if url == '':
             return []
 
-        if Utils.is_url(url):  # If Url
+        def __sanitize_metadata(info: dict) -> bool:
+            required_keys = ['id', 'title', 'duration']
+            return all(key in info and info[key] is not None for key in required_keys)
+
+        if Utils.is_url(url):
             options = Downloader.__YDL_OPTIONS_EXTRACT
             with YoutubeDL(options) as ydl:
                 try:
                     extracted_info = ydl.extract_info(url, download=False)
-                    # Some links doesn't extract unless extract_flat key is passed as False in options
-                    if self.__failed_to_extract(extracted_info):
+                    if extracted_info and not __sanitize_metadata(extracted_info):
                         extracted_info = self.__get_forced_extracted_info(url)
 
                     if self.__is_music(extracted_info):
@@ -140,6 +151,11 @@ class Downloader:
             except Exception as e:
                 print(f'DEVELOPER NOTE -> Error Forcing Extract Music: {e}')
                 return []
+
+    def __reinitialize_extractor_session(self):
+        self.__YDL_OPTIONS['rm_cache_dir'] = True
+        self.__YDL_OPTIONS['http_headers']['Sec-Fetch-Site'] = 'same-origin'
+        print("[RECOVERY] yt extractor refreshed")
 
     def __download_url(self, url) -> dict:
         options = Downloader.__YDL_OPTIONS

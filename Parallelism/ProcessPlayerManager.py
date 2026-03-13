@@ -206,6 +206,16 @@ class ProcessPlayerManager(Singleton, AbstractPlayersManager):
 
         return processInfo
 
+    def __enforce_resource_cleanup(self, guild_id: int):
+        if guild_id in self.__playersProcess:
+            p_info = self.__playersProcess[guild_id]
+            while not p_info.getQueueToPlayer().empty():
+                try:
+                    p_info.getQueueToPlayer().get_nowait()
+                except:
+                    break
+            print(f"[CLEANUP] Resources for Guild {guild_id} purged.")
+
     def __listenToCommands(self, queue: Queue, guild: Guild) -> None:
         guildID = guild.id
         while True:
