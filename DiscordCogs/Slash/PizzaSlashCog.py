@@ -44,7 +44,8 @@ class PizzaSlashCog(Cog):
 
         pizza_messages = []
         is_a_dm = message.guild is None
-        is_okay_server = (not is_a_dm and message.guild.id == self.__config.PIZZA_SERVER and any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles))
+        has_pizza_role = any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles) if message.author.roles is not None else False
+        is_okay_server = (not is_a_dm and message.guild.id == self.__config.PIZZA_SERVER and has_pizza_role)
         if not (is_a_dm or is_okay_server):
             return
         for current_dict in data['p_commands']:
