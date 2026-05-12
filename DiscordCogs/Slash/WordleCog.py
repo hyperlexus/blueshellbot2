@@ -144,7 +144,7 @@ class WordleCog(Cog):
 
         await ctx.respond(f"{count}")
 
-    @slash_command(name="wordle_stats", description="Show server wordle statistics", guild_ids=[GUILD_ID, 964302006091128893, 1494713422271746139])
+    @slash_command(name="wordle_stats", description="Show server wordle statistics", guild_ids=[GUILD_ID])
     async def wordle_stats(
             self,
             ctx: discord.ApplicationContext,
