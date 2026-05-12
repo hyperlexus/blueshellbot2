@@ -21,7 +21,7 @@ def clean_time(t):
 class MudaeCondenser(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.target_users = ["hyperlexus", "ad.infernum"]
+        self.target_users = ["hyperlexus", "ad.infernum", "tokyobre"]  # yes this is hardcoded no im too lazy
         self.mudae_id = 432610292342587392
         self.servers_to_search = [1486857971060445186, 995966314877300737, 1494713422271746139]
 
@@ -86,14 +86,29 @@ class MudaeCondenser(commands.Cog):
         k_stock = extract(r'Stock: \*\*([\d,]+)\*\*\s*<:kakera', content)
         sp_stock = extract(r'Stock: \*\*([\d,]+)\*\*\s*<:sp', content, default="0")
 
-        result = (
-            f"**{current_user}**:\n"
-            f"{rolls}:slot_machine: {rolls_time}:clock1: {rt_stock}:arrows_counterclockwise: {claim_str}\n"
-            f"{daily_str}:date: {vote_str}:ballot_box: {dk_str}:money_with_wings:\n"
-            f":key:{keys_val}, {keys_time}, {bku_prob}\n"
-            f":gem:{power}{react_str}, {k_stock}\n"
-            f":red_circle:{sp_stock}"
-        )
+        if current_user in ["hyperlexus", "ad.infernum"]:
+            result = (
+                f"**{current_user}**:\n"
+                f"{rolls}:slot_machine: {rolls_time}:clock1: {rt_stock}:arrows_counterclockwise: {claim_str}\n"
+                f"{daily_str}:date: {vote_str}:ballot_box: {dk_str}:money_with_wings:\n"
+                f":key:{keys_val}, {keys_time}, {bku_prob}\n"
+                f":gem:{power}{react_str}, {k_stock}\n"
+                f":red_circle:{sp_stock}"
+            )
+        elif current_user == "tokyobre":
+            result = (
+                f"**{current_user}** has a Claim in **{claim_str}**\n\n"
+                f"You have {rolls} Rolls left for {rolls_time}\n"
+                f"**{rt_stock}** :arrows_counterclockwise:\n\n"
+                f"$daily in **{daily_str}**.\n"
+                f"$dk in **{dk_str}**.\n"
+                f"$vote in **{vote_str}**.\n\n"
+                f"React to Kakera in **{react_str}**.\n"
+                f"**{k_stock} :gem:**\n"
+                f"**{sp_stock} :red_circle:**\n"
+                f"||{keys_val}, {keys_time}, {bku_prob}||\n"
+            )
+        else: result = ""
 
         await message.channel.send(result)
 
