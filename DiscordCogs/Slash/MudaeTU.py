@@ -80,7 +80,7 @@ class MudaeCondenser(commands.Cog):
         cant_react_match = re.search(r"You can't react to kakera for \*\*([^*]+)\*\*", content)
 
         if can_react: react_str = ":white_check_mark:"
-        elif cant_react_match: react_str = f":x: {self.clean_time(cant_react_match.group(1))}"
+        elif cant_react_match: react_str = f":x: {clean_time(cant_react_match.group(1))}"
         else: react_str = ":x:"
 
         k_stock = extract(r'Stock: \*\*([\d,]+)\*\*\s*<:kakera', content)
