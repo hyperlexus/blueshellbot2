@@ -1,0 +1,192 @@
+import discord
+from discord.ext.commands import slash_command, Cog
+from discord import ApplicationContext
+
+
+goofy_strategy_dingens = {
+    (0,): 12,
+        (0, 0): 25, (0, 0, -1): 41, (0, 0, -1, -1): 54,
+        (0, 1): 15,
+            (0, 1, 0): 52, (0, 1, 0, -1): 21,
+            (0, 1, 1): 45, (0, 1, 1, -1): 14,
+            (0, 1, 2): 45, (0, 1, 2, -1): 14,
+            (0, 1, 4): 14,
+        (0, 2): 14, (0, 2, -1): 52,
+        (0, 3): 21, (0, 3, -1): 45,
+    (1,): 23,
+        (1, 0): 42,
+            (1, 0, 0): 35,
+                (1, 0, 0, 0): 11,
+                (1, 0, 0, 1): 55,
+                (1, 0, 0, 2): 55,
+            (1, 0, 1): 51,
+                (1, 0, 1, 0): 44,
+                (1, 0, 1, 1): 31,
+                (1, 0, 1, 2): 31,
+                (1, 0, 1, 3): 15,
+            (1, 0, 2): 44,
+            (1, 0, 3): 31,
+                (1, 0, 3, 0): 15,
+                (1, 0, 3, 1): 51,
+                (1, 0, 3, 2): 51,
+        (1, 1): 32,
+            (1, 1, 0): 53,
+                (1, 1, 0, 0): 24,
+                (1, 1, 0, 1): 13,
+                (1, 1, 0, 2): 13,
+            (1, 1, 1): 34,
+                (1, 1, 1, 0): 22,
+                (1, 1, 1, 1): 43,
+                (1, 1, 1, 3): 43,
+            (1, 1, 2): 34, (1, 1, 2, -1): 22,
+            (1, 1, 3): 43,
+            (1, 1, 4): 22,
+        (1, 2): 53,
+            (1, 2, 0): 22, (1, 2, 0, -1): 24,
+            (1, 2, 1): 13, (1, 2, 1, -1): 43,
+            (1, 2, 2): 13, (1, 2, 2, -1): 43,
+            (1, 2, 4): 43,
+        (1, 3): 32, (1, 3, -1): 34,
+        (1, 4): 32, (1, 4, -1): 34, (1, 4, -1, -1): 13,
+    (2,): 12,
+        (2, 0): 53,
+            (2, 0, 1): 31,
+                (2, 0, 1, 0): 43,
+                (2, 0, 1, 1): 35,
+                (2, 0, 1, 2): 35,
+            (2, 0, 2): 43,
+            (2, 0, 3): 31, (2, 0, 3, -1): 35,
+            (2, 0, 4): 43,
+        (2, 1): 23,
+            (2, 1, 1): 34,
+                (2, 1, 1, 0): 13,
+                (2, 1, 1, 1): 32,
+                (2, 1, 1, 2): 32,
+            (2, 1, 2): 13,
+            (2, 1, 3): 34, (2, 1, 3, -1): 32,
+            (2, 1, 4): 13,
+        (2, 2): 32, (2, 2, -1): 13,
+        (2, 3): 23, (2, 3, -1): 34,
+        (2, 4): 13,
+    (3,): 11,
+        (3, 0): 24, (3, 0, -1): 42,
+        (3, 1): 25,
+            (3, 1, 0): 44, (3, 1, 0, -1): 51,
+            (3, 1, 1): 22, (3, 1, 1, -1): 55,
+            (3, 1, 2): 22, (3, 1, 2, -1): 55,
+            (3, 1, 4): 15,
+        (3, 2): 15, (3, 2, -1): 51,
+        (3, 3): 55, (3, 3, -1): 22, (3, 3, -1, -1): 44,
+    (4,): 23, (4, -1): 32, (4, -1, -1): 35, (4, -1, -1, -1): 43
+}
+
+sphere_values = {
+    0: 10,
+    1: 20,
+    2: 35,
+    3: 55,
+    4: 90,
+    5: 150
+}
+
+def get_next_click(what_has_been_clicked):
+    click_sequence = tuple(what_has_been_clicked)
+    if click_sequence in goofy_strategy_dingens:
+        return goofy_strategy_dingens[click_sequence]
+
+    b = list(what_has_been_clicked)
+    for i in range(len(b)-1, 0, -1):
+        b[i] = -1
+        dings = tuple(b)
+
+        if dings in goofy_strategy_dingens:
+            return goofy_strategy_dingens[dings]
+    return None
+
+def solve_all():
+    what_has_been_clicked = []
+    for i in range(1, 6):
+        last_colour = int(input("blud "))
+
+        what_has_been_clicked.append(last_colour)
+        next_move = get_next_click(what_has_been_clicked)
+
+        if next_move:
+            print(next_move)
+
+
+class RedfinderCog(Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.clicker = 0
+
+    @slash_command(name='redfinder', description='finds red', guild_ids=[995966314877300737, 1494713422271746139])
+    async def redfinder(self, ctx: ApplicationContext):
+        view = AgainAndAgainButton(ctx.author.id)
+        await ctx.respond("This will help you find the red sphere in $oc. Please click the middle button to start. Coordinates are Down, Right.", view=view)
+
+class AgainAndAgainButton(discord.ui.View):
+    def __init__(self, who_has_clicked: int):
+        super().__init__(timeout=120)
+        self.what_has_been_clicked = []
+        self.spawn()
+        self.who_has_clicked = who_has_clicked
+        self.total_sphere_value = 0
+
+    def spawn(self):
+        colours = [
+            ("Blue", 0, discord.ButtonStyle.primary, "🔵"),
+            ("Teal", 1, discord.ButtonStyle.primary, "😢"),
+            ("Green", 2, discord.ButtonStyle.primary, "🟢"),
+            ("Yellow", 3, discord.ButtonStyle.primary, "🟡"),
+            ("Orange", 4, discord.ButtonStyle.primary, "🟠"),
+        ]
+
+        for name, value, style, emote in colours:
+            button = discord.ui.Button(label=name, style=style, emoji=emote, custom_id=f"colour_{value}")
+            button.callback = self.something_has_been_clicked
+            self.add_item(button)
+        red_button = discord.ui.Button(label="Red", style=discord.ButtonStyle.success, emoji="<:spheres:1506804921444601913>", custom_id="colour_5", row=2)
+        red_button.callback = self.something_has_been_clicked
+        self.add_item(red_button)
+
+    async def something_has_been_clicked(self, interaction: discord.Interaction):
+        if interaction.user.id != self.who_has_clicked:
+            return await interaction.response.send_message(
+                "These are not your buttons. Please don't stick your nose in others' business.",
+                ephemeral=False
+            )
+
+        colour = int(interaction.custom_id.split("_")[1])
+        self.total_sphere_value += sphere_values[colour]
+        self.what_has_been_clicked.append(colour)
+        stage = len(self.what_has_been_clicked)
+
+        if colour == 5:
+            self.clear_items()
+            await interaction.response.edit_message(
+                content=f"Yay! You did it. +{self.total_sphere_value}<:spheres:1506804921444601913>", view=self
+            )
+            return
+        if stage >= 5:
+            self.clear_items()
+            await interaction.response.edit_message(
+                content="ham gekackt.", view=self
+            )
+            return
+
+        next_move = get_next_click(self.what_has_been_clicked)
+        next_click = f"{str(next_move)[0]}, {str(next_move)[1]}"
+
+        if next_move:
+            msg = f"stage {stage+1}/5, please click at {next_click}."
+            await interaction.response.edit_message(content=msg, view=self)
+        else:
+            self.clear_items()
+            await interaction.response.edit_message(
+                content=f"sie ham gelogen, diesen button kann es da ({self.what_has_been_clicked}) gar nicht geben!", view=self
+            )
+        return
+
+def setup(bot):
+    bot.add_cog(RedfinderCog(bot))

@@ -47,7 +47,7 @@ stack_rolls_emoji = "<:stackedrolls:1506817470357442650>"
 dollar_rt_emoji = "<:rolltimer:1506817938420924426>"
 add_roll_emoji = "<:addroll:1506819400169427128>"
 
-class MudaeCondenser(Cog):
+class MudaeCog(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.target_users = ["hyperlexus", "ad.infernum", "tokyobre"]  # yes this is hardcoded no im too lazy
@@ -176,4 +176,4 @@ class MudaeCondenser(Cog):
         return
 
 def setup(bot):
-    bot.add_cog(MudaeCondenser(bot))
+    bot.add_cog(MudaeCog(bot))
