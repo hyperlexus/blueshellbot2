@@ -3,6 +3,7 @@ import json
 import math
 import os
 import time
+import subprocess
 from datetime import datetime
 from mpmath import mp, mpf, exp
 from Music.BlueshellBot import BlueshellBot
@@ -324,6 +325,64 @@ class MiscSlashCog(Cog):
     @check_alerts.before_loop
     async def before_check_alerts(self):
         await self.__bot.wait_until_ready()
+
+    @slash_command(name='restart_compcount',
+                   description='compcount gets restarted and all streaks are saved. only runnable by admin',
+                   guild_ids=[995966314877300737])
+    async def restart_compcount(self, ctx: ApplicationContext):
+        if ctx.interaction.user.id not in (422800248935546880, 468786219258740756):
+            await ctx.respond("you are not authorised to do this.")
+            return
+        await ctx.defer()
+        env_variables = os.environ.copy()
+
+        message = await ctx.followup.send("deploying...\n```bash\n\n```", wait=True)
+
+        path = os.getcwd()
+        target_path = os.path.abspath(os.path.join(path, "..", "compcountdeploy.sh"))
+
+        process = await asyncio.create_subprocess_exec(
+            'sh', target_path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+            env=env_variables
+        )
+
+        async def HURRAH_ICH_VERWENDE_DAS_WAS_MAGGDA_GEZEIGT_HAT(stdout):
+            while True:
+                line = await stdout.readline()
+                if not line:
+                    break
+                yield line.decode('utf-8')  # leeeeeeeel
+
+        log_lines = []
+        last_update_time = asyncio.get_event_loop().time()
+        update_interval = 1.5
+
+        async for line in HURRAH_ICH_VERWENDE_DAS_WAS_MAGGDA_GEZEIGT_HAT(process.stdout):
+            log_lines.append(line)
+            current_time = asyncio.get_event_loop().time()
+
+            if current_time - last_update_time > update_interval:
+                full_log = "".join(log_lines)
+                
+                if len(full_log) > 1900:
+                    full_log = "...\n" + full_log[-1850:]
+                
+                try:
+                    await message.edit(content=f"deploying...\n```bash\n{full_log}```")
+                except Exception as e:
+                    print(f"reingeschissen: {e}")
+                
+                last_update_time = current_time
+
+        await process.wait()
+
+        full_log = "".join(log_lines)
+        if len(full_log) > 1900:
+            full_log = "...\n" + full_log[-1850:]
+            
+        await message.edit(content=f"deployment completed with code {process.returncode}:\n```bash\n{full_log}```")
 
 def setup(bot):
     bot.add_cog(MiscSlashCog(bot))

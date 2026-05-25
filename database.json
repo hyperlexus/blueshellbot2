@@ -1667,6 +1667,30 @@
             "author": "468786219258740756",
             "read": "in 'ist bekannt' | in 'is bekannt' | in 'ist bekant' | in 'is bekant' | in 'is known' | in 'kent man' | in 'kennt man'",
             "write": "https://tenor.com/view/it-is-known-game-of-thrones-it's-understood-everyone-knows-we-know-gif-9361879955269503159"
+        },
+        {
+            "time": "1771845158963",
+            "author": "468786219258740756",
+            "read": "in 'erfreut'",
+            "write": "[replace\\erfreut\\erneut]"
+        },
+        {
+            "time": "1771845432702",
+            "author": "468786219258740756",
+            "read": "in 'erneut' & not in 'ganz erneut'",
+            "write": "[replace\\erneut\\ganz erneut]"
+        },
+        {
+            "time": "1777541580101",
+            "author": "468786219258740756",
+            "read": "in 'omen'",
+            "write": "[replace\\omen\\bibel omam]"
+        },
+        {
+            "time": "1778877378983",
+            "author": "422800248935546880",
+            "read": "is peak",
+            "write": "peak? wie [random\\die hit farbe aus dem hit game doppelkopf-1\\das hit spiel auf steam.com-1\\der gipfel vom alexberg-1\\das kart aus attack on titan-1]?"
         }
     ]
 }
