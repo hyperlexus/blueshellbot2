@@ -58,6 +58,7 @@ class MudaeCog(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
+        if self.bot.voice_clients: return
         if message.guild.id not in self.servers_to_search: return
         if message.author.id != self.mudae_id:
             if not message.author.name.lower().startswith("mudae"): return

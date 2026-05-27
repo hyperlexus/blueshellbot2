@@ -120,7 +120,7 @@ class RedfinderCog(Cog):
         self.bot = bot
         self.clicker = 0
 
-    @slash_command(name='redfinder', description='finds red', guild_ids=[995966314877300737, 1494713422271746139])
+    @slash_command(name='redfinder', description='finds red')
     async def redfinder(self, ctx: ApplicationContext):
         view = AgainAndAgainButton(ctx.author.id)
         await ctx.respond("This will help you find the red sphere in $oc. Please click the middle button to start. Coordinates are Down, Right.", view=view)

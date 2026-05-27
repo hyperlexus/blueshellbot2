@@ -166,12 +166,12 @@ class MiscSlashCog(Cog):
 
         def formula(n, precision, inverse):
             mp.dps = precision
-            result = (
-                    mpf('200') +
-                    mpf('600') * exp(mpf('-0.045') * mpf(n)) +
-                    mpf('225') * exp(mpf('-0.0015') * mpf(n))
+            formula_result = (
+                    mpf('150') +
+                    mpf('1000') * exp(mpf('-0.02') * mpf(n)) +
+                    mpf('100') * exp(mpf('-0.001') * mpf(n))
             )
-            return 1 / result if inverse else result
+            return 1 / formula_result if inverse else formula_result
 
         def get_trophy_chance(n, inverse):
             precision = 1500
@@ -187,7 +187,7 @@ class MiscSlashCog(Cog):
                     else:
                         if digit != "9":
                             return i + 5, str(formula(n, i + 5, inverse))
-            return -1, 200 if inverse else 0.005
+            return -1, str(mpf('1') / mpf('150')) if inverse else "150"
 
         result = get_trophy_chance(number, False)
         result_inverse = get_trophy_chance(number, True)
@@ -383,6 +383,18 @@ class MiscSlashCog(Cog):
             full_log = "...\n" + full_log[-1850:]
             
         await message.edit(content=f"deployment completed with code {process.returncode}:\n```bash\n{full_log}```")
+
+    @slash_command(name='restart_compcount',
+                   description='compcount gets restarted and all streaks are saved. only runnable by admin',
+                   guild_ids=[995966314877300737, 1050060357613400144])
+    async def restart_compcount(self, ctx: ApplicationContext):
+        if ctx.interaction.user.id not in (422800248935546880, 468786219258740756):
+            await ctx.respond("you are not authorised to do this.")
+            return
+        path = os.getcwd()
+        target_path = os.path.join(path, "../compcountdeploy.sh")
+        await ctx.respond(target_path)
+        return
 
 def setup(bot):
     bot.add_cog(MiscSlashCog(bot))
