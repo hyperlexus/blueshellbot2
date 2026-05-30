@@ -81,6 +81,7 @@ class ProcessPlayer(Process):
     async def _run(self) -> None:
         # Recreate the bot instance and objects using discord API
         self.__bot = await self.__createBotInstance()
+        await self.__bot.wait_until_ready()
         self.__botCompletedLoad = True
         self.__guild = self.__bot.get_guild(self.__guildID)
         self.__voiceChannel = self.__bot.get_channel(self.__voiceChannelID)
@@ -453,6 +454,13 @@ class ProcessPlayer(Process):
             await asyncio.sleep(0.2)
 
     async def __connectToVoiceChannel(self) -> bool:
+        if self.__voiceChannel is None:
+            while True:
+                self.__voiceChannel = self.__bot.get_channel(self.__voiceChannelID)
+                if self.__voiceChannel is None:
+                    await asyncio.sleep(0.2)
+                else:
+                    break
         try:
             if self.__voiceClient and self.__voiceClient.is_connected() and self.__voiceClient.channel.id == self.__voiceChannelID:
                 print('[PROCESS PLAYER -> ALREADY CONNECTED TO THE CORRECT VC]')
