@@ -1697,6 +1697,18 @@
             "author": "422800248935546880",
             "read": "end nix",
             "write": "nix nix nix nix!"
+        },
+        {
+            "time": "1779981397721",
+            "author": "422800248935546880",
+            "read": "in check",
+            "write": "[replace\\check\\slovak]"
+        },
+        {
+            "time": "1780008094761",
+            "author": "422800248935546880",
+            "read": "in helly",
+            "write": "[replace\\helly\\blue shelly]"
         }
     ]
 }

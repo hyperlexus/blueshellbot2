@@ -2,7 +2,7 @@ import asyncio
 import shutil
 from typing import List
 from Config.Configs import BConfigs
-from yt_dlp import YoutubeDL, DownloadError
+from yt_dlp import YoutubeDL
 from concurrent.futures import ThreadPoolExecutor
 from Music.Song import Song
 from Utils.Utils import Utils, run_async
@@ -18,6 +18,7 @@ class Downloader:
                      'default_search': 'auto',
                      'playliststart': 0,
                      'limit_rate': '250K',
+                     'source_address': '0.0.0.0',
                      'rm_cache_dir': True,
                      'extract_flat': False,
                      'playlistend': config.MAX_PLAYLIST_LENGTH,
@@ -38,6 +39,7 @@ class Downloader:
                              'default_search': 'auto',
                              'playliststart': 0,
                              'limit_rate': '250K',
+                             'source_address': '0.0.0.0',
                              'rm_cache_dir': True,
                              'extract_flat': False,
                              'playlistend': config.MAX_PLAYLIST_LENGTH,
@@ -56,6 +58,7 @@ class Downloader:
                                    'default_search': 'auto',
                                    'playliststart': 0,
                                    'limit_rate': '250K',
+                                   'source_address': '0.0.0.0',
                                    'rm_cache_dir': True,
                                    'extract_flat': False,
                                    'playlistend': config.MAX_PLAYLIST_LENGTH,
@@ -214,10 +217,11 @@ class Downloader:
                 return {}
 
     def __is_music(self, extracted_info: dict) -> bool:
-        for key in self.__music_keys_only:
-            if key not in extracted_info.keys():
-                return False
-        return True
+        has_id = 'id' in extracted_info
+        has_title = 'title' in extracted_info
+        is_not_playlist = 'entries' not in extracted_info
+
+        return has_id and has_title and is_not_playlist
 
     def __is_multiple_songs(self, extracted_info: dict) -> bool:
         for key in self.__playlist_keys:

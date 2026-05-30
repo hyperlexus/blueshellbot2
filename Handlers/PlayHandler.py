@@ -48,7 +48,8 @@ class PlayHandler(AbstractHandler):
 
             if len(songs) == 1:
                 # If only one song, download it directly
-                song = self.__down.finish_one_song(songs[0])
+                song = songs[0]
+                await self.__down.download_song(song)
                 if song.problematic:  # If error in download song return
                     embed = self.embeds.SONG_PROBLEMATIC()
                     error = DownloadingError()

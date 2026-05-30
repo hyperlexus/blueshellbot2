@@ -4,6 +4,7 @@ from spotipy.exceptions import SpotifyException
 from Config.Exceptions import SpotifyError
 from Config.Configs import BConfigs
 from Config.Messages import SpotifyMessages
+from Utils.Utils import run_async
 
 
 class SpotifySearch:
@@ -21,6 +22,7 @@ class SpotifySearch:
         except Exception as e:
             print(f'DEVELOPER NOTE -> Spotify Connection Error {e}')
 
+    @run_async
     def search(self, url: str) -> list:
         if not self.__checkUrlValid(url):
             raise SpotifyError(self.__messages.INVALID_SPOTIFY_URL, self.__messages.GENERIC_TITLE)
@@ -40,17 +42,6 @@ class SpotifySearch:
                         songs = self.__get_track(code)
                     case 'artist':
                         songs = self.__get_artist(code)
-
-            if self.__connected:
-                match song_type:
-                    case 'album':
-                        self.__get_album(code)
-                    case 'playlist':
-                        self.__get_playlist(code)
-                    case 'track':
-                        self.__get_track(code)
-                    case 'artist':
-                        self.__get_artist(code)
 
                 # ↓ this will stay here as a testiment to my lack of brain ↓
                 # if type == 'album' or 'playlist' or 'track' or 'artist':

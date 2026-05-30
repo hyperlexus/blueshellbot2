@@ -33,7 +33,7 @@ class Searcher:
 
         elif provider == Provider.Spotify:
             try:
-                songs = self.__spotify.search(track)
+                songs = await self.__spotify.search(track)
                 if songs == None or len(songs) == 0:
                     raise SpotifyError(self.__messages.SPOTIFY_NOT_FOUND, self.__messages.GENERIC_TITLE)
 
@@ -63,13 +63,14 @@ class Searcher:
 
     def __cleanYoutubeInput(self, track: str) -> str:
         trackAnalyzer = URLAnalyzer(track)
-        # Just ID and List arguments probably
         if trackAnalyzer.queryParamsQuant <= 2:
             return track
 
-        # Arguments used in Mix Youtube Playlists
-        if 'start_radio' or 'index' in trackAnalyzer.queryParams.keys():
+        keys = trackAnalyzer.queryParams.keys()
+        if 'start_radio' in keys or 'index' in keys:
             return trackAnalyzer.getCleanedUrl()
+
+        return track
 
     def __identify_source(self, track: str) -> Provider:
         if track == '':

@@ -108,8 +108,11 @@ class ThreadPlayer(Thread):
             if song is None:
                 return
 
-            if song.source is None:
-                return self.__playNext(None)
+            if song.source is None or not self.__verifyIfSongAvailable(song):
+                await self.__downloader.download_song(song)
+                if song.problematic or song.source is None:
+                    self.__playNext(None)
+                    return
 
             # If not connected, connect to bind channel
             if self.__voiceClient is None:
@@ -125,11 +128,6 @@ class ThreadPlayer(Thread):
                 self.__playlist.add_song_start(song)
                 return
 
-            songStillAvailable = self.__verifyIfSongAvailable(song)
-            if not songStillAvailable:
-                print('[THREAD PLAYER -> SONG NOT AVAILABLE ANYMORE, DOWNLOADING AGAIN]')
-                song = self.__downloadSongAgain(song)
-
             self.__playing = True
             self.__songPlaying = song
 
@@ -144,6 +142,7 @@ class ThreadPlayer(Thread):
 
             nowPlayingCommand = BCommands(BCommandsType.NOW_PLAYING, song)
             await self.__callback(nowPlayingCommand, self.__guild, song)
+
         except Exception as e:
             print(f'[THREAD PLAYER -> ERROR IN PLAY SONG FUNCTION] -> {e}, {type(e)}')
             self.__playNext(None)

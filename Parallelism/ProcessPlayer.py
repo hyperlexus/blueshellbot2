@@ -162,9 +162,14 @@ class ProcessPlayer(Process):
             self.__playerLock.acquire()
             if song is None:
                 return
+            if song.source is None or not self.__verifyIfSongAvailable(song):
+                print(f'[PROCESS PLAYER -> EXTRACTION FOR: {song.title}]')
+                await self.__downloader.download_song(song)
 
-            if song.source is None:
-                return self.__playNext(None)
+                if song.problematic or song.source is None:
+                    print('[PROCESS PLAYER -> FAILED TO EXTRACT SONG]')
+                    self._after_playback(None)
+                    return
 
             if self.__voiceClient is None:
                 await self.__connectToVoiceChannel()
@@ -179,11 +184,6 @@ class ProcessPlayer(Process):
                 self.__playlist.add_song_start(song)
                 return
 
-            songStillAvailable = self.__verifyIfSongAvailable(song)
-            if not songStillAvailable:
-                print(f'[PROCESS PLAYER -> SONG {song.title} NOT AVAILABLE ANYMORE, DOWNLOADING AGAIN]')
-                song = self.__downloadSongAgain(song)
-
             self.__playing = True
             self.__songPlaying = song
 
@@ -197,6 +197,7 @@ class ProcessPlayer(Process):
 
             nowPlayingCommand = BCommands(BCommandsType.NOW_PLAYING, song)
             self.__queueSend.put(nowPlayingCommand)
+
         except Exception as e:
             print(f'[PROCESS PLAYER -> ERROR IN PLAY SONG FUNCTION] -> {e}, {type(e)}')
             self._after_playback(e)

@@ -8,7 +8,7 @@ class BColors(Singleton):
         self.__green = 0x1F8B4C
         self.__grey = 0x708090
         self.__blue = 0x206694
-        self.__black = 0x23272A
+        self.__black = 0x23272B
 
     @property
     def GREEN(self):

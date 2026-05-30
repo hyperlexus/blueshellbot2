@@ -1,6 +1,7 @@
 import deezer
 from Config.Exceptions import DeezerError
 from Config.Messages import DeezerMessages
+from Utils.Utils import run_async
 
 
 class DeezerSearcher:
@@ -9,6 +10,7 @@ class DeezerSearcher:
         self.__messages = DeezerMessages()
         self.__acceptedTypes = ['track', 'artist', 'playlist', 'album']
 
+    @run_async
     def search(self, url: str) -> None:
         if not self.__verifyValidUrl(url):
             raise DeezerError(self.__messages.INVALID_DEEZER_URL, self.__messages.GENERIC_TITLE)
