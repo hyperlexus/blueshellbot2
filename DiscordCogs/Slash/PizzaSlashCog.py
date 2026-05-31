@@ -76,8 +76,8 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
     async def pinsert(self, ctx: ApplicationContext,
-                      read: str = Option(str, "The string to match. The compiler works on this one"),
-                      write: str = Option(str, "What pizza romani responds with. The [] syntax goes here")):
+                      read: Option(str, "The string to match. The compiler works on this one"),
+                      write: Option(str, "What pizza romani responds with. The [] syntax goes here")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -129,16 +129,16 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="plist", description=helper.HELP_PLIST)
     async def plist(self, ctx: ApplicationContext,
-                    filter_category: str = Option(str, choices=[
+                    filter_category = Option(str, choices=[
                         OptionChoice(name='time', value='time'),
                         OptionChoice(name='author', value='author'),
                         OptionChoice(name='read', value='read'),
                         OptionChoice(name='write', value='write')],
                                             description="What type to filter by. Requires string_to_match to be passed as well.",
                                             default=None),
-                    string_to_match: str = Option(str,
+                    string_to_match = Option(str,
                                             "String to filter by. Requires command_filter to be passed as well.", default=None),
-                    page: int = Option(int,
+                    page = Option(int,
                                  "which page of list to show. may be required if output is longer than 25 lines", default=None)
                     ):
         if not self.__bot.listingSlash: return None
@@ -208,7 +208,7 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="pinfo", description=helper.HELP_PINFO)
     async def pinfo(self, ctx: ApplicationContext,
-                    command_id: int = Option(int, "Command id. You can get this from /plist")):
+                    command_id = Option(int, "Command id. You can get this from /plist")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -238,7 +238,7 @@ class PizzaSlashCog(Cog):
     # noinspection DuplicatedCode
     @slash_command(name="premove", description=helper.HELP_PREMOVE)
     async def premove(self, ctx: ApplicationContext,
-                      command_id: int = Option(int, "Command id. You can get this from /plist")):
+                      command_id = Option(int, "Command id. You can get this from /plist")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -271,9 +271,9 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
     async def ptestcompiler(self, ctx: ApplicationContext,
-                            read: str = Option(str, "The string to match. The compiler works on this one"),
-                            write: str = Option(str, "What pizza romani responds with. The [] syntax goes here"),
-                            message: str = Option(str, "test message")):
+                            read = Option(str, "The string to match. The compiler works on this one"),
+                            write = Option(str, "What pizza romani responds with. The [] syntax goes here"),
+                            message = Option(str, "test message")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -297,7 +297,6 @@ class PizzaSlashCog(Cog):
     @slash_command(name="pmute", description=helper.HELP_PMUTE)
     async def pmute(self, ctx: ApplicationContext):
         bot_admins = self.__config.BOT_ADMINS.split(",")
-        print(bot_admins, ctx.interaction.user.id)
         if str(ctx.interaction.user.id) not in bot_admins:
             await ctx.respond("You must be a bot admin to mute/unmute pizza romani!")
             return
@@ -309,7 +308,7 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="phelp", description=helper.HELP_PHELP)
     async def phelp(self, ctx: ApplicationContext,
-                    command: str = Option(str, choices=[
+                    command = Option(str, choices=[
                         OptionChoice(name='pinsert', value='pinsert'),
                         OptionChoice(name='plist', value='plist'),
                         OptionChoice(name='pinfo', value='pinfo'),

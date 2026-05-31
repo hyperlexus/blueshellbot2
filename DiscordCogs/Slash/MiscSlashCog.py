@@ -103,7 +103,8 @@ class MiscSlashCog(Cog):
                                       vanilla_number: Option(int, "Vanilla number. If you use this, goal money is disregarded.") = None,
                                       div_rules: Option(str, "Division rules. Enter like this: '2,3,5'") = None,
                                       digsum_rules: Option(str, "Digsum rules. Enter like this: '2,3,4'") = None,
-                                      root_rules: Option(str, "Root rules. Enter like this: '2,3,5'") = None
+                                      root_rules: Option(str, "Root rules. Enter like this: '2,3,5'") = None,
+                                      total_bonus_factor: Option(float, "Your total bonus factor when counting. e.g. 1.5") = 1.0
                                       ):
         try:
             if div_rules in ("1", "0", "1,", ",1"):
@@ -119,7 +120,13 @@ class MiscSlashCog(Cog):
                 await ctx.respond("something went wrong when parsing rules. please try again and make sure to follow the format.")
                 return
 
-            sum_no_rules = goal_money
+            digsum_rules_set = set(digsum_rules) if digsum_rules else set()
+
+            raw_target_money = goal_money
+            if vanilla_number is not None:
+                raw_target_money = vanilla_number * (vanilla_number + 1) // 2
+
+            sum_no_rules = raw_target_money / total_bonus_factor
             vanilla_number_goal = math.ceil((-1 + math.sqrt(1 + 8 * goal_money)) / 2)
             if vanilla_number is not None:
                 sum_no_rules = vanilla_number * (vanilla_number + 1) // 2
@@ -128,27 +135,33 @@ class MiscSlashCog(Cog):
                 return any(num % divisor == 0 for divisor in div_rules)
 
             def digsumcheck(num):
-                return any(sum(int(n) for n in str(num)) == m for m in digsum_rules)
+                if not digsum_rules_set: return False
+                total = 0
+                while num > 0:
+                    total += num % 10
+                    num //= 10
+                return total in digsum_rules_set
 
             def rootcheck(num):
-                return any(int(num ** (1 / n)) ** n == num for n in root_rules)
+                return any(round(num ** (1.0 / n)) ** n == num for n in root_rules)
 
             number = 1
             sum_rules = 0
             amount_numbers = 0
             while sum_rules < sum_no_rules:
                 number += 1
-                if divcheck(number) or digsumcheck(number) or rootcheck(number):
+                if divcheck(number) or rootcheck(number) or digsumcheck(number):
                     continue
                 amount_numbers += 1
                 sum_rules += number
 
             efficiency = vanilla_number_goal / amount_numbers - 1
-            efficiency = int(efficiency*10000) / 100  # disgusting rounding because floats are stupid
+            efficiency = round(efficiency * 100, 2)  # no longer disgusting rounding, yay
 
             answer_string = f"you would need to count up to number {number} to get more than "
             answer_string += f"the equivalent of {vanilla_number} in vanilla" if goal_money is None else f"{goal_money} money"
             answer_string += f"\nThe following rules were applied: div: {div_rules}, digsum: {digsum_rules}, root: {root_rules}" if there_are_rules else ""
+            answer_string += f"\n calculated with a {total_bonus_factor}x multiplier." if total_bonus_factor != 1.0 else ""
             answer_string += f"\nThis equals {amount_numbers+1} actual counts in total. This is {efficiency}% more efficient than without any rules." if there_are_rules else ""
             answer_string += f"\nPlease keep in mind that this is total money, and you only get a maximum of 50% ~~+1~~ of that when counting"
             await ctx.respond(answer_string)
