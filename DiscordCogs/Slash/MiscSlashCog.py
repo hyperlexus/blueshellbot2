@@ -397,5 +397,25 @@ class MiscSlashCog(Cog):
             
         await message.edit(content=f"deployment completed with code {process.returncode}:\n```bash\n{full_log}```")
 
+    @slash_command(name="base_kakera_calculator",
+                       description="calculate a character's ka value based on rank, claims, and keys.")
+    async def base_kakera_calculator(self, ctx: ApplicationContext,
+            r = Option(int, "claim rank ($top)", min_value=1),
+            l = Option(int, "like rank ($topl)", min_value=1),
+            left = Option(int, "total number of claimed characters (with $left), 0 for base value", min_value=0),
+            keys = Option(int, "number of keys on the character", min_value=0)
+    ):
+        if keys == 0: ym = 1.0
+        elif 1 <= keys < 3: ym = 1.0 + 0.1 * (keys - 1)
+        elif 3 <= keys < 6: ym = 1.1 + 0.1 * (keys - 3)
+        elif 6 <= keys < 10: ym = 1.3 + 0.1 * (keys - 6)
+        else: ym = 1.6 + 0.05 * (keys - 10)
+        rl = (r + l) / 2.0
+        cm = 1.0 + (left / 5500.0)
+        inner_val = 25000 * math.pow(rl + 70, -0.75) + 20
+        bv = math.floor(inner_val * cm + 0.5)
+        kv = math.floor(bv * ym + 0.5)
+        await ctx.respond(f"r: {r}, rl: {rl}, l: {l}, $left: {left}, y: {keys}\n"f"value: {kv}")
+
 def setup(bot):
     bot.add_cog(MiscSlashCog(bot))
