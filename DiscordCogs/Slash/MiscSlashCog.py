@@ -434,8 +434,13 @@ class MiscSlashCog(Cog):
         }
         graphql_query = f"""{{
             team(teamId: "k3_uU0") {{
+                tiers {{
+                    name
+                    lowerBound
+                }}
                 player(name: "{leaderboard_name}") {{
                     name
+                    rating
                 }}
             }}
         }}"""
@@ -450,18 +455,27 @@ class MiscSlashCog(Cog):
                         return
                     data = await response.json()
                     team_data = data.get("data", {}).get("team", {})
+                    player_data = team_data.get("player")
 
-                    if not team_data or team_data.get("player") is None:
+                    if not team_data or player_data is None:
                         await ctx.respond(
                             f"couldn't find a player named `{leaderboard_name}` on the leaderboard. double-check the spelling on <https://gb.hlorenzi.com/reg/k3_uU0>.\n"
                             f"leaderboard names are case-sensitive!")
                         return
+                    player_rating = player_data.get("rating", 0)
+                    tiers = team_data.get("tiers", [])
+                    tiers.sort(key=lambda t: t.get("lowerBound", -99999), reverse=True)
+
+                    player_rank = "unknown"
+                    for tier in tiers:
+                        if player_rating >= tier.get("lowerBound", -99999):
+                            player_rank = tier.get("name")
+                            break
 
             except aiohttp.ClientError as e:
                 print(f"Network error trying to submit lounge role request: {e}")
                 await ctx.respond("the leaderboard site is currently unreachable. try again later.")
                 return
-
 
         target_channel_id = 1512468097649348658
         target_user_ids = 422800248935546880, 640985620948189186
@@ -470,8 +484,9 @@ class MiscSlashCog(Cog):
 
         await self.__bot.get_channel(target_channel_id).send(
             f"<@{target_user_ids[0]}> <@{target_user_ids[1]}>\n"
-            f"{ctx.author.display_name} has submitted a lounge role request with leaderboard name **{leaderboard_name}**.\n"
-            f"You can check this player's rating here: {check_url}"
+            f"<@{ctx.author.id}> has submitted a lounge role request with leaderboard name **{leaderboard_name}**.\n"
+            f"their rank is {player_rank} with a rating of {round(player_rating)}.\n"
+            f"You can check this player's rating here: <{check_url}>"
         )
 
         await ctx.respond("your request has been submitted successfully. please be patient as it has to be processed manually.")
