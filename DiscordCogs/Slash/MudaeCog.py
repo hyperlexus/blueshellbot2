@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 import discord
 from discord.ext.commands import slash_command, Cog
 from discord import ApplicationContext
@@ -20,8 +21,8 @@ def format_relative(t):
     else:
         return t + "m"
 
-def format_absolute(t):
-    now = datetime.now()
+def format_absolute(t, tz_name="Europe/Berlin"):
+    now = datetime.now(ZoneInfo(tz_name))
     if not t or t == "0":
         return now.strftime("%H:%M")
     t = t.strip()
@@ -37,7 +38,19 @@ def format_absolute(t):
         minutes_str = t.replace("m", "").strip()
         mins = int(minutes_str) if minutes_str else 0
     dt = now + timedelta(hours=hrs, minutes=mins)
-    return dt.strftime("%H:%M")
+    days_diff = (dt.date() - now.date()).days
+    time_str = dt.strftime("%H:%M")
+    if days_diff > 1:
+        return f"{time_str} +{days_diff}d"
+    return time_str
+
+def get_o_value(content, o_type):
+    match = re.search(r'\*\*(\d+)\*\*(?:\s*\(\+(\d+)\s*stored\))?\s*' + o_type, content)
+    if match:
+        base = int(match.group(1))
+        stored = int(match.group(2)) if match.group(2) else 0
+        return str(base + stored)
+    return "0"
 
 key_emoji = "<:keys:1506802471568277584>"
 kakera_emoji = "<:kakera:1506799052745080833>"
@@ -79,9 +92,10 @@ class MudaeCog(Cog):
         except discord.Forbidden: pass
         except discord.NotFound: pass
 
+        current_tz = "America/New_York" if current_user == "ad.infernum" else "Europe/Berlin"
         rolls = extract(r'You have \*\*(\d+)\*\* rolls left', content)
         rolls_time_raw = extract(r'Next rolls reset in \*\*([^*]+)\*\*', content, default="0")
-        rolls_time_abs = format_absolute(rolls_time_raw)
+        rolls_time_abs = format_absolute(rolls_time_raw, current_tz)
         rolls_time_rel = format_relative(rolls_time_raw)
 
         rt_stock = extract(r'You have \*\*(\d+)\*\* rolls reset', content)
@@ -91,28 +105,37 @@ class MudaeCog(Cog):
 
         if claim_yes:
             claim_str_rel = f"{format_relative(claim_yes.group(1))}{kekmark_emoji}"
-            claim_str_abs = f"{format_absolute(claim_yes.group(1))}{kekmark_emoji}"
+            claim_str_abs = f"{format_absolute(claim_yes.group(1), current_tz)}{kekmark_emoji}"
         elif claim_no:
             claim_str_rel = f"{format_relative(claim_no.group(1))}:x:"
-            claim_str_abs = f"{format_absolute(claim_no.group(1))}:x:"
+            claim_str_abs = f"{format_absolute(claim_no.group(1), current_tz)}:x:"
         else: claim_str_rel = claim_str_abs = ":question:"
 
         dk_match = re.search(r'Next \$dk in \*\*([^*]+)\*\*', content)
         dk_rel = format_relative(dk_match.group(1)) if dk_match else kekmark_emoji
-        dk_abs = format_absolute(dk_match.group(1)) if dk_match else kekmark_emoji
+        dk_abs = format_absolute(dk_match.group(1), current_tz) if dk_match else kekmark_emoji
 
         vote_match = re.search(r'vote again in \*\*([^*]+)\*\*', content)
         vote_rel = format_relative(vote_match.group(1)) if vote_match else kekmark_emoji
-        vote_abs = format_absolute(vote_match.group(1)) if vote_match else kekmark_emoji
+        vote_abs = format_absolute(vote_match.group(1), current_tz) if vote_match else kekmark_emoji
 
         daily_match = re.search(r'Next \$daily reset in \*\*([^*]+)\*\*', content)
         daily_rel = format_relative(daily_match.group(1)) if daily_match else kekmark_emoji
-        daily_abs = format_absolute(daily_match.group(1)) if daily_match else kekmark_emoji
+        daily_abs = format_absolute(daily_match.group(1), current_tz) if daily_match else kekmark_emoji
+
+        rt_cd_match = re.search(r'The cooldown of \$rt is not over\. Time left: \*\*([^*]+)\*\*', content)
+        if re.search(r'\$rt is available!', content):
+            rt_rel = rt_abs = kekmark_emoji
+        elif rt_cd_match:
+            rt_rel = format_relative(rt_cd_match.group(1))
+            rt_abs = format_absolute(rt_cd_match.group(1), current_tz)
+        else:
+            rt_rel = rt_abs = ":question:"
 
         keys_val = extract(r'\*\*([\d,]+)\*\*\s*<:kakera[^>]+>to collect', content).replace(",", "").replace(".", "")
         keys_time_raw = extract(r'to collect before the next reset \(\*\*([^*]+)\*\*', content, default="0")
         keys_time_rel = format_relative(keys_time_raw)
-        keys_time_abs = format_absolute(keys_time_raw)
+        keys_time_abs = format_absolute(keys_time_raw, current_tz)
 
         bku_prob = extract(r'\$bku on your next \$sw: \*\*([^*]+)\*\*', content, default="0%")
         power = extract(r'Power: \*\*([^*]+)\*\*', content, default="100%")
@@ -120,46 +143,43 @@ class MudaeCog(Cog):
         can_react = "You __can__ react to kakera" in content
         cant_react_match = re.search(r"You can't react to kakera for \*\*([^*]+)\*\*", content)
 
-        if can_react: react_rel = react_abs = kekmark_emoji
+        if can_react:
+            react_rel = react_abs = kekmark_emoji
         elif cant_react_match:
             react_rel = f":x: {format_relative(cant_react_match.group(1))}"
-            react_abs = f":x: {format_absolute(cant_react_match.group(1))}"
-        else: react_rel = react_abs = ":x:"
+            react_abs = f":x: {format_absolute(cant_react_match.group(1), current_tz)}"
+        else:
+            react_rel = react_abs = ":x:"
 
         k_stock = extract(r'Stock: \*\*([\d,]+)\*\*\s*<:kakera', content)
         sp_stock = extract(r'Stock: \*\*([\d,]+)\*\*\s*<:sp', content, default="0")
 
+        oh_val = get_o_value(content, r'\$oh')
+        oc_val = get_o_value(content, r'\$oc')
+        oq_val = get_o_value(content, r'\$oq')
+        ot_val = get_o_value(content, r'\$ot')
+        o_string = f"{oh_val},{oc_val},{oq_val},{ot_val}"
+
         if current_user in ["hyperlexus", "ad.infernum"]:
-            key_string = "" if int(keys_val) == 4500 else f"{key_emoji}{keys_val}, {keys_time_abs}, {bku_prob}\n"
+            if self.absolute_toggle:
+                keys_time = keys_time_abs
+            else:
+                keys_time = keys_time_rel
+            key_string = "" if int(keys_val) == 4500 else f"{key_emoji}{keys_val}, {keys_time}, {bku_prob}\n"
             result = (
                 f"**{current_user}**:\n"
                 f"{rolls}{stack_rolls_emoji} {rolls_time_abs}🕐 {rt_stock}{add_roll_emoji} {claim_str_abs}\n"
-                f"{daily_abs}📅 {vote_abs}🗳️ {dk_abs}💸\n"
+                f"{daily_abs}📅 {vote_abs}🗳️ {dk_abs}💸 {rt_abs}{dollar_rt_emoji}\n"
                 f"{key_string}"
                 f"{k_stock}{kakera_emoji}, {power}{react_abs}\n"
-                f"{sp_stock}{spheres_emoji}"
+                f"{sp_stock}{spheres_emoji} | {o_string}"
             ) if self.absolute_toggle else (
                 f"**{current_user}**:\n"
                 f"{rolls}{stack_rolls_emoji} {rolls_time_rel}🕐 {rt_stock}{add_roll_emoji} {claim_str_rel}\n"
-                f"{daily_rel}📅 {vote_rel}🗳️ {dk_rel}💸\n"
+                f"{daily_rel}📅 {vote_rel}🗳️ {dk_rel}💸 {rt_rel}{dollar_rt_emoji}\n"
                 f"{key_string}"
                 f"{k_stock}{kakera_emoji}, {power}{react_rel}\n"
-                f"{sp_stock}{spheres_emoji}"
-            )
-        elif current_user == "tokyobre":
-            finished_rolls_string = f"You have **{rolls_time_rel}** left to use your **{rolls}** remaining Rolls.\n"\
-                if int(rolls) > 0 else f"**YOU IDIOT ALREADY ROLLED THIS HOUR**\nCome back in {rolls_time_rel}."
-            result = (
-                f"**{current_user}** gets a new Claim in **{claim_str_rel}**\n\n"
-                f"{finished_rolls_string}\n"
-                f"**{rt_stock}**:arrows_counterclockwise:\n\n"
-                f"$daily in **{daily_rel}**.\n"
-                f"$dk in **{dk_rel}**.\n"
-                f"$vote in **{vote_rel}**.\n\n"
-                f"React to Kakera in **{react_rel}**.\n"
-                f"**{k_stock}** {kakera_emoji}\n"
-                f"**{sp_stock}** {spheres_emoji}\n"
-                f"||**{keys_val}**, **{keys_time_rel}**, **{bku_prob}**||\n"
+                f"{sp_stock}{spheres_emoji} | {o_string}"
             )
         else: result = ""
 
