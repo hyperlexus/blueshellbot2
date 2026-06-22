@@ -398,6 +398,8 @@ class MiscSlashCog(Cog):
             
         await message.edit(content=f"deployment completed with code {process.returncode}:\n```bash\n{full_log}```")
 
+    @slash_command(name='restart_blueshellbot',
+                   description='restart the bot. only runnable by admin')
     async def restart_blueshellbot(self, ctx: ApplicationContext):
         await ctx.defer()
         if ctx.interaction.user.id != 422800248935546880:

@@ -1723,10 +1723,28 @@
             "write": "gut"
         },
         {
-            "time": "1780255557968",
+            "time": "1780591550475",
             "author": "422800248935546880",
-            "read": "is 'ich trag nen hut'",
-            "write": "gut"
+            "read": "is vergessen",
+            "write": "gegessen"
+        },
+        {
+            "time": "1780997850782",
+            "author": "422800248935546880",
+            "read": "is leel",
+            "write": "leel anel isopronanel"
+        },
+        {
+            "time": "1781695279530",
+            "author": "422800248935546880",
+            "read": "end el & not end iel & not end leel",
+            "write": "leel"
+        },
+        {
+            "time": "1782141424119",
+            "author": "422800248935546880",
+            "read": "isolated tu",
+            "write": "[replace\\tu\\LMU]"
         }
     ]
 }
