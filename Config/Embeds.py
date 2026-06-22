@@ -2,14 +2,15 @@ import math
 from pydoc import describe
 from random import random
 from datetime import timedelta
+
+import pizza_eval
 from discord import Embed
+from pizza_eval import PizzaError
 
 from Config.Messages import Messages
 from Config.Exceptions import BlueshellError
 from Config.Configs import BConfigs
 from Config.Colors import BColors
-from Utils.PizzaEval.PizzaEvalUtils import identify_error
-from Utils.PizzaEval.PizzaEvalErrorDict import error_dict
 
 
 class BEmbeds:
@@ -629,9 +630,10 @@ class BEmbeds:
         return embed
 
     def PIZZA_INVALID_INPUT(self, error_code, expression):
+        error_message = str(PizzaError(error_code, expression))
         embed = Embed(
             title="Error: Pizza Romani input not valid.",
-            description="The input did not satisfy all requirements. Problem: \n\n" + identify_error(error_code, expression),
+            description="The input did not satisfy all requirements. Problem: \n\n" + error_message,
             color=self.__colors.RED
         )
         embed.set_footer(text="Check if you made a typo or are maybe missing a space.",
@@ -641,7 +643,7 @@ class BEmbeds:
     def PIZZA_MOD_LIST_ERROR_DICT(self):
         embed = Embed(
             title='Forced embed: Error dict for complex evaluator',
-            description="\n".join(f"{code}: {message}" for code, message in error_dict.items()),
+            description="\n".join(f"{code}: {message}" for code, message in pizza_eval.errors.error_dict.items()),
             color=self.__colors.BLUE
         )
         return embed

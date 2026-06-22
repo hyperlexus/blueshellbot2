@@ -52,7 +52,9 @@ class Downloader:
                                  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                                  'Accept-Language': 'en-US,en;q=0.9',
                                  'Sec-Fetch-Mode': 'navigate',
-                             }
+                             },
+                             'js_runtimes': {'deno': {'args': deno_path}, 'node': {'args': node_path}},
+                             'remote_components': ['ejs:github'],
                              }
     __YDL_OPTIONS_FORCE_EXTRACT = {'format': 'bestaudio/best',
                                    'default_search': 'auto',
@@ -72,6 +74,8 @@ class Downloader:
                                        'Accept-Language': 'en-US,en;q=0.9',
                                        'Sec-Fetch-Mode': 'navigate',
                                    },
+                                   'js_runtimes': {'deno': {'args': deno_path}, 'node': {'args': node_path}},
+                                   'remote_components': ['ejs:github'],
                                    }
     __BASE_URL = 'https://www.youtube.com/watch?v={}'
 

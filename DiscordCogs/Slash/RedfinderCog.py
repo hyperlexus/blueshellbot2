@@ -103,18 +103,6 @@ def get_next_click(what_has_been_clicked):
             return goofy_strategy_dingens[dings]
     return None
 
-def solve_all():
-    what_has_been_clicked = []
-    for i in range(1, 6):
-        last_colour = int(input("blud "))
-
-        what_has_been_clicked.append(last_colour)
-        next_move = get_next_click(what_has_been_clicked)
-
-        if next_move:
-            print(next_move)
-
-
 class RedfinderCog(Cog):
     def __init__(self, bot):
         self.bot = bot

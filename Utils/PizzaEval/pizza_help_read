@@ -7,6 +7,8 @@ checks are written in the following way:
 <check type> <text>, like `in maggdeur`. if the message contains 'maggdeur', it is triggered and set as true. checks always evaluate to boolean true or false.
 possible check types are `in` (contains), `is` (matches exactly), `start` and `end` (self explanatory).
 
+there is also the keyword `isolated`, which basically combines all of the above checks, aka it is not surrounded by letters.
+
 if your trigger text check contains spaces, you must put the entire message in SINGLE quotes: `in 'daan ist ein kek'`. the message SHOULD NOT CONTAIN A COLON (like this: `in: 'maggda ist leel'`) because that is the old outdated syntax.
 read messages are case **in**sensitive.
 

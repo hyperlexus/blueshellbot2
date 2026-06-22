@@ -3,7 +3,7 @@ import math
 import random
 from collections import deque
 import discord
-
+from pizza_eval import pizza_eval_write, pizza_eval_read, errors
 from Music.BlueshellBot import BlueshellBot
 from discord import ApplicationContext, Option, OptionChoice
 from discord.ext.commands import slash_command, Cog
@@ -12,9 +12,6 @@ from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
 from UI.PizzaViews import PizzaUndoView, PizzaSingleResultView
-from Utils.PizzaEval import PizzaEvalErrorDict, PizzaEvalUtils
-from Utils.PizzaEval.PizzaEvaluator import pizza_eval_read
-from Utils.PizzaEval.PizzaEvaluatorWrite import pizza_eval_write
 from Utils.BoolDiscordFormatting import evaluate_discord_timestamp
 from Utils.Utils import Utils
 
@@ -56,7 +53,7 @@ class PizzaSlashCog(Cog):
                 if "[replace\\" in current_dict['write'] and len(message.content) > 50:
                     continue
                 pizza_messages.append(pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write']))
-            except PizzaEvalUtils.PizzaError as e:
+            except errors.PizzaError as e:
                 ctx = await self.__bot.get_context(message)
                 details = e.args[0]
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
@@ -76,8 +73,8 @@ class PizzaSlashCog(Cog):
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
     async def pinsert(self, ctx: ApplicationContext,
-                      read: Option(str, "The string to match. The compiler works on this one"),
-                      write: Option(str, "What pizza romani responds with. The [] syntax goes here")):
+                      read = Option(str, "The string to match. The compiler works on this one"),
+                      write = Option(str, "What pizza romani responds with. The [] syntax goes here")):
         if not self.__bot.listingSlash:
             return
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
@@ -91,10 +88,9 @@ class PizzaSlashCog(Cog):
         author_name = self.__bot.get_user(author)
 
         try:
-            PizzaEvalErrorDict.recursion_counter = 0
             pizza_eval_read(read, 'soos')
             pizza_eval_write(author_name, 'siis', write)
-        except PizzaEvalUtils.PizzaError as e:
+        except errors.PizzaError as e:
             details = e.args[0]
             await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
             return
@@ -282,12 +278,11 @@ class PizzaSlashCog(Cog):
         await ctx.defer()
 
         try:
-            PizzaEvalErrorDict.recursion_counter = 0
             if not pizza_eval_read(read, message):
                 await ctx.respond("read check didn't pass.")
                 return
             write = pizza_eval_write(str(ctx.interaction.user)[:-2], message, write)
-        except PizzaEvalUtils.PizzaError as e:
+        except errors.PizzaError as e:
             details = e.args[0]
             await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
             return

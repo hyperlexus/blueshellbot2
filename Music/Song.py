@@ -25,8 +25,7 @@ class Song:
             if key in info.keys():
                 self.__info[key] = info[key]
             else:
-                print(
-                    f'DEVELOPER NOTE -> Required information [{key}] was not found in the music: {self.identifier}')
+                print(f'DEVELOPER NOTE -> Required information [{key}] was not found in the music: {self.identifier}')
                 self.destroy()
                 return
 
@@ -35,6 +34,7 @@ class Song:
                 self.__info[key] = info[key]
 
         self.__cleanTitle()
+        return None
 
     def __cleanTitle(self) -> None:
         self.__info['title'] = ''.join(char if char.isalnum() or char ==

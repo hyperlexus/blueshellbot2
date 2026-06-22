@@ -250,12 +250,17 @@ class MiscSlashCog(Cog):
 
     @slash_command(name='clean', description=helper.HELP_CLEAN)
     async def clean(self, ctx: ApplicationContext,
-                    limit: Option(int, "How many messages to delete?", default=20),
-                    who: Option(str, "whose messages to clean?", choices=["all", "bot", "user", "saul", "any"], default="all")):
+                    limit = Option(int, "How many messages to delete?", default=20),
+                    who = Option(str, "whose messages to clean?", choices=["all", "bot", "user", "saul", "any"], default="all")):
         if Utils.check_if_banned(ctx.author.id, self.__config.PROJECT_PATH):
             await ctx.respond(embed=self.__embeds.BANNED())
             return
-
+        if not ctx.guild:
+            await ctx.respond("this command is restricted to servers.")
+            return
+        if who == "any" and not (ctx.guild.id == 995966314877300737 or ctx.author.guild_permissions.administrator):
+            await ctx.respond("you are not authorised to delete everyone's messages, only your own and the bot's.")
+            return
         if limit > self.__config.CLEAN_AMOUNT:
             await ctx.respond(embed=self.__embeds.TOO_MANY_CLEAN_QUERIES(limit))
             return
@@ -263,16 +268,12 @@ class MiscSlashCog(Cog):
         await ctx.defer(ephemeral=True)
 
         def should_delete(msg):
-            if who == "any":
-                return True
-            if who == "saul" and msg.author.id == 1012755944846938163:
-                return True
-
-            # Only delete messages from THIS bot instance
+            # only delete messages from the bot itself
             if who in ("bot", "all") and msg.author.id == ctx.bot.user.id:
                 return True
-
             if who in ("user", "all") and msg.content.startswith(self.__config.BOT_PREFIX):
+                return True
+            if who == "any":
                 return True
             return False
 
@@ -341,8 +342,7 @@ class MiscSlashCog(Cog):
         await self.__bot.wait_until_ready()
 
     @slash_command(name='restart_compcount',
-                   description='compcount gets restarted and all streaks are saved. only runnable by admin',
-                   guild_ids=[995966314877300737])
+                   description='compcount gets restarted and all streaks are saved. only runnable by admin')
     async def restart_compcount(self, ctx: ApplicationContext):
         if ctx.interaction.user.id not in (422800248935546880, 468786219258740756):
             await ctx.respond("you are not authorised to do this.")
@@ -397,6 +397,23 @@ class MiscSlashCog(Cog):
             full_log = "...\n" + full_log[-1850:]
             
         await message.edit(content=f"deployment completed with code {process.returncode}:\n```bash\n{full_log}```")
+
+    async def restart_blueshellbot(self, ctx: ApplicationContext):
+        await ctx.defer()
+        if ctx.interaction.user.id != 422800248935546880:
+            await ctx.respond("you are not authorised to run this command as you are not the bot admin.")
+            return
+
+        await ctx.respond("restarting...")
+        await asyncio.sleep(0.25)
+        path = os.getcwd()
+        target_path = os.path.abspath(os.path.join(path, "..", "restart-blueshelly.sh"))
+
+        process = await asyncio.create_subprocess_exec(
+            'sh', target_path,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL
+        )
 
     @slash_command(name="base_kakera_calculator",
                        description="calculate a character's ka value based on rank, claims, and keys.")
