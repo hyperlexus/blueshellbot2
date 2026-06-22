@@ -3,6 +3,7 @@ import shutil
 from typing import List
 from Config.Configs import BConfigs
 from yt_dlp import YoutubeDL
+from yt_dlp.utils import YoutubeDLError
 from concurrent.futures import ThreadPoolExecutor
 from Music.Song import Song
 from Utils.Utils import Utils, run_async
@@ -20,7 +21,8 @@ class Downloader:
                      'limit_rate': '250K',
                      'source_address': '0.0.0.0',
                      'rm_cache_dir': True,
-                     'extract_flat': False,
+                     'extract_flat': 'in_playlist',
+                     'ignoreerrors': True,
                      'playlistend': config.MAX_PLAYLIST_LENGTH,
                      'quiet': True,
                      'nocheckcertificate': True,
@@ -41,7 +43,8 @@ class Downloader:
                              'limit_rate': '250K',
                              'source_address': '0.0.0.0',
                              'rm_cache_dir': True,
-                             'extract_flat': False,
+                             'extract_flat': 'in_playlist',
+                             'ignoreerrors': True,
                              'playlistend': config.MAX_PLAYLIST_LENGTH,
                              'quiet': True,
                              'nocheckcertificate': True,
@@ -62,7 +65,8 @@ class Downloader:
                                    'limit_rate': '250K',
                                    'source_address': '0.0.0.0',
                                    'rm_cache_dir': True,
-                                   'extract_flat': False,
+                                   'extract_flat': 'in_playlist',
+                                   'ignoreerrors': True,
                                    'playlistend': config.MAX_PLAYLIST_LENGTH,
                                    'quiet': True,
                                    'nocheckcertificate': True,
@@ -99,7 +103,7 @@ class Downloader:
             song.finish_down(song_info)
             return song
         # Convert yt_dlp error to my own error
-        except DownloadError as e:
+        except YoutubeDLError as e:
             raise DownloadingError(e.msg)
 
     def finish_one_song_with_retry(self, song: Song, retries=2) -> Song:
@@ -140,7 +144,7 @@ class Downloader:
                         print(f'DEVELOPER NOTE -> Failed to Extract URL {url}')
                         return []
                 # Convert the yt_dlp download error to own error
-                except DownloadError:
+                except YoutubeDLError:
                     raise DownloadingError()
                 except Exception as e:
                     print(f'DEVELOPER NOTE -> Error Extracting Music: {e}, {type(e)}')

@@ -80,11 +80,30 @@ class PlayHandler(AbstractHandler):
 
                 return response
             else:  # If multiple songs added
-                # Trigger a task to download all songs and then store them in the playlist
-                asyncio.create_task(self.__downloadSongsInBatches(songs, playersManager))
+                first_song = songs[0]
+                await self.__down.download_song(first_song)
 
+                if not first_song.problematic:
+                    playerLock = playersManager.getPlayerLock(self.guild)
+                    acquired = playerLock.acquire(timeout=self.config.ACQUIRE_LOCK_TIMEOUT)
+                    if acquired:
+                        playlist.add_song(first_song)
+                        playerLock.release()
+                        playCommand = BCommands(BCommandsType.PLAY, None)
+                        await playersManager.sendCommandToPlayer(playCommand, self.guild, self.ctx)
+                    else:
+                        playersManager.resetPlayer(self.guild, self.ctx)
+
+                # communicate that playlist was added
                 embed = self.embeds.SONGS_ADDED(len(songs))
-                return HandlerResponse(self.ctx, embed)
+                response = HandlerResponse(self.ctx, embed)
+
+                # download the rest in the background
+                remaining_songs = songs[1:]
+                if remaining_songs:
+                    asyncio.create_task(self.__downloadSongsInBatches(remaining_songs, playersManager))
+
+                return response
 
         except DownloadingError as error:
             embed = self.embeds.DOWNLOADING_ERROR()
