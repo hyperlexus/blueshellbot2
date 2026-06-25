@@ -21,7 +21,7 @@ class Downloader:
                      'limit_rate': '250K',
                      'source_address': '0.0.0.0',
                      'rm_cache_dir': True,
-                     'extract_flat': 'in_playlist',
+                     'extract_flat': False,
                      'ignoreerrors': True,
                      'playlistend': config.MAX_PLAYLIST_LENGTH,
                      'quiet': True,
