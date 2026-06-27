@@ -22,12 +22,12 @@ from Utils import rr_api
 helper = Helper()
 
 def save_alerts(alerts_list):
-    file_path = "alerts.json"
+    file_path = "Storage/alerts.json"
     with open(file_path, "w") as f:
         json.dump(alerts_list, f, indent=4)
 
 def get_alerts():
-    file_path = "alerts.json"
+    file_path = "Storage/alerts.json"
     if not os.path.exists(file_path):
         return []
     with open(file_path, "r") as f:

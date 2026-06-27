@@ -36,7 +36,7 @@ class WordleCog(Cog):
         self.bot = bot
         self.__config = BConfigs()
 
-        self.conn = sqlite3.connect('wordle_stats.db')
+        self.conn = sqlite3.connect('Storage/wordle_stats.db')
         self.cursor = self.conn.cursor()
         self._setup_db()
 

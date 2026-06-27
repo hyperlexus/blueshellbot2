@@ -53,7 +53,7 @@ class ModCog(Cog):
 
         username = str(self.__bot.get_user(int(to_ban)))[:-2]
 
-        with open("./banlist.txt", "r+") as file:
+        with open("./Storage/banlist.txt", "r+") as file:
             banlist = file.read().splitlines()
             if to_ban not in banlist:
                 banlist.append(to_ban)
@@ -62,7 +62,7 @@ class ModCog(Cog):
                 embed = self.__embeds.SUCCESSFUL_UNBAN(username)
                 banlist[:] = (uid for uid in banlist if uid != to_ban)
 
-        with open("./banlist.txt", "w") as file:
+        with open("./Storage/banlist.txt", "w") as file:
             for i in banlist:
                 file.write(f"{i}\n")
 

@@ -25,7 +25,7 @@ class Utils:
     def check_if_banned(cls, user, path) -> bool:
         banned_ids = []
         os.chdir(path)
-        with open("./banlist.txt", "r") as file:
+        with open("./Storage/banlist.txt", "r") as file:
             for line in file:
                 try:
                     banned_ids.append(int(line))

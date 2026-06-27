@@ -20,6 +20,23 @@ helper = Helper()
 with open("database.json", "r") as f:
     data = json.load(f)
 
+try:
+    with open("Storage/pizza_lb.json", "r") as f_lb:
+        pizza_lb = json.load(f_lb)
+except (FileNotFoundError, json.JSONDecodeError):
+    pizza_lb = {}
+
+pizza_tiers = {
+    1000: "<:pizza_champion:1520095859159732334>",
+    640: "<:pizza_grandmaster:1520095823235645480>",
+    320: "<:pizza_master:1520095781229432945>",
+    160: "<:pizza_diamond:1520095746970615818>",
+    80: "<:pizza_platinum:1520095709968335109>",
+    40: "<:pizza_gold:1520095667299680546>",
+    20: "<:pizza_silver:1520095621556605060>",
+    10: "<:pizza_bronze:1520095589247877200>"
+}
+
 
 class PizzaSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
@@ -49,10 +66,10 @@ class PizzaSlashCog(Cog):
             try:
                 if not pizza_eval_read(current_dict['read'], message.content):
                     continue
-
                 if "[replace\\" in current_dict['write'] and len(message.content) > 50:
                     continue
-                pizza_messages.append(pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write']))
+                evaluated_msg = pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write'])
+                pizza_messages.append((current_dict['time'], evaluated_msg))
             except errors.PizzaError as e:
                 ctx = await self.__bot.get_context(message)
                 details = e.args[0]
@@ -61,13 +78,30 @@ class PizzaSlashCog(Cog):
         if not pizza_messages:
             return
 
-        # 過去10件にないメッセージを選んで送ってください。
-        possible = [m for m in pizza_messages if m not in self.last_10_messages]
+        # 過去10件にないメッセージを選んで送ってください。#2
+        possible = [m for m in pizza_messages if m[1] not in self.last_10_messages]
         if not possible:
             return
-        to_send = random.choice(possible)
+
+        chosen_command_id, to_send = random.choice(possible)
         self.last_10_messages.append(to_send)
         content = to_send if to_send else "\u2800"
+
+        if chosen_command_id not in pizza_lb:
+            pizza_lb[chosen_command_id] = 0
+        pizza_lb[chosen_command_id] += 1
+
+        with open("Storage/pizza_lb.json", "w") as f_lb:
+            json.dump(pizza_lb, f_lb, indent=4)
+
+        count = pizza_lb[chosen_command_id]
+        emoji_to_append = ""
+
+        for threshold, emoji in pizza_tiers.items():
+            if count == threshold:
+                emoji_to_append = emoji
+        if emoji_to_append:
+            content = f"{emoji_to_append} {content}"
         await message.channel.send(content)
         return
 
@@ -76,10 +110,9 @@ class PizzaSlashCog(Cog):
                       read = Option(str, "The string to match. The compiler works on this one"),
                       write = Option(str, "What pizza romani responds with. The [] syntax goes here")):
         if not self.__bot.listingSlash:
-            return
+            return None
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            await ctx.respond(embed=self.__embeds.BANNED())
-            return
+            return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
 
         # initialise all variables that will be passed to the json
@@ -92,12 +125,10 @@ class PizzaSlashCog(Cog):
             pizza_eval_write(author_name, 'siis', write)
         except errors.PizzaError as e:
             details = e.args[0]
-            await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
-            return
+            return await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
         if '@everyone' in write or '@here' in write:
-            await ctx.send("please do not attempt to make pizza ping everyone!")
-            return
+            return await ctx.send("please do not attempt to make pizza ping everyone!")
 
         new_command = {
             "time": time,
@@ -119,9 +150,7 @@ class PizzaSlashCog(Cog):
             embeds_ref=self.__embeds
         )
 
-        await ctx.respond(embed=self.__embeds.PIZZA_INSERTED(read, write, time),
-                          view=view)
-        return
+        return await ctx.respond(embed=self.__embeds.PIZZA_INSERTED(read, write, time), view=view)
 
     @slash_command(name="plist", description=helper.HELP_PLIST)
     async def plist(self, ctx: ApplicationContext,
@@ -180,10 +209,21 @@ class PizzaSlashCog(Cog):
         command_list = []
 
         for d in page_items:
+            cmd_id = str(d['time'])
+            count = pizza_lb.get(cmd_id, 0)
+            current_rank_emoji = ""
+
+            for threshold, emoji in pizza_tiers.items():
+                if count >= threshold:
+                    current_rank_emoji = f" {emoji}"
+                    break
+
+            ranked = f"{current_rank_emoji} "
+
             if len(d['write']) > 2000 or len(d['read']) > 2000:
-                command_list.append(f"{d['time']}: command too long to display.")
+                command_list.append(f"{ranked}{cmd_id}: command too long to display.")
             else:
-                command_list.append(f"{d['time']}: {d['read']} -> {d['write']}")
+                command_list.append(f"{ranked}{cmd_id}: {d['read']} -> {d['write']}")
 
         result = "\n".join(command_list)
         if len(result) > 4096:
@@ -227,9 +267,20 @@ class PizzaSlashCog(Cog):
         else:
             author_name = str(self.__bot.get_user(int(valid_command['author']))).split(' ')[0]
             real_time = int(valid_command['time']) // 1000
-            await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
-                real_time, author_name, valid_command['read'], valid_command['write'], mode="info"))
-            return
+            count = pizza_lb.get(str(command_id), 0)
+            current_rank_emoji = ""
+
+            for threshold, emoji in pizza_tiers.items():
+                if count >= threshold:
+                    current_rank_emoji = emoji
+                    break
+
+            await ctx.respond(
+                embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
+                    real_time, author_name, valid_command['read'], valid_command['write'], mode="info",
+                    uses=count, rank_emoji=current_rank_emoji
+                )
+            )
 
     # noinspection DuplicatedCode
     @slash_command(name="premove", description=helper.HELP_PREMOVE)
@@ -260,6 +311,11 @@ class PizzaSlashCog(Cog):
             await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
                 real_time, author_name, valid_command['read'], valid_command['write'], mode="remove"))
             data['p_commands'] = [d for d in data['p_commands'] if d != valid_command]
+
+            if str(command_id) in pizza_lb:
+                del pizza_lb[str(command_id)]
+                with open("pizza_lb.json", "w") as f_lb:
+                    json.dump(pizza_lb, f_lb, indent=4)
 
         with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
@@ -328,6 +384,50 @@ class PizzaSlashCog(Cog):
         await ctx.interaction.followup.send(output)
         if command == "pinsert":
             await ctx.interaction.followup.send(output_write)
+
+    @slash_command(name="ptop", description="Displays the top 10 most used pizza commands.")
+    async def ptop(self, ctx: ApplicationContext):
+        if not self.__bot.listingSlash:
+            return None
+        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
+            return await ctx.respond(embed=self.__embeds.BANNED())
+        await ctx.defer()
+
+        # Check if the leaderboard is empty
+        if not pizza_lb:
+            empty_embed = discord.Embed(
+                title="Pizza Leaderboard empty",
+                description="maybe wrong database location?",
+                color=self.__colors.BLUE
+            )
+            return await ctx.respond(embed=empty_embed)
+
+        sorted_lb = sorted(pizza_lb.items(), key=lambda item: item[1], reverse=True)[:10]
+
+        description_lines = []
+        for index, (cmd_id, count) in enumerate(sorted_lb):
+            current_rank_emoji = ""
+            for threshold, emoji in pizza_tiers.items():
+                if count >= threshold:
+                    current_rank_emoji = f" {emoji}"
+                    break
+            cmd_details = next((d for d in data['p_commands'] if d['time'] == cmd_id), None)
+
+            if cmd_details:
+                read_val = cmd_details['read'][:25] + ("..." if len(cmd_details['read']) > 25 else "")
+                write_val = cmd_details['write'][:35] + ("..." if len(cmd_details['write']) > 35 else "")
+                line = f"\\#{index + 1}: {current_rank_emoji} {count} | {read_val} ➔ {write_val}"
+            else:
+                line = f"\\#{index + 1}: {current_rank_emoji} {count} | command was removed."
+
+            description_lines.append(line)
+
+        embed = discord.Embed(
+            title="Pizza command leaderboard",
+            description="\n".join(description_lines),
+            color=self.__colors.BLUE
+        )
+        return await ctx.respond(embed=embed)
 
 
 def setup(bot):
