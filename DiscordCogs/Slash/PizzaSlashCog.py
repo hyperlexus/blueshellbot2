@@ -189,7 +189,7 @@ class PizzaSlashCog(Cog):
         original_author_id = valid_command['author']
         is_original_author = str(ctx.interaction.user.id) == original_author_id
 
-        if is_original_author or original_author_id == 0:
+        if is_original_author or original_author_id == "0":
             valid_command[filter_category] = new_input
             with open("database.json", "w") as f2:
                 json.dump(data, f2, indent=4)
