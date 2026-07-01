@@ -11,7 +11,7 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from UI.PizzaViews import PizzaUndoView, PizzaSingleResultView
+from UI.PizzaViews import PizzaUndoView, PizzaSingleResultView, PizzaConsentView, PizzaPaginationView
 from Utils.BoolDiscordFormatting import evaluate_discord_timestamp
 from Utils.Utils import Utils
 
@@ -50,18 +50,20 @@ class PizzaSlashCog(Cog):
     @Cog.listener()
     async def on_message(self, message):
         if self.__bot.voice_clients:
-            return
+            return None
+        if message.author.id == 1509153361000136825:
+            return await message.add_reaction("🤫")
         if self.is_muted or message.author == self.__bot.user or not message.content:
-            return
+            return None
         if "nopizza" in (str(message.channel.topic) if isinstance(message.channel, discord.TextChannel) else ""):
-            return
+            return None
 
         pizza_messages = []
         is_a_dm = message.guild is None
         has_pizza_role = any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles) if message.author.roles is not None else False
         is_okay_server = (not is_a_dm and message.guild.id == self.__config.PIZZA_SERVER and has_pizza_role)
         if not (is_a_dm or is_okay_server):
-            return
+            return None
         for current_dict in data['p_commands']:
             try:
                 if not pizza_eval_read(current_dict['read'], message.content):
@@ -76,12 +78,12 @@ class PizzaSlashCog(Cog):
                 await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
 
         if not pizza_messages:
-            return
+            return None
 
         # 過去10件にないメッセージを選んで送ってください。#2
         possible = [m for m in pizza_messages if m[1] not in self.last_10_messages]
         if not possible:
-            return
+            return None
 
         chosen_command_id, to_send = random.choice(possible)
         self.last_10_messages.append(to_send)
@@ -102,15 +104,13 @@ class PizzaSlashCog(Cog):
                 emoji_to_append = emoji
         if emoji_to_append:
             content = f"{emoji_to_append} {content}"
-        await message.channel.send(content)
-        return
+        return await message.channel.send(content)
 
     @slash_command(name="pinsert", description=helper.HELP_PINSERT)
     async def pinsert(self, ctx: ApplicationContext,
                       read = Option(str, "The string to match. The compiler works on this one"),
                       write = Option(str, "What pizza romani responds with. The [] syntax goes here")):
-        if not self.__bot.listingSlash:
-            return None
+        if not self.__bot.listingSlash: return None
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
             return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
@@ -152,6 +152,64 @@ class PizzaSlashCog(Cog):
 
         return await ctx.respond(embed=self.__embeds.PIZZA_INSERTED(read, write, time), view=view)
 
+    @slash_command(name="pedit", description=helper.HELP_PEDIT)
+    async def pedit(self, ctx: ApplicationContext,
+                    command_id: Option = Option(int, description="command id. you can get this from /plist"),
+                    filter_category: Option = Option(str, choices=[
+                        OptionChoice(name='read', value='read'),
+                        OptionChoice(name='write', value='write')]),
+                    new_input: Option = Option(str, description="what to replace the current content with")
+                    ):
+        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
+            return await ctx.respond(embed=self.__embeds.BANNED())
+        await ctx.defer()
+
+        valid_command = None
+        for current_dict in data['p_commands']:
+            if current_dict['time'] == str(command_id):
+                valid_command = current_dict
+                break
+
+        if valid_command is None:
+            return await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
+
+        try:
+            if filter_category == 'read':
+                pizza_eval_read(new_input, 'soos')
+            else:  # write
+                author_name = str(ctx.interaction.user).split(" ")[0]
+                pizza_eval_write(author_name, 'siis', new_input)
+        except errors.PizzaError as e:
+            details = e.args[0]
+            return await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+
+        if filter_category == 'write' and ('@everyone' in new_input or '@here' in new_input):
+            return await ctx.send("please do not attempt to make pizza ping everyone!")
+
+        original_author_id = valid_command['author']
+        is_original_author = str(ctx.interaction.user.id) == original_author_id
+
+        if is_original_author:
+            valid_command[filter_category] = new_input
+            with open("database.json", "w") as f2:
+                json.dump(data, f2, indent=4)
+            return await ctx.respond(f"edited `{filter_category}` value for command `{command_id}`!")
+        else:
+            view = PizzaConsentView(
+                original_author_id=original_author_id,
+                data_ref=data,
+                command_id=str(command_id),
+                filter_category=filter_category,
+                new_input=new_input
+            )
+
+            prompt_message = (
+                f"<@{original_author_id}>, {ctx.interaction.user.display_name} wants to change the "
+                f"`{filter_category}` category of your pizza command `{command_id}` to:\n```\n{new_input}\n```\n"
+                f"Do you consent?"
+            )
+            return await ctx.respond(prompt_message, view=view)
+
     @slash_command(name="plist", description=helper.HELP_PLIST)
     async def plist(self, ctx: ApplicationContext,
                     filter_category = Option(str, choices=[
@@ -161,9 +219,9 @@ class PizzaSlashCog(Cog):
                         OptionChoice(name='write', value='write')],
                                             description="What type to filter by. Requires string_to_match to be passed as well.",
                                             default=None),
-                    string_to_match = Option(str,
-                                            "String to filter by. Requires command_filter to be passed as well.", default=None),
-                    page = Option(int,
+                    string_to_match: Option = Option(str,
+                                            description="String to filter by. Requires command_filter to be passed as well.", default=None),
+                    page: Option = Option(int,
                                  "which page of list to show. may be required if output is longer than 25 lines", default=None)
                     ):
         if not self.__bot.listingSlash: return None
@@ -193,22 +251,9 @@ class PizzaSlashCog(Cog):
         if total_amount == 0:
             return await ctx.respond(embed=self.__embeds.PIZZA_LIST("No commands found."))
 
-        items_per_page = 25
-        amount_pages = math.ceil(total_amount / items_per_page)
-
-        if total_amount > items_per_page:
-            if page is None:
-                return await ctx.respond(embed=self.__embeds.PIZZA_LIST_TOO_LONG(total_amount, amount_pages))
-            if current_page >= amount_pages:
-                return await ctx.respond(embed=self.__embeds.SLASH_PLIST_PAGE_LARGER_THAN_AMOUNT_COMMANDS(amount_pages))
-
-        start = current_page * items_per_page
-        end = start + items_per_page
-        page_items = filtered[start:end]
-
         command_list = []
-
-        for d in page_items:
+        count, ranked = 0, ""
+        for d in filtered:
             cmd_id = str(d['time'])
             count = pizza_lb.get(cmd_id, 0)
             current_rank_emoji = ""
@@ -225,22 +270,36 @@ class PizzaSlashCog(Cog):
             else:
                 command_list.append(f"{ranked}{cmd_id}: {d['read']} -> {d['write']}")
 
-        result = "\n".join(command_list)
-        if len(result) > 4096:
-            longest = max(result.splitlines(), key=len)
-            result = f"command list was too long. length was {len(result)}.\nlongest command (first 1k characters):\n{longest[:1000]}"
-
-        view = None
         if total_amount == 1:
             view = PizzaSingleResultView(
-                command_dict=filtered[0],
-                bot=self.__bot, data_ref=data,
-                embeds_ref=self.__embeds, author_ref=str(ctx.interaction.user.id)
+                command_dict=filtered[0], bot=self.__bot, data_ref=data,
+                embeds_ref=self.__embeds, author_ref=str(ctx.interaction.user.id),
+                uses_ref=count, rank_emoji_ref=ranked
             )
+            embed = (self.__embeds.PIZZA_LIST_FILTERED(command_list[0], filter_category, string_to_match)
+                     if filter_category else self.__embeds.PIZZA_LIST(command_list[0]))
+            return await ctx.respond(embed=embed, view=view)
 
-        embed = (self.__embeds.PIZZA_LIST_FILTERED(result, filter_category, string_to_match)
-                 if filter_category else self.__embeds.PIZZA_LIST(result))
-        return await ctx.respond(embed=embed, view=view)
+        def generate_plist_embed(result_text, curr_page, tot_pages):
+            if len(result_text) > 4096:
+                longest = max(result_text.splitlines(), key=len)
+                result_text = f"command list was too long. length was {len(result_text)}.\nlongest command (first 1k characters):\n{longest[:1000]}"
+
+            list_embed = (self.__embeds.PIZZA_LIST_FILTERED(result_text, filter_category, string_to_match)
+                     if filter_category else self.__embeds.PIZZA_LIST(result_text))
+            if tot_pages > 1:
+                list_embed.set_footer(text=f"page {curr_page}/{tot_pages}")
+            return list_embed
+
+        current_page_idx = (page - 1) if page and page > 0 else 0
+        view = PizzaPaginationView(
+            items=command_list,
+            embed_generator=generate_plist_embed,
+            per_page=25,
+            starting_page=current_page_idx
+        )
+
+        return await ctx.respond(embed=view.get_current_embed(), view=view)
 
     @slash_command(name="pinfo", description=helper.HELP_PINFO)
     async def pinfo(self, ctx: ApplicationContext,
@@ -385,15 +444,15 @@ class PizzaSlashCog(Cog):
         if command == "pinsert":
             await ctx.interaction.followup.send(output_write)
 
-    @slash_command(name="ptop", description="Displays the top 10 most used pizza commands.")
-    async def ptop(self, ctx: ApplicationContext):
+    @slash_command(name="ptop", description="Displays a ranking of the top most used pizza commands.")
+    async def ptop(self, ctx: ApplicationContext,
+                   page: Option = Option(int, "which page to show.", default=None)):
         if not self.__bot.listingSlash:
             return None
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
             return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
 
-        # Check if the leaderboard is empty
         if not pizza_lb:
             empty_embed = discord.Embed(
                 title="Pizza Leaderboard empty",
@@ -402,7 +461,7 @@ class PizzaSlashCog(Cog):
             )
             return await ctx.respond(embed=empty_embed)
 
-        sorted_lb = sorted(pizza_lb.items(), key=lambda item: item[1], reverse=True)[:10]
+        sorted_lb = sorted(pizza_lb.items(), key=lambda item: item[1], reverse=True)
 
         description_lines = []
         for index, (cmd_id, count) in enumerate(sorted_lb):
@@ -422,12 +481,25 @@ class PizzaSlashCog(Cog):
 
             description_lines.append(line)
 
-        embed = discord.Embed(
-            title="Pizza command leaderboard",
-            description="\n".join(description_lines),
-            color=self.__colors.BLUE
+        def generate_ptop_embed(result_text, curr_page, tot_pages):
+            embed = discord.Embed(
+                title="Pizza command leaderboard",
+                description=result_text,
+                color=self.__colors.BLUE
+            )
+            if tot_pages > 1:
+                embed.set_footer(text=f"Page {curr_page} of {tot_pages}")
+            return embed
+
+        current_page_idx = (page - 1) if page and page > 0 else 0
+        view = PizzaPaginationView(
+            items=description_lines,
+            embed_generator=generate_ptop_embed,
+            per_page=10,
+            starting_page=current_page_idx
         )
-        return await ctx.respond(embed=embed)
+
+        return await ctx.respond(embed=view.get_current_embed(), view=view)
 
 
 def setup(bot):

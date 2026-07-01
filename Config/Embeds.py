@@ -717,6 +717,7 @@ class BEmbeds:
 
     def SLASH_PINFO_PREMOVE_RESULT(self, time, author, read, write, mode, uses=None, rank_emoji=""):
         ranked = f"Triggered {rank_emoji}{uses} times.\n" if uses is not None else ""
+        too_long = False
         description = (f"{ranked}"
                        f"Creation time: <t:{time}> \n"
                        f"Added by: {author} \n"
@@ -725,17 +726,19 @@ class BEmbeds:
         if len(description) > 3000:
             read = read[:1000]
             write = write[:1000]
+            too_long = True
             description = (f"{ranked}"
                            f"Creation time: <t:{time}> \n"
                            f"Added by: {author} \n"
                            f"Read value: {read} \n"
-                           f"Write value: {write}"
-                           f"\n*This command was too long, so its read and write were trimmed to 1k characters each.*")
+                           f"Write value: {write}")
         embed = Embed(
             title=f"{'Information on a pizza command' if mode == 'info' else 'Command removed from Pizza Romani'}",
             description=description,
             color=self.__colors.BLUE
         )
+        if too_long:
+            embed.set_footer(text="This command was too long, so its read and write were trimmed to 1k characters each.")
         return embed
 
     def UPTIME(self, uptime: str):

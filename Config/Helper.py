@@ -81,6 +81,8 @@ class Helper(Singleton):
                                     f'If you provide either filter_category or string_to_match, you HAVE to pass the other one too.'
                                     f'Choose one of the options for filter_category and start listing :)')
 
+            self.HELP_PEDIT = 'allows editing of an existing pizza command.'
+
             self.HELP_PINFO = 'Gets info about one pizza command.'
             self.HELP_PINFO_LONG = (f'Retrieves information about one pizza romani command.\n'
                                     f'You need the command\'s ID to find the command.\n'
