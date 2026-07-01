@@ -189,12 +189,13 @@ class PizzaSlashCog(Cog):
         original_author_id = valid_command['author']
         is_original_author = str(ctx.interaction.user.id) == original_author_id
 
-        if is_original_author:
+        if is_original_author or original_author_id == 0:
             valid_command[filter_category] = new_input
             with open("database.json", "w") as f2:
                 json.dump(data, f2, indent=4)
             return await ctx.respond(f"edited `{filter_category}` value for command `{command_id}`!")
         else:
+            old_input = valid_command[filter_category]
             view = PizzaConsentView(
                 original_author_id=original_author_id,
                 data_ref=data,
@@ -205,7 +206,7 @@ class PizzaSlashCog(Cog):
 
             prompt_message = (
                 f"<@{original_author_id}>, {ctx.interaction.user.display_name} wants to change the "
-                f"`{filter_category}` category of your pizza command `{command_id}` to:\n```\n{new_input}\n```\n"
+                f"`{filter_category}` category of your pizza command `{command_id}` from\n```\n{old_input}\n```\nto:\n```\n{new_input}\n```\n"
                 f"Do you consent?"
             )
             return await ctx.respond(prompt_message, view=view)
