@@ -17,7 +17,7 @@ from Utils.Utils import Utils
 
 helper = Helper()
 
-with open("database.json", "r") as f:
+with open("Storage/pizza_commands.json", "r") as f:
     data = json.load(f)
 
 try:
@@ -60,18 +60,17 @@ class PizzaSlashCog(Cog):
 
         pizza_messages = []
         is_a_dm = message.guild is None
-        has_pizza_role = any(role.id == self.__config.PIZZA_ROLE for role in message.author.roles) if message.author.roles is not None else False
+        has_pizza_role = bool(message.author.get_role(self.__config.PIZZA_ROLE))
         is_okay_server = (not is_a_dm and message.guild.id == self.__config.PIZZA_SERVER and has_pizza_role)
-        if not (is_a_dm or is_okay_server):
-            return None
-        for current_dict in data['p_commands']:
+        if not (is_a_dm or is_okay_server): return None
+        for cmd_id, current_dict in data.items():
             try:
                 if not pizza_eval_read(current_dict['read'], message.content):
                     continue
                 if "[replace\\" in current_dict['write'] and len(message.content) > 50:
                     continue
                 evaluated_msg = pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write'])
-                pizza_messages.append((current_dict['time'], evaluated_msg))
+                pizza_messages.append((cmd_id, evaluated_msg))
             except errors.PizzaError as e:
                 ctx = await self.__bot.get_context(message)
                 details = e.args[0]
@@ -131,13 +130,11 @@ class PizzaSlashCog(Cog):
             return await ctx.send("please do not attempt to make pizza ping everyone!")
 
         new_command = {
-            "time": time,
             "author": author,
             "read": read,
             "write": write
         }
-
-        data['p_commands'].append(new_command)
+        data[time] = new_command
 
         with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
@@ -158,17 +155,13 @@ class PizzaSlashCog(Cog):
                     filter_category: Option = Option(str, choices=[
                         OptionChoice(name='read', value='read'),
                         OptionChoice(name='write', value='write')]),
-                    new_input: Option = Option(str, description="what to replace the current content with")
+                    new_input = Option(str, description="what to replace the current content with")
                     ):
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
             return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
 
-        valid_command = None
-        for current_dict in data['p_commands']:
-            if current_dict['time'] == str(command_id):
-                valid_command = current_dict
-                break
+        valid_command = data.get(str(command_id))
 
         if valid_command is None:
             return await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
@@ -233,8 +226,6 @@ class PizzaSlashCog(Cog):
             return await ctx.respond(embed=self.__embeds.SLASH_PLIST_NOT_BOTH_OPTIONS())
         await ctx.defer()
 
-        current_page = (page - 1) if page and page > 0 else 0
-
         if filter_category == "author":
             raw_match = string_to_match
             string_to_match = str(Utils.ping_to_id(string_to_match))
@@ -242,11 +233,11 @@ class PizzaSlashCog(Cog):
                 return await ctx.respond(embed=self.__embeds.BAD_USER_ID(raw_match))
 
         if not filter_category:
-            filtered = data['p_commands']
+            filtered = list(data.items())
         elif filter_category == "time":
-            filtered = [d for d in data['p_commands'] if evaluate_discord_timestamp(int(d['time']) // 1000, string_to_match)]
+            filtered = [(k, v) for k, v in data.items() if evaluate_discord_timestamp(int(k) // 1000, string_to_match)]
         else:
-            filtered = [d for d in data['p_commands'] if string_to_match.lower() in d.get(filter_category, "").lower()]
+            filtered = [(k, v) for k, v in data.items() if string_to_match.lower() in v.get(filter_category, "").lower()]
 
         total_amount = len(filtered)
         if total_amount == 0:
@@ -254,8 +245,7 @@ class PizzaSlashCog(Cog):
 
         command_list = []
         count, ranked = 0, ""
-        for d in filtered:
-            cmd_id = str(d['time'])
+        for cmd_id, cmd_details in filtered:
             count = pizza_lb.get(cmd_id, 0)
             current_rank_emoji = ""
 
@@ -266,10 +256,10 @@ class PizzaSlashCog(Cog):
 
             ranked = f"{current_rank_emoji} "
 
-            if len(d['write']) > 2000 or len(d['read']) > 2000:
+            if len(cmd_details['write']) > 2000 or len(cmd_details['read']) > 2000:
                 command_list.append(f"{ranked}{cmd_id}: command too long to display.")
             else:
-                command_list.append(f"{ranked}{cmd_id}: {d['read']} -> {d['write']}")
+                command_list.append(f"{ranked}{cmd_id}: {cmd_details['read']} -> {cmd_details['write']}")
 
         if total_amount == 1:
             view = PizzaSingleResultView(
@@ -289,7 +279,7 @@ class PizzaSlashCog(Cog):
             list_embed = (self.__embeds.PIZZA_LIST_FILTERED(result_text, filter_category, string_to_match)
                      if filter_category else self.__embeds.PIZZA_LIST(result_text))
             if tot_pages > 1:
-                list_embed.set_footer(text=f"page {curr_page}/{tot_pages}")
+                list_embed.set_footer(text=f"Page {curr_page} of {tot_pages}")
             return list_embed
 
         current_page_idx = (page - 1) if page and page > 0 else 0
@@ -312,21 +302,14 @@ class PizzaSlashCog(Cog):
             return
         await ctx.defer()
 
-        valid_command = None
-        for current_dict in data['p_commands']:
-            if current_dict['time'] == str(command_id):
-                if valid_command is None:
-                    valid_command = current_dict
-                else:
-                    await ctx.respond(embed=self.__embeds.SLASH_PIZZA_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(command_id))
-                    return
+        valid_command = data.get(str(command_id))
 
         if valid_command is None:
             await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
             return
         else:
             author_name = str(self.__bot.get_user(int(valid_command['author']))).split(' ')[0]
-            real_time = int(valid_command['time']) // 1000
+            real_time = int(command_id) // 1000
             count = pizza_lb.get(str(command_id), 0)
             current_rank_emoji = ""
 
@@ -346,30 +329,19 @@ class PizzaSlashCog(Cog):
     @slash_command(name="premove", description=helper.HELP_PREMOVE)
     async def premove(self, ctx: ApplicationContext,
                       command_id = Option(int, "Command id. You can get this from /plist")):
-        if not self.__bot.listingSlash:
-            return
+        if not self.__bot.listingSlash: return None
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            await ctx.respond(embed=self.__embeds.BANNED())
-            return
+            return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
 
-        valid_command = None
-        for current_dict in data['p_commands']:
-            if current_dict['time'] == str(command_id):
-                if valid_command is None:
-                    valid_command = current_dict
-                else:
-                    await ctx.respond(embed=self.__embeds.SLASH_PIZZA_MORE_THAN_ONE_COMMAND_WITH_SAME_ID(command_id))
-                    return
+        valid_command = data.get(str(command_id))
 
         if valid_command is None:
-            await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
-            return
+            return await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
         else:
             author_name = str(self.__bot.get_user(int(valid_command['author']))).split(' ')[0]
             real_time = int(valid_command['time']) // 1000
-            await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
-                real_time, author_name, valid_command['read'], valid_command['write'], mode="remove"))
+            await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(real_time, author_name, valid_command['read'], valid_command['write'], mode="remove"))
             data['p_commands'] = [d for d in data['p_commands'] if d != valid_command]
 
             if str(command_id) in pizza_lb:
@@ -379,7 +351,7 @@ class PizzaSlashCog(Cog):
 
         with open("database.json", "w") as f2:
             json.dump(data, f2, indent=4)
-        return
+        return None
 
     @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
     async def ptestcompiler(self, ctx: ApplicationContext,
@@ -471,7 +443,7 @@ class PizzaSlashCog(Cog):
                 if count >= threshold:
                     current_rank_emoji = f" {emoji}"
                     break
-            cmd_details = next((d for d in data['p_commands'] if d['time'] == cmd_id), None)
+            cmd_details = data.get(cmd_id)
 
             if cmd_details:
                 read_val = cmd_details['read'][:25] + ("..." if len(cmd_details['read']) > 25 else "")
