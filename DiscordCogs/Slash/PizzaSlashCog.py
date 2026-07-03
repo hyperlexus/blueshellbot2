@@ -123,8 +123,7 @@ class PizzaSlashCog(Cog):
             pizza_eval_read(read, 'soos')
             pizza_eval_write(author_name, 'siis', write)
         except errors.PizzaError as e:
-            details = e.args[0]
-            return await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+            return await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(e))
 
         if '@everyone' in write or '@here' in write:
             return await ctx.send("please do not attempt to make pizza ping everyone!")
@@ -173,8 +172,7 @@ class PizzaSlashCog(Cog):
                 author_name = str(ctx.interaction.user).split(" ")[0]
                 pizza_eval_write(author_name, 'siis', new_input)
         except errors.PizzaError as e:
-            details = e.args[0]
-            return await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+            return await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(e))
 
         if filter_category == 'write' and ('@everyone' in new_input or '@here' in new_input):
             return await ctx.send("please do not attempt to make pizza ping everyone!")
@@ -358,24 +356,19 @@ class PizzaSlashCog(Cog):
                             read = Option(str, "The string to match. The compiler works on this one"),
                             write = Option(str, "What pizza romani responds with. The [] syntax goes here"),
                             message = Option(str, "test message")):
-        if not self.__bot.listingSlash:
-            return
+        if not self.__bot.listingSlash: return None
         if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            await ctx.respond(embed=self.__embeds.BANNED())
-            return
+            return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
 
         try:
             if not pizza_eval_read(read, message):
-                await ctx.respond("read check didn't pass.")
-                return
+                return await ctx.respond("read check didn't pass.")
             write = pizza_eval_write(str(ctx.interaction.user)[:-2], message, write)
         except errors.PizzaError as e:
-            details = e.args[0]
-            await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
-            return
+            return await ctx.respond(embed=self.__embeds.PIZZA_INVALID_INPUT(e))
 
-        await ctx.respond(write)
+        return await ctx.respond(write)
 
     @slash_command(name="pmute", description=helper.HELP_PMUTE)
     async def pmute(self, ctx: ApplicationContext):

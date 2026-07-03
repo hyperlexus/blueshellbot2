@@ -629,8 +629,8 @@ class BEmbeds:
         )
         return embed
 
-    def PIZZA_INVALID_INPUT(self, error_code, expression):
-        error_message = str(PizzaError(error_code, expression))
+    def PIZZA_INVALID_INPUT(self, error_info: PizzaError):
+        error_message = error_info.__str__()
         embed = Embed(
             title="Error: Pizza Romani input not valid.",
             description="The input did not satisfy all requirements. Problem: \n\n" + error_message,
