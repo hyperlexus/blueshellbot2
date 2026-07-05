@@ -74,7 +74,7 @@ class PizzaSlashCog(Cog):
             return None
 
         for cmd_id, evaluated_msg in pizza_messages:
-            if pizza_lb[cmd_id] == 0:
+            if pizza_lb.get(cmd_id) is None:
                 pizza_messages = [(cmd_id, evaluated_msg)]  # make sure commands that have never been used get a chance
                 break
 
