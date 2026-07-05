@@ -339,14 +339,14 @@ class PizzaSlashCog(Cog):
             author_name = str(self.__bot.get_user(int(valid_command['author']))).split(' ')[0]
             real_time = int(command_id) // 1000
             await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(real_time, author_name, valid_command['read'], valid_command['write'], mode="remove"))
-            data['p_commands'] = [d for d in data['p_commands'] if d != valid_command]
+            del data[str(command_id)]
 
             if str(command_id) in pizza_lb:
                 del pizza_lb[str(command_id)]
                 with open("pizza_lb.json", "w") as f_lb:
                     json.dump(pizza_lb, f_lb, indent=4)
 
-        with open("database.json", "w") as f2:
+        with open("Storage/pizza_commands.json", "w") as f2:
             json.dump(data, f2, indent=4)
         return None
 
