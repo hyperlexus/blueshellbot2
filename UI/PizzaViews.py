@@ -47,10 +47,10 @@ class PizzaSingleResultView(discord.ui.View):
     async def info_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         if str(interaction.user.id) != self.author_ref:
             return await interaction.response.send_message("This offer doesn't match any of yours")
-        author_name = str(self.bot.get_user(int(self.command['author']))).split(' ')[0]
-        real_time = int(self.command['time']) // 1000
+        author_name = str(self.bot.get_user(int(self.command[1]['author']))).split(' ')[0]
+        real_time = int(self.command[0]) // 1000
         embed = self.__embeds.SLASH_PINFO_PREMOVE_RESULT(
-            real_time, author_name, self.command['read'], self.command['write'], mode="info",
+            real_time, author_name, self.command[1]['read'], self.command[1]['write'], mode="info",
             uses=self.uses_ref, rank_emoji=self.rank_emoji_ref
         )
         return await interaction.response.send_message(embed=embed)

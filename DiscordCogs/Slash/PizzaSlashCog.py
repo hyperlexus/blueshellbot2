@@ -49,20 +49,14 @@ class PizzaSlashCog(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if self.__bot.voice_clients:
-            return None
-        if message.author.id == 1509153361000136825:
-            return await message.add_reaction("🤫")
-        if self.is_muted or message.author == self.__bot.user or not message.content:
-            return None
-        if "nopizza" in (str(message.channel.topic) if isinstance(message.channel, discord.TextChannel) else ""):
-            return None
+        if self.is_muted or not message.content or message.author == self.__bot.user or self.__bot.voice_clients: return None
+        if message.author.id == 1509153361000136825 and random.random() < 0.01: return await message.add_reaction("🤫")
+        if message.guild is None: pass
+        else:
+            if message.guild.id != self.__config.PIZZA_SERVER or not isinstance(message.author, discord.Member) or not message.author.get_role(self.__config.PIZZA_ROLE): return None
+        if "nopizza" in (getattr(message.channel, "topic", "") or "").lower(): return None
 
         pizza_messages = []
-        is_a_dm = message.guild is None
-        has_pizza_role = bool(message.author.get_role(self.__config.PIZZA_ROLE))
-        is_okay_server = (not is_a_dm and message.guild.id == self.__config.PIZZA_SERVER and has_pizza_role)
-        if not (is_a_dm or is_okay_server): return None
         for cmd_id, current_dict in data.items():
             try:
                 if not pizza_eval_read(current_dict['read'], message.content):
@@ -73,8 +67,7 @@ class PizzaSlashCog(Cog):
                 pizza_messages.append((cmd_id, evaluated_msg))
             except errors.PizzaError as e:
                 ctx = await self.__bot.get_context(message)
-                details = e.args[0]
-                await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(details['c'], details['e']))
+                await ctx.send(embed=self.__embeds.PIZZA_INVALID_INPUT(e))
 
         if not pizza_messages:
             return None
