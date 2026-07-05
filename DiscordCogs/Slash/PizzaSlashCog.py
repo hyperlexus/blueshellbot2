@@ -337,7 +337,7 @@ class PizzaSlashCog(Cog):
             return await ctx.respond(embed=self.__embeds.SLASH_PIZZA_NOTHING_FOUND(command_id))
         else:
             author_name = str(self.__bot.get_user(int(valid_command['author']))).split(' ')[0]
-            real_time = int(valid_command['time']) // 1000
+            real_time = int(command_id) // 1000
             await ctx.respond(embed=self.__embeds.SLASH_PINFO_PREMOVE_RESULT(real_time, author_name, valid_command['read'], valid_command['write'], mode="remove"))
             data['p_commands'] = [d for d in data['p_commands'] if d != valid_command]
 
