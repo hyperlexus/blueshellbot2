@@ -75,19 +75,32 @@ class PizzaSingleResultView(discord.ui.View):
 
 class PizzaConsentView(discord.ui.View):
     def __init__(self, original_author_id: str, data_ref: dict, command_id: str, filter_category: str, new_input: str):
-        super().__init__(timeout=300)
+        super().__init__(timeout=90)
         self.original_author_id = original_author_id
         self.data_ref = data_ref
         self.command_id = command_id
         self.filter_category = filter_category
         self.new_input = new_input
+        self.message = None
+
+    async def on_timeout(self) -> None:
+        target = self.data_ref.get(self.command_id)
+        if target:
+            target[self.filter_category] = self.new_input
+            with open("database.json", "w") as f:
+                json.dump(self.data_ref, f, indent=4)
+
+            if self.message:
+                await self.message.edit(
+                    content=f"following the elementary consent principle of `not False = True`, the command `{self.command_id}` was automatically updated due to timeout.",
+                    view=None)
 
     @discord.ui.button(label="Yes", style=discord.ButtonStyle.success, emoji="<:kekmark:1506816979804229752>")
     async def confirm(self, _button: discord.ui.Button, interaction: discord.Interaction):
         if str(interaction.user.id) != self.original_author_id:
             return await interaction.response.send_message("you may not give consent for someone else.")
 
-        target = next((d for d in self.data_ref['p_commands'] if d['time'] == self.command_id), None)
+        target = self.data_ref.get(self.command_id)
         if target:
             target[self.filter_category] = self.new_input
             with open("database.json", "w") as f:

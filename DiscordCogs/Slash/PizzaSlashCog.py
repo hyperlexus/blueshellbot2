@@ -64,6 +64,7 @@ class PizzaSlashCog(Cog):
                 if "[replace\\" in current_dict['write'] and len(message.content) > 50:
                     continue
                 evaluated_msg = pizza_eval_write(str(message.author).split(" ")[0], message.content, current_dict['write'])
+                if evaluated_msg == message.content: continue
                 pizza_messages.append((cmd_id, evaluated_msg))
             except errors.PizzaError as e:
                 ctx = await self.__bot.get_context(message)
@@ -71,6 +72,11 @@ class PizzaSlashCog(Cog):
 
         if not pizza_messages:
             return None
+
+        for cmd_id, evaluated_msg in pizza_messages:
+            if pizza_lb[cmd_id] == 0:
+                pizza_messages = [(cmd_id, evaluated_msg)]  # make sure commands that have never been used get a chance
+                break
 
         # 過去10件にないメッセージを選んで送ってください。#2
         possible = [m for m in pizza_messages if m[1] not in self.last_10_messages]
