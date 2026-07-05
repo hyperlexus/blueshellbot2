@@ -134,7 +134,7 @@ class PizzaSlashCog(Cog):
         }
         data[time] = new_command
 
-        with open("database.json", "w") as f2:
+        with open("Storage/pizza_commands.json", "w") as f2:
             json.dump(data, f2, indent=4)
 
         view = PizzaUndoView(
@@ -181,7 +181,7 @@ class PizzaSlashCog(Cog):
 
         if is_original_author or original_author_id == "0":
             valid_command[filter_category] = new_input
-            with open("database.json", "w") as f2:
+            with open("Storage/pizza_commands.json", "w") as f2:
                 json.dump(data, f2, indent=4)
             return await ctx.respond(f"edited `{filter_category}` value for command `{command_id}`!")
         else:
