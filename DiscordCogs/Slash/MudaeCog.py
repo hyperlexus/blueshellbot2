@@ -10,6 +10,7 @@ def extract(pattern, text, default="0", group=1):
     match = re.search(pattern, text)
     return match.group(group) if match else default
 
+
 def format_relative(t):
     if not t or t == "0":
         return "0m"
@@ -20,6 +21,7 @@ def format_relative(t):
         return t
     else:
         return t + "m"
+
 
 def format_absolute(t, tz_name="Europe/Berlin"):
     now = datetime.now(ZoneInfo(tz_name))
@@ -44,13 +46,15 @@ def format_absolute(t, tz_name="Europe/Berlin"):
         return f"{time_str} +{days_diff}d"
     return time_str
 
+
 def get_o_value(content, o_type):
-    match = re.search(r'\*\*(\d+)\*\*(?:\s*\(\+(\d+)\s*stored\))?\s*' + o_type, content)
+    match = re.search(r'\*\*(\d+)\*\*\s*' + o_type + r'(?:[^*(]*\(\+\*\*(\d+)\*\*\s*stored\))?', content)
     if match:
         base = int(match.group(1))
         stored = int(match.group(2)) if match.group(2) else 0
         return str(base + stored)
     return "0"
+
 
 key_emoji = "<:keys:1506802471568277584>"
 kakera_emoji = "<:kakera:1506799052745080833>"
@@ -59,11 +63,12 @@ kekmark_emoji = "<:kekmark:1506816979804229752>"
 stack_rolls_emoji = "<:stackedrolls:1506817470357442650>"
 dollar_rt_emoji = "<:rolltimer:1506817938420924426>"
 add_roll_emoji = "<:addroll:1506819400169427128>"
+omega_emoji = "<:omegakey:1529169719192588379>"
 
 class MudaeCog(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.target_users = ["hyperlexus", "ad.infernum", "tokyobre"]  # yes this is hardcoded no im too lazy
+        self.target_users = ["hyperlexus", "ad.infernum"]  # yes this is hardcoded no im too lazy
         self.mudae_id = 432610292342587392
         self.servers_to_search = [1486857971060445186, 995966314877300737, 1494713422271746139]
         self.last_message_reacted_to = 0
@@ -71,11 +76,10 @@ class MudaeCog(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if self.bot.voice_clients: return
-        if message.guild is None or message.guild.id is None or (message.guild.id not in self.servers_to_search):
-            return
+        if self.bot.voice_clients: return None
+        if message.guild is None or message.guild.id is None or (message.guild.id not in self.servers_to_search): return
         if message.author.id != self.mudae_id:
-            if not message.author.name.lower().startswith("mudae"): return
+            if not message.author.name.lower().startswith("mudae"): return None
 
         content = message.content
         current_user = None
@@ -84,13 +88,15 @@ class MudaeCog(Cog):
                 current_user = user
                 break
 
-        if not current_user: return
+        if not current_user: return None
+        if "rolls left" not in content and "rolls reset" not in content: return None
 
-        if "rolls left" not in content and "rolls reset" not in content: return
-
-        try: await message.delete()
-        except discord.Forbidden: pass
-        except discord.NotFound: pass
+        try:
+            await message.delete()
+        except discord.Forbidden:
+            pass
+        except discord.NotFound:
+            pass
 
         current_tz = "America/New_York" if current_user == "ad.infernum" else "Europe/Berlin"
         rolls = extract(r'You have \*\*(\d+)\*\* rolls left', content)
@@ -139,6 +145,7 @@ class MudaeCog(Cog):
 
         bku_prob = extract(r'\$bku on your next \$sw: \*\*([^*]+)\*\*', content, default="0%")
         power = extract(r'Power: \*\*([^*]+)\*\*', content, default="100%")
+        omega_keys = extract(r'\*\*([\d,]+)\*\*\s*<:omegakey', content, default="0").replace(",", "")
 
         can_react = "You __can__ react to kakera" in content
         cant_react_match = re.search(r"You can't react to kakera for \*\*([^*]+)\*\*", content)
@@ -158,34 +165,48 @@ class MudaeCog(Cog):
         oc_val = get_o_value(content, r'\$oc')
         oq_val = get_o_value(content, r'\$oq')
         ot_val = get_o_value(content, r'\$ot')
-        o_string = f"{oh_val},{oc_val},{oq_val},{ot_val}"
+        o_string = f"{oh_val}👨‍🌾{oc_val}♟️{oq_val}💣{ot_val}🚢"
+
+        p8_match = re.search(r'\(Perk 8\).*?Clicked today:\s*\*\*(\d+)\*\*/(\d+)\.\s*Rolled today:\s*\*\*(\d+)\*\*/(\d+)', content)
+        p8_str = f"{p8_match.group(1)}/{p8_match.group(2)} | {p8_match.group(3)}/{p8_match.group(4)}" if p8_match else "0/40 | 0/?"
+
+        buttons_match = re.search(r'\*\*(\d+)/(\d+)\*\*\s*buttons clicked', content)
+        buttons_str = f"{buttons_match.group(1)}/{buttons_match.group(2)}" if buttons_match else "0/10"
+
+        p9_match = re.search(r'\(Perk 9\).*?Rolled today:\s*\*\*(\d+)\*\*/(\d+)', content)
+        p9_str = f"{p9_match.group(1)}/{p9_match.group(2)}" if p9_match else "0/6"
+
+        perks_string = f"{spheres_emoji}8: {p8_str}, {spheres_emoji}9: {buttons_str} | {p9_str}"
 
         if current_user in ["hyperlexus", "ad.infernum"]:
             if self.absolute_toggle:
                 keys_time = keys_time_abs
             else:
                 keys_time = keys_time_rel
-            key_string = "" if int(keys_val) == 4500 else f"{key_emoji}{keys_val}, {keys_time}, {bku_prob}\n"
+            key_string = "" if int(keys_val) == 4500 else f"{key_emoji}{keys_val}, {keys_time}, {bku_prob} {omega_emoji}{omega_keys}\n"
             result = (
                 f"**{current_user}**:\n"
                 f"{rolls}{stack_rolls_emoji} {rolls_time_abs}🕐 {rt_stock}{add_roll_emoji} {claim_str_abs}\n"
                 f"{daily_abs}📅 {vote_abs}🗳️ {dk_abs}💸 {rt_abs}{dollar_rt_emoji}\n"
                 f"{key_string}"
                 f"{k_stock}{kakera_emoji}, {power}{react_abs}\n"
-                f"{sp_stock}{spheres_emoji} | {o_string}"
+                f"{sp_stock}{spheres_emoji} | {o_string}\n"
+                f"{perks_string}"
             ) if self.absolute_toggle else (
                 f"**{current_user}**:\n"
                 f"{rolls}{stack_rolls_emoji} {rolls_time_rel}🕐 {rt_stock}{add_roll_emoji} {claim_str_rel}\n"
                 f"{daily_rel}📅 {vote_rel}🗳️ {dk_rel}💸 {rt_rel}{dollar_rt_emoji}\n"
                 f"{key_string}"
                 f"{k_stock}{kakera_emoji}, {power}{react_rel}\n"
-                f"{sp_stock}{spheres_emoji} | {o_string}"
+                f"{sp_stock}{spheres_emoji} | {o_string}\n"
+                f"{perks_string}"
             )
-        else: result = ""
+        else: return None
 
         if message.id != self.last_message_reacted_to:
             self.last_message_reacted_to = message.id
-            await message.channel.send(result)
+            return await message.channel.send(result)
+        return None
 
     @slash_command(name='toggle_tu_message')
     async def flip_tu_message(self, ctx: ApplicationContext):
