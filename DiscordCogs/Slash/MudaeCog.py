@@ -64,6 +64,8 @@ stack_rolls_emoji = "<:stackedrolls:1506817470357442650>"
 dollar_rt_emoji = "<:rolltimer:1506817938420924426>"
 add_roll_emoji = "<:addroll:1506819400169427128>"
 omega_emoji = "<:omegakey:1529169719192588379>"
+mega_emoji = "<:megasphere:1529174573315129514>"
+poke_emoji = "<:slugma:1529176216517607565>"
 
 class MudaeCog(Cog):
     def __init__(self, bot):
@@ -138,6 +140,15 @@ class MudaeCog(Cog):
         else:
             rt_rel = rt_abs = ":question:"
 
+        p_cd_match = re.search(r'Remaining time before your next \$p: \*\*([^*]+)\*\*', content)
+        if re.search(r'\$p is available!', content):
+            p_rel = p_abs = kekmark_emoji
+        elif p_cd_match:
+            p_rel = format_relative(p_cd_match.group(1))
+            p_abs = format_absolute(p_cd_match.group(1), current_tz)
+        else:
+            p_rel = p_abs = ":question:"
+
         keys_val = extract(r'\*\*([\d,]+)\*\*\s*<:kakera[^>]+>to collect', content).replace(",", "").replace(".", "")
         keys_time_raw = extract(r'to collect before the next reset \(\*\*([^*]+)\*\*', content, default="0")
         keys_time_rel = format_relative(keys_time_raw)
@@ -167,6 +178,13 @@ class MudaeCog(Cog):
         ot_val = get_o_value(content, r'\$ot')
         o_string = f"{oh_val}👨‍🌾{oc_val}♟️{oq_val}💣{ot_val}🚢"
 
+        mega_match = re.search(r'Next <:spM:\d+> has \*\*([^*]+)\*\* chance', content)
+        no_mega = re.search(r'No <:spM:\d+> left today\.', content)
+
+        if mega_match: mega_str = f"{mega_emoji}{mega_match.group(1)}{kekmark_emoji}"
+        elif no_mega: mega_str = f"{mega_emoji}:x:"
+        else: mega_str = f"{mega_emoji}:question:"
+
         p8_match = re.search(r'\(Perk 8\).*?Clicked today:\s*\*\*(\d+)\*\*/(\d+)\.\s*Rolled today:\s*\*\*(\d+)\*\*/(\d+)', content)
         p8_str = f"{p8_match.group(1)}/{p8_match.group(2)} | {p8_match.group(3)}/{p8_match.group(4)}" if p8_match else "0/40 | 0/?"
 
@@ -187,18 +205,18 @@ class MudaeCog(Cog):
             result = (
                 f"**{current_user}**:\n"
                 f"{rolls}{stack_rolls_emoji} {rolls_time_abs}🕐 {rt_stock}{add_roll_emoji} {claim_str_abs}\n"
-                f"{daily_abs}📅 {vote_abs}🗳️ {dk_abs}💸 {rt_abs}{dollar_rt_emoji}\n"
+                f"{daily_abs}📅 {vote_abs}🗳️ {dk_abs}💸 {rt_abs}{dollar_rt_emoji} {p_abs}{poke_emoji}\n"
                 f"{key_string}"
                 f"{k_stock}{kakera_emoji}, {power}{react_abs}\n"
-                f"{sp_stock}{spheres_emoji} | {o_string}\n"
+                f"{sp_stock}{spheres_emoji} | {o_string} | {mega_str}\n"
                 f"{perks_string}"
             ) if self.absolute_toggle else (
                 f"**{current_user}**:\n"
                 f"{rolls}{stack_rolls_emoji} {rolls_time_rel}🕐 {rt_stock}{add_roll_emoji} {claim_str_rel}\n"
-                f"{daily_rel}📅 {vote_rel}🗳️ {dk_rel}💸 {rt_rel}{dollar_rt_emoji}\n"
+                f"{daily_rel}📅 {vote_rel}🗳️ {dk_rel}💸 {rt_rel}{dollar_rt_emoji} {p_rel}{poke_emoji}\n"
                 f"{key_string}"
                 f"{k_stock}{kakera_emoji}, {power}{react_rel}\n"
-                f"{sp_stock}{spheres_emoji} | {o_string}\n"
+                f"{sp_stock}{spheres_emoji} | {o_string} | {mega_str}\n"
                 f"{perks_string}"
             )
         else: return None
