@@ -3,6 +3,7 @@ import discord
 from discord.ext.commands import slash_command, Cog
 from discord import ApplicationContext
 import re
+import math
 from datetime import datetime, timedelta
 
 
@@ -40,11 +41,40 @@ def format_absolute(t, tz_name="Europe/Berlin"):
         minutes_str = t.replace("m", "").strip()
         mins = int(minutes_str) if minutes_str else 0
     dt = now + timedelta(hours=hrs, minutes=mins)
-    days_diff = (dt.date() - now.date()).days
+    hours_diff = (dt.date() - now.date()).seconds // 3600
     time_str = dt.strftime("%H:%M")
-    if days_diff > 1:
-        return f"{time_str} +{days_diff}d"
+    if hours_diff > 24:
+        return f"{time_str} +{hours_diff//24}d"
     return time_str
+
+
+def format_power_time(minutes, tz_name, is_absolute):
+    if minutes <= 0:
+        return "MAX"
+    if is_absolute:
+        now = datetime.now(ZoneInfo(tz_name))
+        dt = now + timedelta(minutes=minutes)
+        days_diff = (dt.date() - now.date()).days
+        time_str = dt.strftime("%H:%M")
+        if days_diff > 1:
+            return f"{time_str} +{days_diff}d"
+        return time_str
+    else:
+        hrs = minutes // 60
+        mins = minutes % 60
+        if hrs > 0 and mins > 0:
+            return f"{hrs}:{mins:02d}h"
+        elif hrs > 0:
+            return f"{hrs}h"
+        else:
+            return f"{mins}m"
+
+
+def get_power_display(current_power, target, tz_name, is_absolute, is_cap=False):
+    if current_power >= target:
+        return "max" if is_cap else str(int(current_power // target))
+    mins_needed = math.ceil((target - current_power) * 3)
+    return format_power_time(mins_needed, tz_name, is_absolute)
 
 
 def get_o_value(content, o_type):
@@ -56,9 +86,12 @@ def get_o_value(content, o_type):
     return "0"
 
 
-key_emoji = "<:keys:1506802471568277584>"
+key_emoji = "<:goldKey:1532460704676708495>"
 kakera_emoji = "<:kakera:1506799052745080833>"
 spheres_emoji = "<:spheres:1506804921444601913>"
+sphere_w8 = "<:spW8:1532463911175983265>"
+sphere_8 = "<:sp8:1532460836176531467>"
+sphere_9 = "<:sp9:1532460813359513790>"
 kekmark_emoji = "<:kekmark:1506816979804229752>"
 stack_rolls_emoji = "<:stackedrolls:1506817470357442650>"
 dollar_rt_emoji = "<:rolltimer:1506817938420924426>"
@@ -66,6 +99,7 @@ add_roll_emoji = "<:addroll:1506819400169427128>"
 omega_emoji = "<:omegakey:1529169719192588379>"
 mega_emoji = "<:megasphere:1529174573315129514>"
 poke_emoji = "<:slugma:1529176216517607565>"
+chaos_key = "<:chaosKey:1532460675366912152>"
 
 class MudaeCog(Cog):
     def __init__(self, bot):
@@ -75,6 +109,10 @@ class MudaeCog(Cog):
         self.servers_to_search = [1486857971060445186, 995966314877300737, 1494713422271746139]
         self.last_message_reacted_to = 0
         self.absolute_toggle = True
+        self.max_power = {
+            "hyperlexus": 110,
+            "ad.infernum": 110
+        }
 
     @Cog.listener()
     async def on_message(self, message):
@@ -155,19 +193,7 @@ class MudaeCog(Cog):
         keys_time_abs = format_absolute(keys_time_raw, current_tz)
 
         bku_prob = extract(r'\$bku on your next \$sw: \*\*([^*]+)\*\*', content, default="0%")
-        power = extract(r'Power: \*\*([^*]+)\*\*', content, default="100%")
         omega_keys = extract(r'\*\*([\d,]+)\*\*\s*<:omegakey', content, default="0").replace(",", "")
-
-        can_react = "You __can__ react to kakera" in content
-        cant_react_match = re.search(r"You can't react to kakera for \*\*([^*]+)\*\*", content)
-
-        if can_react:
-            react_rel = react_abs = kekmark_emoji
-        elif cant_react_match:
-            react_rel = f":x: {format_relative(cant_react_match.group(1))}"
-            react_abs = f":x: {format_absolute(cant_react_match.group(1), current_tz)}"
-        else:
-            react_rel = react_abs = ":x:"
 
         k_stock = extract(r'Stock: \*\*([\d,]+)\*\*\s*<:kakera', content)
         sp_stock = extract(r'Stock: \*\*([\d,]+)\*\*\s*<:sp', content, default="0")
@@ -176,7 +202,7 @@ class MudaeCog(Cog):
         oc_val = get_o_value(content, r'\$oc')
         oq_val = get_o_value(content, r'\$oq')
         ot_val = get_o_value(content, r'\$ot')
-        o_string = f"{oh_val}👨‍🌾{oc_val}♟️{oq_val}💣{ot_val}🚢"
+        o_string = f"👨‍🌾{oh_val}♟️{oc_val}💣{oq_val}🚢{ot_val}"
 
         mega_match = re.search(r'Next <:spM:\d+> has \*\*([^*]+)\*\* chance', content)
         no_mega = re.search(r'No <:spM:\d+> left today\.', content)
@@ -194,20 +220,38 @@ class MudaeCog(Cog):
         p9_match = re.search(r'\(Perk 9\).*?Rolled today:\s*\*\*(\d+)\*\*/(\d+)', content)
         p9_str = f"{p9_match.group(1)}/{p9_match.group(2)}" if p9_match else "0/6"
 
-        perks_string = f"{spheres_emoji}8: {p8_str}, {spheres_emoji}9: {buttons_str} | {p9_str}"
+        perks_string = f"{sphere_8}: {p8_str}, {sphere_9}: {buttons_str} | {p9_str}"
 
         if current_user in ["hyperlexus", "ad.infernum"]:
             if self.absolute_toggle:
                 keys_time = keys_time_abs
             else:
                 keys_time = keys_time_rel
-            key_string = "" if int(keys_val) == 4500 else f"{key_emoji}{keys_val}, {keys_time}, {bku_prob} {omega_emoji}{omega_keys}\n"
+            key_string = "" if int(
+                keys_val) == 4500 else f"{key_emoji}{keys_val}, {keys_time}, {bku_prob} {omega_emoji}{omega_keys}\n"
+            power_match = re.search(r'Power: \*\*(\d+)%\*\*', content)
+            current_power = int(power_match.group(1)) if power_match else 100
+            cost_match = re.search(r'Each kakera button consumes (\d+)% of your reaction power', content)
+            base_cost = float(cost_match.group(1)) if cost_match else 34.0
+
+            cost_quarter = base_cost / 4.0
+            cost_half = base_cost / 2.0
+            cost_full = base_cost
+            max_p = self.max_power.get(current_user, 110)
+
+            p8_c_val = get_power_display(current_power, cost_quarter, current_tz, self.absolute_toggle)
+            p8_val = get_power_display(current_power, cost_half, current_tz, self.absolute_toggle)
+            full_val = get_power_display(current_power, cost_full, current_tz, self.absolute_toggle)
+            max_val = get_power_display(current_power, max_p, current_tz, self.absolute_toggle, is_cap=True)
+
+            power_line = f"{k_stock}{kakera_emoji}{current_power}% | {sphere_w8}{p8_c_val}, {sphere_8}{p8_val},{kakera_emoji}{full_val}, :warning:{max_val}\n"
+
             result = (
                 f"**{current_user}**:\n"
                 f"{rolls}{stack_rolls_emoji} {rolls_time_abs}🕐 {rt_stock}{add_roll_emoji} {claim_str_abs}\n"
                 f"{daily_abs}📅 {vote_abs}🗳️ {dk_abs}💸 {rt_abs}{dollar_rt_emoji} {p_abs}{poke_emoji}\n"
                 f"{key_string}"
-                f"{k_stock}{kakera_emoji}, {power}{react_abs}\n"
+                f"{power_line}"
                 f"{sp_stock}{spheres_emoji} | {o_string} | {mega_str}\n"
                 f"{perks_string}"
             ) if self.absolute_toggle else (
@@ -215,11 +259,11 @@ class MudaeCog(Cog):
                 f"{rolls}{stack_rolls_emoji} {rolls_time_rel}🕐 {rt_stock}{add_roll_emoji} {claim_str_rel}\n"
                 f"{daily_rel}📅 {vote_rel}🗳️ {dk_rel}💸 {rt_rel}{dollar_rt_emoji} {p_rel}{poke_emoji}\n"
                 f"{key_string}"
-                f"{k_stock}{kakera_emoji}, {power}{react_rel}\n"
+                f"{power_line}"
                 f"{sp_stock}{spheres_emoji} | {o_string} | {mega_str}\n"
                 f"{perks_string}"
             )
-        else: return None
+        else: return None  # artefact from when we had different users with different code. might need it again
 
         if message.id != self.last_message_reacted_to:
             self.last_message_reacted_to = message.id
@@ -235,6 +279,7 @@ class MudaeCog(Cog):
         self.absolute_toggle = not self.absolute_toggle
         await ctx.respond(kekmark_emoji)
         return
+
 
 def setup(bot):
     bot.add_cog(MudaeCog(bot))
