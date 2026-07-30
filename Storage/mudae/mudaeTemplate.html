@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root {
+    --bg-main: #1e1f22;
+    --bg-card: #2b2d31;
+    --bg-inner: #313338;
+    --normal: #dbdee1;
+    --muted: #949ba4;
+    --scheis: #ffffff;
+    --accent-teal: #00b0f4;
+    --ready-green: #23a55a;
+    --cooldown-colour: #da373c;
+    --warn-yellow: #f0b232;
+    --border-colour: #3f4147;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'gg sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--normal);
+    width: 540px;
+    padding: 16px;
+  }
+
+  .card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-colour);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .ready-bg {
+    background-color: rgba(35, 165, 90, 0.15) !important;
+    border: 1px solid var(--ready-green) !important;
+    box-shadow: 0 0 8px rgba(35, 165, 90, 0.25);
+  }
+
+  .warning-bg {
+    background-color: rgba(240, 178, 50, 0.15) !important;
+    border: 1px solid var(--warn-yellow) !important;
+    box-shadow: 0 0 8px rgba(240, 178, 50, 0.25);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-colour);
+    padding-bottom: 10px;
+  }
+
+  .user-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--scheis);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-time {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .rolls-badge {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background-color: var(--bg-inner);
+    border: 1px solid var(--border-colour);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .pills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .pill {
+    background-color: var(--bg-inner);
+    border: 1px solid var(--border-colour);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pill.ready {
+    border-color: var(--ready-green);
+    color: var(--scheis);
+  }
+  .pill.cooldown {
+    opacity: 0.8;
+  }
+
+  .power-section {
+    background-color: var(--bg-inner);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .power-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .power-header .ready {
+    color: var(--ready-green);
+  }
+  .power-header .cooldown {
+    color: var(--muted);
+  }
+
+  .bar-container {
+    position: relative;
+    height: 22px;
+    background-color: #1b1c1e;
+    border-radius: 11px;
+    overflow: visible;
+    margin-top: 2px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border-radius: 11px;
+    background: linear-gradient(90deg, #0080f4, var(--accent-teal));
+    transition: width 0.3s ease;
+  }
+
+  .bar-text {
+    position: relative;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .marker {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    background-color: var(--muted);
+    z-index: 2;
+  }
+  .marker.reached {
+    background-color: var(--scheis);
+    box-shadow: 0 0 4px var(--scheis);
+  }
+  .marker.max-cap {
+    background-color: var(--warn-yellow);
+  }
+
+  .marker-label {
+    position: absolute;
+    top: 27px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--normal);
+    white-space: nowrap;
+  }
+
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .o-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .o-cell {
+    background-color: var(--bg-inner);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s ease;
+  }
+
+  .spheres-panel {
+    background-color: var(--bg-inner);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    justify-content: center;
+  }
+
+  .sphere-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .emoji {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+  }
+
+  .disabled-icon-box {
+    position: relative;
+    display: inline-block;
+  }
+  .disabled-icon-box .emoji {
+    filter: grayscale(1) opacity(0.35);
+  }
+  .disabled-icon-box::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -2px;
+    right: -2px;
+    height: 2px;
+    background-color: var(--cooldown-colour);
+    transform: rotate(-45deg);
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="user-title">
+      <span>{{ user }}</span>
+    </div>
+    <div class="header-time">
+      <span>{{ current_time }}</span>
+    </div>
+    <div class="rolls-badge {{ rolls_class }}">
+      <span>Rolls: <strong style="color: var(--scheis);">{{ rolls }}</strong> <span style="color: var(--muted);">(+{{ rt_stock }} stored)</span></span>
+    </div>
+  </div>
+
+  <div class="pills-grid">
+    <div class="pill {{ claim_class }}"><span>claim / $bku</span> <strong>{{ claim_text }}</strong></div>
+    <div class="pill {% if daily_time == 'ready' %}ready{% else %}cooldown{% endif %}"><span>$daily</span> <strong>{{ daily_time }}</strong></div>
+    <div class="pill {% if vote_time == 'ready' %}ready{% else %}cooldown{% endif %}"><span>$vote</span> <strong>{{ vote_time }}</strong></div>
+    <div class="pill {% if dk_time == 'ready' %}ready{% else %}cooldown{% endif %}"><span>$dk</span> <strong>{{ dk_time }}</strong></div>
+    <div class="pill {% if rt_time == 'ready' %}ready{% else %}cooldown{% endif %}"><span>$rt</span> <strong>{{ rt_time }}</strong></div>
+    <div class="pill {% if p_time == 'ready' %}ready{% else %}cooldown{% endif %}"><span>$p</span> <strong>{{ p_time }}</strong></div>
+  </div>
+
+  <div class="power-section {{ kakera_box_class }}">
+    <div class="power-header">
+      <span><strong>{{ k_stock }}</strong> <img src="https://cdn.discordapp.com/emojis/1506799052745080833.png" class="emoji"></span>
+      <span><img src="https://cdn.discordapp.com/emojis/689475859429720211.png" class="emoji">{{ bku_amount }}, {{ bku_prob }}, <img src="https://cdn.discordapp.com/emojis/1473308158263951582.png" class="emoji">{{ omega_keys }}</span>
+      <span>react: <strong class="{{ react_class }}">{{ react_status }}</strong></span>
+    </div>
+
+    <div class="bar-container">
+      <!-- no clue why this is red btw -->
+      <div class="bar-fill" style="width: {{ bar_fill_pct }}%;"></div>
+
+      <div class="bar-text">{{ current_power }}% / {{ max_p_lbl }}</div>
+
+      <div class="marker {% if reached_q %}reached{% endif %}" style="left: {{ pos_quarter }}%;">
+        <span class="marker-label">{{ q_val }}</span>
+      </div>
+      <div class="marker {% if reached_h %}reached{% endif %}" style="left: {{ pos_half }}%;">
+        <span class="marker-label">{{ h_val }}</span>
+      </div>
+      <div class="marker {% if reached_f %}reached{% endif %}" style="left: {{ pos_full }}%;">
+        <span class="marker-label">{{ f_val }}</span>
+      </div>
+      <div class="marker {% if reached_d %}reached{% endif %}" style="left: {{ pos_double }}%;">
+        <span class="marker-label">{{ d_val }}</span>
+      </div>
+      <div class="marker max-cap" style="left: 100%;">
+        <span class="marker-label" style="color: var(--warn-yellow);">{{ m_val }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="o-grid">
+      <div class="o-cell {{ oh_class }}"><span>👨‍🌾 $oh</span> <strong>{{ oh_val }}</strong></div>
+      <div class="o-cell {{ oc_class }}"><span>♟️ $oc</span> <strong>{{ oc_val }}</strong></div>
+      <div class="o-cell {{ oq_class }}"><span>💣 $oq</span> <strong>{{ oq_val }}</strong></div>
+      <div class="o-cell {{ ot_class }}"><span>🚢 $ot</span> <strong>{{ ot_val }}</strong></div>
+    </div>
+
+    <div class="spheres-panel">
+      <div class="sphere-row">
+        <span><img src="https://cdn.discordapp.com/emojis/1506804921444601913.png" class="emoji"></span>
+        <strong>{{ sp_stock }}</strong>
+      </div>
+      <div class="sphere-row">
+        <span><img src="https://cdn.discordapp.com/emojis/1532460836176531467.png" class="emoji"> | <img src="https://cdn.discordapp.com/emojis/1532460813359513790.png" class="emoji"></span>
+        <strong>{{ p8_str }} | {{ p9_str }}</strong>
+      </div>
+      <div class="sphere-row">
+        <span class="{% if mega_disabled %}disabled-icon-box{% endif %}"><img src="https://cdn.discordapp.com/emojis/1529174573315129514.png" class="emoji"></span>
+        <span>{{ mega_text }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
