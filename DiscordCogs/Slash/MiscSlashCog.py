@@ -428,11 +428,14 @@ class MiscSlashCog(Cog):
             return
 
         await ctx.defer()
+        env = os.environ.copy()
+        env['XDG_RUNTIME_DIR'] = f"/run/user/{os.getuid()}"
 
         process = await asyncio.create_subprocess_exec(
             'systemctl', '--user', action, 'diddenbludden.service',
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.STDOUT
+            stderr=asyncio.subprocess.STDOUT,
+            env=env
         )
 
         stdout, _ = await process.communicate()
