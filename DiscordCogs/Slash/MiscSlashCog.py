@@ -417,6 +417,39 @@ class MiscSlashCog(Cog):
             stderr=asyncio.subprocess.DEVNULL
         )
 
+    @slash_command(name='diddenbludden', description='manage a service (start/stop/restart/status).')
+    async def diddenbludden(
+            self,
+            ctx: ApplicationContext,
+            action: Option = Option(str, "systemctl action", choices=["start", "stop", "restart", "status"])
+    ):
+        if ctx.interaction.user.id not in (422800248935546880, 640985620948189186):
+            await ctx.respond("you are not authorised to do this.", ephemeral=True)
+            return
+
+        await ctx.defer()
+
+        process = await asyncio.create_subprocess_exec(
+            'systemctl', '--user', action, 'diddenbludden.service',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT
+        )
+
+        stdout, _ = await process.communicate()
+        output = stdout.decode('utf-8').strip()
+        if action in ["start", "stop", "restart"]:
+            if process.returncode == 0:
+                await ctx.followup.send(f"ran `{action}`.")
+            else:
+                await ctx.followup.send(
+                    f"could not `{action}` service. code {process.returncode}:\n```bash\n{output[:1900]}```")
+
+        elif action == "status":
+            if not output:
+                output = "no output."
+
+            await ctx.followup.send(f"status:\n```bash\n{output[:1900]}```")
+
     @slash_command(name="base_kakera_calculator",
                        description="calculate a character's ka value based on rank, claims, and keys.")
     async def base_kakera_calculator(self, ctx: ApplicationContext,
