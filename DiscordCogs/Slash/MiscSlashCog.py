@@ -474,8 +474,7 @@ class MiscSlashCog(Cog):
         await ctx.respond(f"r: {r}, rl: {rl}, l: {l}, $left: {left}, y: {keys}\n"f"value: {kv}")
 
     @slash_command(name="lounge_role_request", guild_ids=[1494713422271746139])
-    async def lounge_role_request(self, ctx: ApplicationContext,
-                                  leaderboard_name = Option(str, "leaderboard name")):
+    async def lounge_role_request(self, ctx: ApplicationContext, leaderboard_name = Option(str, "leaderboard name")):
 
         if Utils.check_if_banned(ctx.author, self.__config.PROJECT_PATH):
             await ctx.respond(embed=self.__embeds.BANNED())
@@ -545,6 +544,30 @@ class MiscSlashCog(Cog):
         )
 
         await ctx.respond("your request has been submitted successfully. please be patient as it has to be processed manually.")
+    
+    @slash_command(name="maggdacyka")
+    async def maggdacyka(self, ctx: ApplicationContext):
+        await ctx.defer()
+        try:
+            async with aiohttp.ClientSession() as s:
+                async with s.get("http://127.0.0.1:6767/maggdacyka") as r:
+                    if r.status == 200:
+                        d = await r.text()
+                        dingens = d[:1990] if len(d) > 1990 else d
+                    else:
+                        dingens = "error, status code {r.status}"
+        except aiohttp.ClientConnectionError:
+            dingens = "kant connect."
+        except Exception as e:
+            dingens = "zu faul für error handling. error ist " + str(e)
+
+        if "|" in dingens:
+            value, trend = dingens.split("|")
+            trend_emojis = {"1": "⬇️", "2": "↘️", "3": "➡️", "4": "↗️", "5": "⬆️"}
+            output = f"BZ: {value.strip()} | {trend_emojis.get(trend.strip(), 'kp')}"
+        
+        await ctx.respond(output)
+
 
 def setup(bot):
     bot.add_cog(MiscSlashCog(bot))
