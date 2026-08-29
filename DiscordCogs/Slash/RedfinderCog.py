@@ -1,7 +1,7 @@
 import discord
-from discord.ext.commands import slash_command, Cog
+from discord.ext.commands import slash_command, Cog, command
 from discord import ApplicationContext, Option
-
+from UI.Views.OcView import OcGameView
 
 one_hundred_percent_red = {
     (0,): 12,
@@ -204,6 +204,16 @@ class RedfinderCog(Cog):
                 starting_click = "4, 2"
         view = AgainAndAgainButton(ctx.author.id, strategy_dict)
         await ctx.respond(f"This will help you make a lot of money from $oc. Please click at {starting_click} to start.\nCoordinates are Down, Right (for example, '1, 5' is top right).", view=view)
+
+    @command(name="oc", description="🐰👉🕐")
+    async def oc_game(self, ctx: discord.ApplicationContext) -> None:
+        view = OcGameView()
+        await ctx.send(
+            "You can click **5** times on the buttons below (2 minutes).\n**1 red sphere** to find (never at the center) along with **2 orange**"
+            " (always next to the red sphere), **3 yellow** (always diagonal to the red sphere), **4 green** (in the same row or column as red), "
+            "**teal** (in the same row, column or diagonal as red) and **blue** (NEVER in the same row, column nor diagonal from red).\n",
+            view=view,
+        )
 
 class AgainAndAgainButton(discord.ui.View):
     def __init__(self, who_has_clicked: int, strategy_dict: dict):
