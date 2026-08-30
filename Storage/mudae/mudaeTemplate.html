@@ -161,6 +161,7 @@
     transition: width 0.3s ease;
   }
 
+  /* for now unused but we might want to use it again */
   .bar-text {
     position: relative;
     font-size: 12px;
@@ -294,14 +295,12 @@
     <div class="power-header">
       <span><strong>{{ k_stock }}</strong> <img src="https://cdn.discordapp.com/emojis/1506799052745080833.png" class="emoji"></span>
       <span><img src="https://cdn.discordapp.com/emojis/689475859429720211.png" class="emoji">{{ bku_amount }}, {{ bku_prob }}, <img src="https://cdn.discordapp.com/emojis/1473308158263951582.png" class="emoji">{{ omega_keys }}</span>
-      <span>react: <strong class="{{ react_class }}">{{ react_status }}</strong></span>
+      <span><span class="{{ react_class }}">{{ current_power }}% </span> / {{ max_p_lbl }}</span>
     </div>
 
     <div class="bar-container">
       <!-- no clue why this is red btw -->
       <div class="bar-fill" style="width: {{ bar_fill_pct }}%;"></div>
-
-      <div class="bar-text">{{ current_power }}% / {{ max_p_lbl }}</div>
 
       <div class="marker {% if reached_q %}reached{% endif %}" style="left: {{ pos_quarter }}%;">
         <span class="marker-label">{{ q_val }}</span>

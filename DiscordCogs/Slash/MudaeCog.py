@@ -181,8 +181,7 @@ class MudaeCog(Cog):
                 claim_yes.group(1))
             claim_class = "ready"
         elif claim_no:
-            claim_text = format_absolute(claim_no.group(1), current_tz) if self.absolute_toggle else format_relative(
-                claim_no.group(1))
+            claim_text = format_absolute(claim_no.group(1), current_tz) if self.absolute_toggle else format_relative(claim_no.group(1))
             claim_class = "cooldown"
         else:
             claim_text = "ready"
@@ -275,7 +274,7 @@ class MudaeCog(Cog):
 
         kakera_box_class = "ready-bg"
         react_class = "ready"
-        react_status = "?"
+        react_status = "?"  # this is currently unused and not displayed anywhere
         if current_power == max_p:
             react_status = "max"
         elif current_power >= cost_double:
@@ -302,7 +301,7 @@ class MudaeCog(Cog):
             "claim_class": claim_class,
             "claim_text": claim_text,
             "react_class": react_class,
-            "react_status": react_status,
+            "react_status": react_status,  # unused
             "kakera_box_class": kakera_box_class,
             "daily_time": daily_time,
             "vote_time": vote_time,
