@@ -104,7 +104,7 @@ def get_o_value(content, o_type):
 class MudaeCog(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.target_users = ["hyperlexus", "alvideiectiones"]
+        self.target_users = ["hyperlexus", "alvideiectiones", "julisus"]
         self.mudae_id = 432610292342587392
         self.servers_to_search = [1486857971060445186, 995966314877300737, 1494713422271746139]
         self.last_message_reacted_to = 0
@@ -113,7 +113,8 @@ class MudaeCog(Cog):
         self.max_power = {
             "hyperlexus": 115,
             "ad.infernum": 110,
-            "alvideiectiones": 110
+            "alvideiectiones": 110,
+            "julisus": 100
         }
 
         self.hti = Html2Image(size=(540, 380))

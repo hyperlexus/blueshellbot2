@@ -343,7 +343,7 @@ class PizzaSlashCog(Cog):
 
             if str(command_id) in pizza_lb:
                 del pizza_lb[str(command_id)]
-                with open("pizza_lb.json", "w") as f_lb:
+                with open("Storage/pizza_lb.json", "w") as f_lb:
                     json.dump(pizza_lb, f_lb, indent=4)
 
         with open("Storage/pizza_commands.json", "w") as f2:

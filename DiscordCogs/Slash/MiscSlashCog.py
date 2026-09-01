@@ -424,7 +424,7 @@ class MiscSlashCog(Cog):
             action: Option = Option(str, "systemctl action", choices=["start", "stop", "restart", "status"])
     ):
         if ctx.interaction.user.id not in (422800248935546880, 640985620948189186):
-            await ctx.respond("you are not authorised to do this.", ephemeral=True)
+            await ctx.respond("you are not authorised to do this.")
             return
 
         await ctx.defer()

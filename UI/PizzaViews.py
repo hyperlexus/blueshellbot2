@@ -21,7 +21,7 @@ class PizzaUndoView(discord.ui.View):
 
         if len(self.data_ref['p_commands']) < original_len:
             # update
-            with open("database.json", "w") as f:
+            with open("Storage/pizza_commands.json", "w") as f:
                 json.dump(self.data_ref, f, indent=4)
 
             button.disabled = True
@@ -62,7 +62,7 @@ class PizzaSingleResultView(discord.ui.View):
         command_id = self.command['time']
         self.data_ref['p_commands'] = [d for d in self.data_ref['p_commands'] if d['time'] != command_id]
 
-        with open("database.json", "w") as f:
+        with open("Storage/pizza_commands.json", "w") as f:
             json.dump(self.data_ref, f, indent=4)
 
         for item in self.children:
@@ -87,7 +87,7 @@ class PizzaConsentView(discord.ui.View):
         target = self.data_ref.get(self.command_id)
         if target:
             target[self.filter_category] = self.new_input
-            with open("database.json", "w") as f:
+            with open("Storage/pizza_commands.json", "w") as f:
                 json.dump(self.data_ref, f, indent=4)
 
             if self.message:
@@ -103,7 +103,7 @@ class PizzaConsentView(discord.ui.View):
         target = self.data_ref.get(self.command_id)
         if target:
             target[self.filter_category] = self.new_input
-            with open("database.json", "w") as f:
+            with open("Storage/pizza_commands.json", "w") as f:
                 json.dump(self.data_ref, f, indent=4)
             return await interaction.response.edit_message(content=f"you have consented to the command `{self.command_id}` being updated.", view=None)
         else:

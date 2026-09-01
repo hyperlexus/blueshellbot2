@@ -216,7 +216,7 @@
     },
     "1420070400044": {
         "author": "0",
-        "read": "end as",
+        "read": "end as & not end saas & not is sahas",
         "write": "saas"
     },
     "1420070400045": {
@@ -796,7 +796,7 @@
     },
     "1420070400168": {
         "author": "0",
-        "read": "in 'po'",
+        "read": "in po & not in ~bank",
         "write": "[replace\\po\\poloniu]"
     },
     "1420070400169": {
@@ -923,11 +923,6 @@
         "author": "422800248935546880",
         "read": "is schnitzeljagd",
         "write": "bro muss sich aber schon ein wenig mehr anstrengen \ud83d\udc80, denken sie an ihr github issue"
-    },
-    "1732740224994": {
-        "author": "422800248935546880",
-        "read": "is 'skill issue'",
-        "write": "joa von ihrer, ich h\u00e4tte es jetzt schon l\u00e4ngst gel\u00f6\u00f6l"
     },
     "1732740224995": {
         "author": "422800248935546880",
@@ -1493,5 +1488,20 @@
         "author": "422800248935546880",
         "read": "is kk",
         "write": "rowling"
+    },
+    "1787412595490": {
+        "author": "422800248935546880",
+        "read": "end nicht & isolated nicht",
+        "write": "[random\\ich hab die gicht-1\\du kleiner wicht-1\\der gr\u00fcne kaktus sticht-1\\passen sie auf bevor ich meine waffe auf sie richt-1\\wenn sich der julian erbricht-1\\ich spiel forest defense und baue eine ficht-1\\ich bin leise wenn der blue shelly spricht-1\\ich muss los ich hab jetzt schicht-1\\ich schaue jetzt erstmal ins licht-1\\sagt der spast der auf seine rechte verzicht-1\\du bist ja nicht mehr ganz dicht-1\\da ist der blud wohl sehr erpicht-1\\tagt\u00e4chlich verschlechtert sich meine sicht-1\\ich spuck dir gleich ins gesicht-1]"
+    },
+    "1787413291499": {
+        "author": "468786219258740756",
+        "read": "in h\u00e4nd",
+        "write": "[replace\\h\u00e4nd\\hendiadyoin]"
+    },
+    "1787415561566": {
+        "author": "422800248935546880",
+        "read": "is hm",
+        "write": "c&a l\u00f6\u00f6l"
     }
 }
