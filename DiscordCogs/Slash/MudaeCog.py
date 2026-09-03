@@ -1,6 +1,7 @@
 import io
 import re
 import math
+import functools
 from zoneinfo import ZoneInfo
 from datetime import datetime, timedelta
 
@@ -117,16 +118,25 @@ class MudaeCog(Cog):
             "julisus": 100
         }
 
-        self.hti = Html2Image(size=(540, 380))
+        self.hti = Html2Image(
+            size=(540, 400),
+            custom_flags=[
+                '--disable-gpu',
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+                '--headless=new',
+                '--hide-scrollbars',
+                '--force-device-scale-factor=1',
+                '--default-background-color=00000000'
+            ]
+        )
         self.template_path = "Storage/mudae/mudaeTemplate.html"
+        with open(self.template_path, "r", encoding="utf-8") as f:
+            self.template = Template(f.read())
 
     def render_card_to_bytes(self, context: dict) -> io.BytesIO:
         """Reads template, injects variables via Jinja2, and returns in-memory PNG bytes."""
-        with open(self.template_path, "r", encoding="utf-8") as f:
-            template_str = f.read()
-
-        template = Template(template_str)
-        rendered_html = template.render(**context)
+        rendered_html = self.template.render(**context)
 
         raw_png = self.hti.screenshot(
             html_str=rendered_html,
@@ -347,7 +357,9 @@ class MudaeCog(Cog):
         if message.id != self.last_message_reacted_to:
             self.last_message_reacted_to = message.id
 
-            img_buffer = self.render_card_to_bytes(context)
+            render_function = functools.partial(self.render_card_to_bytes, context)
+
+            img_buffer = await self.bot.loop.run_in_executor(None, render_function)
             discord_file = discord.File(fp=img_buffer, filename="mudae_status.png")
 
             return await message.channel.send(file=discord_file)
