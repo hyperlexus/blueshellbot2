@@ -59,16 +59,14 @@ class PizzaSingleResultView(discord.ui.View):
     async def remove_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         if str(interaction.user.id) != self.author_ref:
             return await interaction.response.send_message("This offer doesn't match any of yours")
-        command_id = self.command['time']
-        self.data_ref['p_commands'] = [d for d in self.data_ref['p_commands'] if d['time'] != command_id]
+        command_id = self.command[0]
+        del self.data_ref[command_id]
 
         with open("Storage/pizza_commands.json", "w") as f:
             json.dump(self.data_ref, f, indent=4)
 
-        for item in self.children:
-            item.disabled = True
-            if button.label == "remove":
-                button.label = "removed."
+        button.label = "removed."
+        list(map(lambda item: setattr(item, 'disabled', True), self.children))  # tja
 
         await interaction.response.edit_message(view=self)
         return await interaction.followup.send(f"command `{command_id}` has been removed.")

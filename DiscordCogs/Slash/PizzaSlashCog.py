@@ -5,7 +5,7 @@ from collections import deque
 import discord
 from pizza_eval import pizza_eval_write, pizza_eval_read, errors
 from Music.BlueshellBot import BlueshellBot
-from discord import ApplicationContext, Option, OptionChoice
+from discord import ApplicationContext, Option, OptionChoice, option
 from discord.ext.commands import slash_command, Cog
 from Config.Helper import Helper
 from Config.Embeds import BEmbeds
@@ -13,7 +13,7 @@ from Config.Colors import BColors
 from Config.Configs import BConfigs
 from UI.PizzaViews import PizzaUndoView, PizzaSingleResultView, PizzaConsentView, PizzaPaginationView
 from Utils.BoolDiscordFormatting import evaluate_discord_timestamp
-from Utils.Utils import Utils
+from Utils.Utils import Utils, is_not_banned
 
 helper = Helper()
 
@@ -202,28 +202,25 @@ class PizzaSlashCog(Cog):
             return await ctx.respond(prompt_message, view=view)
 
     @slash_command(name="plist", description=helper.HELP_PLIST)
-    async def plist(self, ctx: ApplicationContext,
-                    filter_category = Option(str, choices=[
+    @option(name="filter_category", type=str, description="what type to filter by. requires string_to_match to be passed as well.", choices=[
                         OptionChoice(name='time', value='time'),
                         OptionChoice(name='author', value='author'),
                         OptionChoice(name='read', value='read'),
-                        OptionChoice(name='write', value='write')],
-                                            description="What type to filter by. Requires string_to_match to be passed as well.",
-                                            default=None),
-                    string_to_match: Option = Option(str,
-                                            description="String to filter by. Requires command_filter to be passed as well.", default=None),
-                    page: Option = Option(int,
-                                 "which page of list to show. may be required if output is longer than 25 lines", default=None)
+                        OptionChoice(name='write', value='write')], default=None)
+    @option(name="string_to_match", type=str, description="String to filter by. Requires command_filter to be passed as well.", default=None)
+    @option(name="page", type=int, description="which page of list to show. may be required if output is longer than 25 lines", default=None)
+    @is_not_banned()
+    async def plist(self, ctx: ApplicationContext,
+                    filter_category: str | None,
+                    string_to_match: str | None,
+                    page: int | None
                     ):
         if not self.__bot.listingSlash: return None
-        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            return await ctx.respond(embed=self.__embeds.BANNED())
-
         if bool(filter_category) ^ bool(string_to_match):  # first ever use of xor recorded in humanity
             return await ctx.respond(embed=self.__embeds.SLASH_PLIST_NOT_BOTH_OPTIONS())
         await ctx.defer()
 
-        if filter_category == "author":
+        if string_to_match is not None and filter_category == "author":
             raw_match = string_to_match
             string_to_match = str(Utils.ping_to_id(string_to_match))
             if string_to_match == 'False':  # なんでこうなってるのか謎だし微妙だなって思ってますが、いじるのはやめておきますね
@@ -231,7 +228,7 @@ class PizzaSlashCog(Cog):
 
         if not filter_category:
             filtered = list(data.items())
-        elif filter_category == "time":
+        elif filter_category == "time" and string_to_match is not None:
             filtered = [(k, v) for k, v in data.items() if evaluate_discord_timestamp(int(k) // 1000, string_to_match)]
         else:
             filtered = [(k, v) for k, v in data.items() if string_to_match.lower() in v.get(filter_category, "").lower()]
@@ -290,12 +287,10 @@ class PizzaSlashCog(Cog):
         return await ctx.respond(embed=view.get_current_embed(), view=view)
 
     @slash_command(name="pinfo", description=helper.HELP_PINFO)
-    async def pinfo(self, ctx: ApplicationContext,
-                    command_id = Option(int, "Command id. You can get this from /plist")):
+    @option(name="command_id", type=int, description="command id. you can get this from /plist")
+    @is_not_banned()
+    async def pinfo(self, ctx: ApplicationContext, command_id: int):
         if not self.__bot.listingSlash:
-            return
-        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            await ctx.respond(embed=self.__embeds.BANNED())
             return
         await ctx.defer()
 
@@ -324,11 +319,10 @@ class PizzaSlashCog(Cog):
 
     # noinspection DuplicatedCode
     @slash_command(name="premove", description=helper.HELP_PREMOVE)
-    async def premove(self, ctx: ApplicationContext,
-                      command_id = Option(int, "Command id. You can get this from /plist")):
+    @option(name="command_id", type=int, description="command id. you can get this from /plist")
+    @is_not_banned()
+    async def premove(self, ctx: ApplicationContext, command_id: int):
         if not self.__bot.listingSlash: return None
-        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
 
         valid_command = data.get(str(command_id))
@@ -351,13 +345,12 @@ class PizzaSlashCog(Cog):
         return None
 
     @slash_command(name="ptestcompiler", description=helper.HELP_COMPILER)
-    async def ptestcompiler(self, ctx: ApplicationContext,
-                            read = Option(str, "The string to match. The compiler works on this one"),
-                            write = Option(str, "What pizza romani responds with. The [] syntax goes here"),
-                            message = Option(str, "test message")):
+    @option(name="read", type=str, description="The string to match. The compiler works on this one")
+    @option(name="write", type=str, description="What pizza romani responds with. The [] syntax goes here")
+    @option(name="message", type=str, description="test message, to find out if it works")
+    @is_not_banned()
+    async def ptestcompiler(self, ctx: ApplicationContext, read: str, write: str, message: str):
         if not self.__bot.listingSlash: return None
-        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
 
         try:
@@ -370,6 +363,7 @@ class PizzaSlashCog(Cog):
         return await ctx.respond(write)
 
     @slash_command(name="pmute", description=helper.HELP_PMUTE)
+    @is_not_banned()
     async def pmute(self, ctx: ApplicationContext):
         bot_admins = self.__config.BOT_ADMINS.split(",")
         if str(ctx.interaction.user.id) not in bot_admins:
@@ -382,13 +376,14 @@ class PizzaSlashCog(Cog):
             await ctx.respond("Hooray, Pizza Romani is able to participate in conversation again! Yippie.")
 
     @slash_command(name="phelp", description=helper.HELP_PHELP)
-    async def phelp(self, ctx: ApplicationContext,
-                    command = Option(str, choices=[
+    @option(name="command", type=str, choices=[
                         OptionChoice(name='pinsert', value='pinsert'),
                         OptionChoice(name='plist', value='plist'),
                         OptionChoice(name='pinfo', value='pinfo'),
                         OptionChoice(name='premove', value='premove'),
-                        OptionChoice(name='ptestcompiler', value='compiler')])):
+                        OptionChoice(name='ptestcompiler', value='compiler')])
+    @is_not_banned()
+    async def phelp(self, ctx: ApplicationContext, command: str):
         output = f"# {command} help"
         await ctx.interaction.response.defer()
         match command:
@@ -410,12 +405,11 @@ class PizzaSlashCog(Cog):
             await ctx.interaction.followup.send(output_write)
 
     @slash_command(name="ptop", description="Displays a ranking of the top most used pizza commands.")
-    async def ptop(self, ctx: ApplicationContext,
-                   page: Option = Option(int, "which page to show.", default=None)):
+    @option(name="page", type=int, description="which page to show.", default=None)
+    @is_not_banned()
+    async def ptop(self, ctx: ApplicationContext, page: int | None):
         if not self.__bot.listingSlash:
             return None
-        if Utils.check_if_banned(ctx.interaction.user.id, self.__config.PROJECT_PATH):
-            return await ctx.respond(embed=self.__embeds.BANNED())
         await ctx.defer()
 
         if not pizza_lb:

@@ -6,17 +6,18 @@ import time
 import urllib
 from datetime import datetime
 import aiohttp
+import discord
 from mpmath import mp, mpf, exp
 from Music.BlueshellBot import BlueshellBot
 from Music.BlueshellBot import blueshell_entire_bot_startup_timestamp
-from discord import ApplicationContext, Option, Member
+from discord import ApplicationContext, Option, Member, option, Interaction, WebhookMessage, HTTPException, Forbidden
 from discord.ext import tasks
 from discord.ext.commands import slash_command, Cog
 from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils.Utils import Utils
+from Utils.Utils import Utils, is_not_banned
 from Utils import rr_api
 
 helper = Helper()
@@ -43,18 +44,24 @@ class MiscSlashCog(Cog):
         self.check_alerts.start()
 
     @slash_command(name='uptime', description="get time since last restart")
-    async def uptime(self, ctx: ApplicationContext) -> None:
-        await ctx.respond(embed=self.__embeds.UPTIME(str(datetime.now() - blueshell_entire_bot_startup_timestamp)[:-7]))
-        return
+    async def uptime(self, ctx: ApplicationContext):
+        return await ctx.respond(embed=self.__embeds.UPTIME(str(datetime.now() - blueshell_entire_bot_startup_timestamp)[:-7]))
 
     @slash_command(name='alert', description="set a reminder for yourself or others")
-    async def alert(self, ctx: ApplicationContext, time_input: str = Option(description="time (10m, 1h, t20:00, etc.)",),
-                    message: str = Option(description="alert description"),
-                    target_user: Member = Option(Member, description="target user", default=None)):
+    @option(name="time_input", type=str, description="time (10m, 1h, t20:00, d2026-11-02;20:00:00, etc.)")
+    @option(name="message", type=str, description="alert description", default=None)
+    @option(name="target_user", type=Member, description="Target user", default=None)
+    @is_not_banned()
+    async def alert(self, ctx: ApplicationContext, time_input: str = "",
+                    message: str | None = None,
+                    target_user: Member | None = None) -> Interaction | WebhookMessage:
         await ctx.defer()
 
-        time_str = Utils.seconds_until(time_input[1:]) if time_input.startswith('t') else time_input
-        seconds = Utils.convert_to_s(time_str)
+        if time_input.startswith("d") or time_input.startswith("t"):
+            seconds = Utils.convert_absolute_time_to_s(time_input)
+        else:
+            seconds = Utils.convert_relative_time_to_s(time_input)
+        time_info = Utils.convert_seconds_to_time_info(seconds)
 
         if seconds is None:
             return await ctx.respond(embed=self.__embeds.BAD_ALERT(time_input))
@@ -69,18 +76,17 @@ class MiscSlashCog(Cog):
             "channel_id": ctx.channel_id,
             "text": message,
             "send_at": send_at,
-            "original_time": time_str
+            "original_time": time_input
         })
         save_alerts(alerts)
 
-        return await ctx.respond(embed=self.__embeds.ALERT_SET(time_str))
+        return await ctx.respond(embed=self.__embeds.ALERT_SET(time_info))
 
 
     @slash_command(name='festgelegte_vertrege', description='vertrag mit der bank ausrechnen')
-    async def vertrege(self, ctx: ApplicationContext,
-                       geld: Option(int, "Geld"),
-                       rate: Option(int, "Rückzahlrate in %")
-                       ) -> None:
+    @option(name='geld', type=int, description="Geld")
+    @option(name='rate', type=int, description="Rückzahlrate in %")
+    async def vertrege(self, ctx: ApplicationContext, geld: int, rate: int) -> None:
         if rate > 100 or rate < 1:
             await ctx.respond("prozent von 1 bis 100")
             return
@@ -98,85 +104,11 @@ class MiscSlashCog(Cog):
         await ctx.respond(embed=self.__embeds.FESTGELEGTE_VERTREGE_EMBED(result[0], result[1], result[2], result[3]))
         return
 
-    @slash_command(name='money_calculator', description='check to what number you have to count to get a certain amount of money')
-    async def rule_vanilla_equivalent(self, ctx: ApplicationContext,
-                                      goal_money: Option(int,"Money you want to reach."),
-                                      vanilla_number: Option(int, "Vanilla number. If you use this, goal money is disregarded.") = None,
-                                      div_rules: Option(str, "Division rules. Enter like this: '2,3,5'") = None,
-                                      digsum_rules: Option(str, "Digsum rules. Enter like this: '2,3,4'") = None,
-                                      root_rules: Option(str, "Root rules. Enter like this: '2,3,5'") = None,
-                                      total_bonus_factor: Option(float, "Your total bonus factor when counting. e.g. 1.5") = 1.0
-                                      ):
-        try:
-            if div_rules in ("1", "0", "1,", ",1"):
-                await ctx.respond("you can't do that, and you know you can't. so don't do it. easy.")
-                return
-            div_rules = Utils.convert_rules_to_list(div_rules, "div")
-            digsum_rules = Utils.convert_rules_to_list(digsum_rules, "dig")
-            root_rules = Utils.convert_rules_to_list(root_rules, "root")
-
-            there_are_rules = bool(div_rules) or bool(digsum_rules) or bool(root_rules)
-
-            if div_rules == -1 or digsum_rules == -1 or root_rules == -1:
-                await ctx.respond("something went wrong when parsing rules. please try again and make sure to follow the format.")
-                return
-
-            digsum_rules_set = set(digsum_rules) if digsum_rules else set()
-
-            raw_target_money = goal_money
-            if vanilla_number is not None:
-                raw_target_money = vanilla_number * (vanilla_number + 1) // 2
-
-            sum_no_rules = raw_target_money / total_bonus_factor
-            vanilla_number_goal = math.ceil((-1 + math.sqrt(1 + 8 * goal_money)) / 2)
-            if vanilla_number is not None:
-                sum_no_rules = vanilla_number * (vanilla_number + 1) // 2
-
-            def divcheck(num):
-                return any(num % divisor == 0 for divisor in div_rules)
-
-            def digsumcheck(num):
-                if not digsum_rules_set: return False
-                total = 0
-                while num > 0:
-                    total += num % 10
-                    num //= 10
-                return total in digsum_rules_set
-
-            def rootcheck(num):
-                return any(round(num ** (1.0 / n)) ** n == num for n in root_rules)
-
-            number = 1
-            sum_rules = 0
-            amount_numbers = 0
-            while sum_rules < sum_no_rules:
-                number += 1
-                if divcheck(number) or rootcheck(number) or digsumcheck(number):
-                    continue
-                amount_numbers += 1
-                sum_rules += number
-
-            efficiency = vanilla_number_goal / amount_numbers - 1
-            efficiency = round(efficiency * 100, 2)  # no longer disgusting rounding, yay
-
-            answer_string = f"you would need to count up to number {number} to get more than "
-            answer_string += f"the equivalent of {vanilla_number} in vanilla" if goal_money is None else f"{goal_money} money"
-            answer_string += f"\nThe following rules were applied: div: {div_rules}, digsum: {digsum_rules}, root: {root_rules}" if there_are_rules else ""
-            answer_string += f"\n calculated with a {total_bonus_factor}x multiplier." if total_bonus_factor != 1.0 else ""
-            answer_string += f"\nThis equals {amount_numbers+1} actual counts in total. This is {efficiency}% more efficient than without any rules." if there_are_rules else ""
-            answer_string += f"\nPlease keep in mind that this is total money, and you only get a maximum of 50% ~~+1~~ of that when counting"
-            await ctx.respond(answer_string)
-            return
-        except Exception as e:
-            await ctx.respond("ich war zu faul für vernünftiges error handling. machs bitte einfach richtig bro")
-            await ctx.respond(e)
-            return
-
     @slash_command(name='trophy_chance_calculator', description='check how likely you are to win a trophy')
-    async def trophy_chance_calculator(self, ctx: ApplicationContext, number: Option(int, "number to calculate rate for")) -> None:
+    @option(name='number', type=int, description="number to calculate rate for")
+    async def trophy_chance_calculator(self, ctx: ApplicationContext, number: int) -> Interaction | WebhookMessage:
         if number < 1 or number > 25000000:
-            await ctx.respond("zahl von 1 bis 2.5e7 bitte")
-            return
+            return await ctx.respond("zahl von 1 bis 2.5e7 bitte")
 
         def formula(n, precision, inverse):
             mp.dps = precision
@@ -206,13 +138,12 @@ class MiscSlashCog(Cog):
         result = get_trophy_chance(number, False)
         result_inverse = get_trophy_chance(number, True)
         if result[0] == -1:
-            await ctx.respond("this is so precise, 1500 digits of precision couldn't handle it, the message would've been too long")
-            return
+            return await ctx.respond("this is so precise, 1500 digits of precision couldn't handle it, the message would've been too long")
 
         output_string = f"chance for a trophy for number {number} is {result_inverse[1]}%, or 1 in {result[1]} with precision of {result[0]} digits"
         if number > 10000:
             output_string = "This is a big number so the numbers can get very huge and long. Be careful\n" + output_string
-        await ctx.respond(output_string)
+        return await ctx.respond(output_string)
 
     @slash_command(name='rr_rooms', description='returns good rr rooms')
     async def good_rooms(self, ctx: ApplicationContext):
@@ -235,7 +166,8 @@ class MiscSlashCog(Cog):
         return
 
     @slash_command(name='join_a_room', description='lists all fcs with openhost on in a specific room')
-    async def join_a_room(self, ctx: ApplicationContext, room_id: Option(str, "Room ID (6 digits)")):
+    @option(name='room_id', type=str, description='Room ID (6 digits)')
+    async def join_a_room(self, ctx: ApplicationContext, room_id: str):
         room = rr_api.get_room_by_id(room_id)
         openhost_codes = rr_api.get_all_openhost_fcs_by_room(room)
         room_vr_count = rr_api.get_average_room_vr(room)
@@ -249,25 +181,20 @@ class MiscSlashCog(Cog):
         return
 
     @slash_command(name='clean', description=helper.HELP_CLEAN)
-    async def clean(self, ctx: ApplicationContext,
-                    limit = Option(int, "How many messages to delete?", default=20),
-                    who = Option(str, "whose messages to clean?", choices=["all", "bot", "user", "saul", "any"], default="all")):
-        if Utils.check_if_banned(ctx.author.id, self.__config.PROJECT_PATH):
-            await ctx.respond(embed=self.__embeds.BANNED())
-            return
+    @option(name="limit", type=int, description="how many messages to delete", default=20)
+    @option(name="who", type=str, description="whose messages to clean", choices=["all", "bot", "user", "saul", "any"], default="all")
+    @is_not_banned()
+    async def clean(self, ctx: ApplicationContext, limit: int, who: str):
         if not ctx.guild:
-            await ctx.respond("this command is restricted to servers.")
-            return
+            return await ctx.respond("this command is restricted to servers.")
         if who == "any" and not (ctx.guild.id == 995966314877300737 or ctx.author.guild_permissions.administrator):
-            await ctx.respond("you are not authorised to delete everyone's messages, only your own and the bot's.")
-            return
+            return await ctx.respond("you are not authorised to delete everyone's messages, only your own and the bot's.")
         if limit > self.__config.CLEAN_AMOUNT:
-            await ctx.respond(embed=self.__embeds.TOO_MANY_CLEAN_QUERIES(limit))
-            return
+            return await ctx.respond(embed=self.__embeds.TOO_MANY_CLEAN_QUERIES(limit))
 
         await ctx.defer(ephemeral=True)
 
-        def should_delete(msg):
+        def should_delete(msg: discord.Message):
             # only delete messages from the bot itself
             if who in ("bot", "all") and msg.author.id == ctx.bot.user.id:
                 return True
@@ -303,8 +230,7 @@ class MiscSlashCog(Cog):
                         await asyncio.sleep(1)
 
         await ctx.channel.send(embed=self.__embeds.CLEANED(limit, len(to_delete), who, inspect_amount), delete_after=10)
-        await ctx.respond("messages cleaned.")
-        return
+        return await ctx.respond("messages cleaned.")
 
     @tasks.loop(seconds=10)
     async def check_alerts(self):
@@ -328,8 +254,8 @@ class MiscSlashCog(Cog):
                     )
                     try:
                         await channel.send(content=mention, embed=embed)
-                    except:
-                        pass  # leel, maybe she was right and i really shouldn't code
+                    except (HTTPException, Forbidden) as e:
+                        print(f"error sending alert: {e.__type__}, {e}")  # finally after all this time
 
             else:
                 updated_alerts.append(alert)
@@ -341,12 +267,10 @@ class MiscSlashCog(Cog):
     async def before_check_alerts(self):
         await self.__bot.wait_until_ready()
 
-    @slash_command(name='restart_compcount',
-                   description='compcount gets restarted and all streaks are saved. only runnable by admin')
+    @slash_command(name='restart_compcount', description='compcount gets restarted and all streaks are saved. only runnable by admin')
     async def restart_compcount(self, ctx: ApplicationContext):
         if ctx.interaction.user.id not in (422800248935546880, 468786219258740756):
-            await ctx.respond("you are not authorised to do this.")
-            return
+            return await ctx.respond("you are not authorised to do this.")
         await ctx.defer()
         env_variables = os.environ.copy()
 
@@ -396,10 +320,9 @@ class MiscSlashCog(Cog):
         if len(full_log) > 1900:
             full_log = "...\n" + full_log[-1850:]
             
-        await message.edit(content=f"deployment completed with code {process.returncode}:\n```bash\n{full_log}```")
+        return await message.edit(content=f"deployment completed with code {process.returncode}:\n```bash\n{full_log}```")
 
-    @slash_command(name='restart_blueshellbot',
-                   description='restart the bot. only runnable by admin')
+    @slash_command(name='restart_blueshellbot', description='restart the bot. only runnable by admin')
     async def restart_blueshellbot(self, ctx: ApplicationContext):
         await ctx.defer()
         if ctx.interaction.user.id != 422800248935546880:
@@ -411,21 +334,17 @@ class MiscSlashCog(Cog):
         path = os.getcwd()
         target_path = os.path.abspath(os.path.join(path, "..", "restart-blueshelly.sh"))
 
-        process = await asyncio.create_subprocess_exec(
-            'sh', target_path,
+        await asyncio.create_subprocess_exec(
+            program='sh', *target_path,
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.DEVNULL
         )
 
     @slash_command(name='diddenbludden', description='manage a service (start/stop/restart/status).')
-    async def diddenbludden(
-            self,
-            ctx: ApplicationContext,
-            action: Option = Option(str, "systemctl action", choices=["start", "stop", "restart", "status"])
-    ):
+    @option(name='action', type=str, description="systemctl action", choices=["start", "stop", "restart", "status"])
+    async def diddenbludden(self, ctx: ApplicationContext, action: str):
         if ctx.interaction.user.id not in (422800248935546880, 640985620948189186):
-            await ctx.respond("you are not authorised to do this.")
-            return
+            return await ctx.respond("you are not authorised to do this.")
 
         await ctx.defer()
         env = os.environ.copy()
@@ -440,27 +359,25 @@ class MiscSlashCog(Cog):
 
         stdout, _ = await process.communicate()
         output = stdout.decode('utf-8').strip()
-        if action in ["start", "stop", "restart"]:
+        if action in ("start", "stop", "restart"):
             if process.returncode == 0:
-                await ctx.followup.send(f"ran `{action}`.")
+                return await ctx.followup.send(f"ran `{action}`.")
             else:
-                await ctx.followup.send(
-                    f"could not `{action}` service. code {process.returncode}:\n```bash\n{output[:1900]}```")
+                return await ctx.followup.send(f"could not `{action}` service. code {process.returncode}:\n```bash\n{output[:1900]}```")
 
-        elif action == "status":
+        else:
             if not output:
                 output = "no output."
 
-            await ctx.followup.send(f"status:\n```bash\n{output[:1900]}```")
+            return await ctx.followup.send(f"status:\n```bash\n{output[:1900]}```")
 
-    @slash_command(name="base_kakera_calculator",
-                       description="calculate a character's ka value based on rank, claims, and keys.")
-    async def base_kakera_calculator(self, ctx: ApplicationContext,
-            r = Option(int, "claim rank ($top)", min_value=1),
-            l = Option(int, "like rank ($topl)", min_value=1),
-            left = Option(int, "total number of claimed characters (with $left), 0 for base value", min_value=0),
-            keys = Option(int, "number of keys on the character", min_value=0)
-    ):
+    @slash_command(name="base_kakera_calculator", description="calculate a character's ka value based on rank, claims, and keys.")
+    @option(name="r", type=int, description="claim rank ($top)", min_value=1)
+    @option(name="l", type=int, description="like rank ($topl)", min_value=1)
+    @option(name="left", type=int, description="total number of claimed characters (with $left), 0 for base value", min_value=0)
+    @option(name="keys", type=int, description="number of keys on the character", min_value=0)
+    @is_not_banned()
+    async def base_kakera_calculator(self, ctx: ApplicationContext, r: int, l: int, left: int, keys: int):
         if keys == 0: ym = 1.0
         elif 1 <= keys < 3: ym = 1.0 + 0.1 * (keys - 1)
         elif 3 <= keys < 6: ym = 1.1 + 0.1 * (keys - 3)
@@ -474,11 +391,8 @@ class MiscSlashCog(Cog):
         await ctx.respond(f"r: {r}, rl: {rl}, l: {l}, $left: {left}, y: {keys}\n"f"value: {kv}")
 
     @slash_command(name="lounge_role_request", guild_ids=[1494713422271746139])
+    @is_not_banned()
     async def lounge_role_request(self, ctx: ApplicationContext, leaderboard_name = Option(str, "leaderboard name")):
-
-        if Utils.check_if_banned(ctx.author, self.__config.PROJECT_PATH):
-            await ctx.respond(embed=self.__embeds.BANNED())
-            return
         await ctx.defer(ephemeral=True)
 
         api_url = "https://gb.hlorenzi.com/api/v1/graphql"
@@ -505,17 +419,15 @@ class MiscSlashCog(Cog):
                     if response.status != 200:
                         error_text = await response.text()
                         print(f"API error status {response.status}: {error_text} trying to submit lounge role request")
-                        await ctx.respond(f"the leaderboard api is returning an error (code {response.status}).")
-                        return
+                        return await ctx.respond(f"the leaderboard api is returning an error (code {response.status}).")
                     data = await response.json()
                     team_data = data.get("data", {}).get("team", {})
                     player_data = team_data.get("player")
 
                     if not team_data or player_data is None:
-                        await ctx.respond(
+                        return await ctx.respond(
                             f"couldn't find a player named `{leaderboard_name}` on the leaderboard. double-check the spelling on <https://gb.hlorenzi.com/reg/k3_uU0>.\n"
                             f"leaderboard names are case-sensitive!")
-                        return
                     player_rating = player_data.get("rating", 0)
                     tiers = team_data.get("tiers", [])
                     tiers.sort(key=lambda t: t.get("lowerBound", -99999), reverse=True)
@@ -528,8 +440,7 @@ class MiscSlashCog(Cog):
 
             except aiohttp.ClientError as e:
                 print(f"Network error trying to submit lounge role request: {e}")
-                await ctx.respond("the leaderboard site is currently unreachable. try again later.")
-                return
+                return await ctx.respond("the leaderboard site is currently unreachable. try again later.")
 
         target_channel_id = 1512468097649348658
         target_user_ids = 422800248935546880, 640985620948189186
@@ -543,7 +454,7 @@ class MiscSlashCog(Cog):
             f"You can check this player's rating here: <{check_url}>"
         )
 
-        await ctx.respond("your request has been submitted successfully. please be patient as it has to be processed manually.")
+        return await ctx.respond("your request has been submitted successfully. please be patient as it has to be processed manually.")
     
     @slash_command(name="maggdacyka")
     async def maggdacyka(self, ctx: ApplicationContext):
@@ -565,8 +476,9 @@ class MiscSlashCog(Cog):
             value, trend = dingens.split("|")
             trend_emojis = {"1": "⬇️", "2": "↘️", "3": "➡️", "4": "↗️", "5": "⬆️"}
             output = f"BZ: {value.strip()} | {trend_emojis.get(trend.strip(), 'kp')}"
-        
-        await ctx.respond(output)
+        else: output = f"input given from maggdacyka.java was not correctly formatted: {dingens}"
+
+        return await ctx.respond(output)
 
 
 def setup(bot):

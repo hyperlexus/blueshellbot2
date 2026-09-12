@@ -2,6 +2,7 @@ import discord
 from discord.ext.commands import slash_command, Cog, command
 from discord import ApplicationContext, Option
 from UI.Views.OcView import OcGameView
+from Utils.Utils import is_not_banned
 
 one_hundred_percent_red = {
     (0,): 12,
@@ -190,6 +191,7 @@ class RedfinderCog(Cog):
         self.strategy_dict = {}
 
     @slash_command(name='redfinder', description='finds red, with different strategies.')
+    @is_not_banned()
     async def redfinder(self, ctx: ApplicationContext,
                         strategy = Option(str, "what strategy to use", choices=["guaranteed red", "most value"], default="all")):
         match strategy:
@@ -206,6 +208,7 @@ class RedfinderCog(Cog):
         await ctx.respond(f"This will help you make a lot of money from $oc. Please click at {starting_click} to start.\nCoordinates are Down, Right (for example, '1, 5' is top right).", view=view)
 
     @command(name="oc", description="🐰👉🕐")
+    @is_not_banned()
     async def oc_game(self, ctx: discord.ApplicationContext) -> None:
         view = OcGameView()
         await ctx.send(

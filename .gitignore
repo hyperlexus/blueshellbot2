@@ -80,3 +80,4 @@ cython_debug/
 cookies.txt
 Storage/wordle_stats.db
 Storage/pizza_lb.json
+mudae_card_temp.png

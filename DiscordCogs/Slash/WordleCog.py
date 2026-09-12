@@ -1,8 +1,11 @@
 import discord
+from discord import option
 from discord.ext.commands import slash_command, Cog
 from Config.Configs import BConfigs
 import sqlite3
 import re
+
+from Utils.Utils import is_not_banned, is_bot_admin
 
 SCORE_PATTERN = re.compile(r'(?:👑\s*)?([1-6X])/6:')
 PING_PATTERN = re.compile(r'<@!?(\d+)>')
@@ -119,7 +122,7 @@ class WordleCog(Cog):
             if not success: await message.channel.send(f" <@422800248935546880> name not in ping or in dict: {bad_name}")
 
     @slash_command(name="sync_wordle", description="sync wordle", guild_ids=[GUILD_ID])
-    @discord.default_permissions(administrator=True)
+    @is_bot_admin()
     async def sync_wordle(self, ctx: discord.ApplicationContext) -> None:
         if ctx.channel.id != WORDLE_CHANNEL_ID:
             await ctx.respond(f"error: not in <#{WORDLE_CHANNEL_ID}>.", ephemeral=True)
@@ -145,12 +148,9 @@ class WordleCog(Cog):
         await ctx.respond(f"{count}")
 
     @slash_command(name="wordle_stats", description="Show server wordle statistics", guild_ids=[GUILD_ID])
-    async def wordle_stats(
-            self,
-            ctx: discord.ApplicationContext,
-            target_user: discord.Member = discord.Option(discord.Member, "specific user", required=False, default=None)
-    ) -> None:
-
+    @option(name="target_user", type=discord.Member, description="Target user", default=None)
+    @is_not_banned()
+    async def wordle_stats(self, ctx: discord.ApplicationContext, target_user: discord.Member):
         self.cursor.execute('SELECT value FROM server_data WHERE key = "total_days"')
         streak_result = self.cursor.fetchone()
 
@@ -161,8 +161,7 @@ class WordleCog(Cog):
             row = self.cursor.fetchone()
 
             if not row:
-                await ctx.respond(f"no stats for {target_user.display_name}.")
-                return
+                return await ctx.respond(f"no stats for {target_user.display_name}.")
 
             user_id, played, s1, s2, s3, s4, s5, s6, sx = row
             wins = s1 + s2 + s3 + s4 + s5 + s6
@@ -193,15 +192,14 @@ class WordleCog(Cog):
             total_geses = (s1 * 1) + (s2 * 2) + (s3 * 3) + (s4 * 4) + (s5 * 5) + (s6 * 6) + (sx * 7)
             embed.add_field(name="total guesses all time", value=str(total_geses), inline=False)
 
-            await ctx.respond(embed=embed)
+            return await ctx.respond(embed=embed)
 
         else:
             self.cursor.execute('SELECT * FROM stats ORDER BY played DESC')
             rows = self.cursor.fetchall()
 
             if not rows:
-                await ctx.respond("No stats found! Run `/sync_wordle` first.")
-                return
+                return await ctx.respond("No stats found! Run `/sync_wordle` first.")
 
             embed = discord.Embed(title=f"#wördle Leaderboard", color=discord.Color.green())
             leaderboard_text = "-# explanation: wins / played / total (win % | play %), avg guesses/6\n\n"
@@ -218,7 +216,7 @@ class WordleCog(Cog):
                 leaderboard_text += f"<@{user_id}>: {wins} / {played} / {total_days:04d} ({win_rate:.1f}% | {play_rate:.1f}%), {avg_score:.2f}/6\n"
 
             embed.description = leaderboard_text
-            await ctx.respond(embed=embed)
+            return await ctx.respond(embed=embed)
 
 def setup(bot):
     bot.add_cog(WordleCog(bot))

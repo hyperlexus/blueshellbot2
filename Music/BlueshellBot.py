@@ -1,11 +1,12 @@
 import asyncio
+import traceback
 from asyncio import AbstractEventLoop
 from datetime import datetime
 import discord
 from discord import Guild, Status, Game, Message
 from discord.ext.commands import Bot, Context
 from discord.ext.commands.errors import CommandNotFound, MissingRequiredArgument, ExpectedClosingQuoteError, \
-    UnexpectedQuoteError, BadArgument, InvalidEndOfQuotedStringError
+    UnexpectedQuoteError, BadArgument, InvalidEndOfQuotedStringError, CheckFailure
 from Config.Configs import BConfigs
 from Config.Messages import Messages
 from Config.Embeds import BEmbeds
@@ -64,26 +65,59 @@ class BlueshellBot(Bot):
             print(self.__messages.STARTUP_COMPLETE_MESSAGE)
 
     async def on_command_error(self, ctx, error):
-        if isinstance(error, MissingRequiredArgument):
+        actual_error = getattr(error, 'original', error)
+        if isinstance(actual_error, MissingRequiredArgument):
             await ctx.send(embed=self.__embeds.MISSING_ARGUMENTS())
 
-        elif isinstance(error, ExpectedClosingQuoteError):
+        elif isinstance(actual_error, ExpectedClosingQuoteError):
             await ctx.send(embed=self.__embeds.NO_CLOSING_QUOTE())
 
-        elif isinstance(error, CommandNotFound):
+        elif isinstance(actual_error, CommandNotFound):
             await ctx.send(embed=self.__embeds.COMMAND_NOT_FOUND())
 
-        elif isinstance(error, InvalidEndOfQuotedStringError):
+        elif isinstance(actual_error, InvalidEndOfQuotedStringError):
             await ctx.send("Please leave a space between arguments")
 
-        elif isinstance(error, UnexpectedQuoteError):
+        elif isinstance(actual_error, UnexpectedQuoteError):
             await ctx.send("Das geht so nicht sie pizzierender spast, machen sie einfach keine quotes")
 
+        elif isinstance(actual_error, CheckFailure):
+            return
+
         else:
-            error_type = type(error).__name__
-            print(f"Unhandled error: {error_type}")
-            print(f'Command has thrown an error -> {error}')
-            await ctx.send(embed=self.__embeds.UNKNOWN_ERROR(error_type))
+            tb = traceback.extract_tb(actual_error.__traceback__)
+            if tb:
+                last_frame = tb[-1]
+                file_name = last_frame.filename.split("/")[-1]
+                line_no = last_frame.lineno
+                location_info = f"in {file_name}:{line_no}"
+            else:
+                location_info = "unknown location"
+
+            error_type = type(actual_error).__name__
+            print(f"Unhandled error: {error_type} at {location_info}")
+            print(f'Command has thrown an error -> {actual_error}')
+            await ctx.send(embed=self.__embeds.UNKNOWN_ERROR(f"{error_type} ({location_info})"))
+
+    async def on_application_command_error(self, ctx, error):
+        actual_error = getattr(error, 'original', error)
+        if isinstance(error, CheckFailure) or isinstance(actual_error, CheckFailure):
+            return
+
+        else:
+            tb = traceback.extract_tb(actual_error.__traceback__)
+            if tb:
+                last_frame = tb[-1]
+                file_name = last_frame.filename.split("/")[-1]
+                line_no = last_frame.lineno
+                location_info = f"in {file_name}:{line_no}"
+            else:
+                location_info = "unknown location"
+
+            error_type = type(actual_error).__name__
+            print(f"Unhandled error: {error_type} at {location_info}")
+            print(f'Slash command has thrown an error -> {actual_error}')
+            await ctx.respond(embed=self.__embeds.UNKNOWN_SLASH_COMMAND_ERROR(f"{error_type} ({location_info})"))
 
     async def process_commands(self, message: Message):
         if message.author.bot:

@@ -8,7 +8,8 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils.Utils import Utils
+from Utils.Utils import Utils, is_bot_admin
+
 helper = Helper()
 
 class ModCog(Cog):
@@ -20,11 +21,8 @@ class ModCog(Cog):
         self.__bot: BlueshellBot = bot
 
     @command(name='restart', help=helper.HELP_RESTART, description=helper.HELP_RESTART_LONG, aliases=['reboot', 'kill'])
+    @is_bot_admin()
     async def restart(self, ctx: Context) -> None:
-        bot_admins = self.__config.BOT_ADMINS.split(",")
-        if str(ctx.author.id) not in bot_admins:
-            await ctx.send(embed=self.__embeds.MISSING_PERMISSIONS("restart"))
-            return
         await ctx.send("restarting bot, please be patient.")
         os.chdir(self.__config.BAT_PATH)
         os.startfile("runbot.bat")
@@ -35,12 +33,10 @@ class ModCog(Cog):
         sys.exit(69)
 
     @command(name='ban', help=helper.HELP_BAN, description=helper.HELP_BAN_LONG)
+    @is_bot_admin()
     async def ban(self, ctx: Context, *args) -> None:
         os.chdir(self.__config.PROJECT_PATH)
         bot_admins = self.__config.BOT_ADMINS.split(",")
-        if str(ctx.author.id) not in bot_admins:
-            await ctx.send(embed=self.__embeds.MISSING_PERMISSIONS("ban"))
-            return
 
         to_ban = str(Utils.ping_to_id(args[0]))
         if to_ban == 'False':
@@ -51,7 +47,7 @@ class ModCog(Cog):
             await ctx.send(embed=self.__embeds.INVALID_BAN_COMMAND())
             return
 
-        username = str(self.__bot.get_user(int(to_ban)))[:-2]
+        username = str(self.__bot.get_user(int(to_ban)))
 
         with open("./Storage/banlist.txt", "r+") as file:
             banlist = file.read().splitlines()
@@ -69,7 +65,7 @@ class ModCog(Cog):
         await ctx.send(embed=embed)
         return
 
-    @command(name='force_embed', help=helper.HELP_FORCE_EMBED, description=helper.HELP_FORCE_EMBED_LONG)  # todo 71, 72 etc fail
+    @command(name='force_embed', help=helper.HELP_FORCE_EMBED, description=helper.HELP_FORCE_EMBED_LONG)
     async def force_embed(self, ctx: Context, *args) -> None:
         embed_to_force = None
         if len(args) != 1:

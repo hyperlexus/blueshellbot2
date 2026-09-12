@@ -228,6 +228,15 @@ class BEmbeds:
         )
         return embed
 
+    def UNKNOWN_SLASH_COMMAND_ERROR(self, error_type=None) -> Embed:
+        desc_addon = f"\n\nerror type: {error_type}" if error_type else ""
+        embed = Embed(
+            title=self.__messages.SLASH_ERROR_TITLE,
+            description=self.__messages.UNKNOWN_ERROR + desc_addon,
+            colour=self.__colors.RED
+        )
+        return embed
+
     def FAIL_DUE_TO_LOOP_ON(self) -> Embed:
         embed = Embed(
             title=self.__messages.SONG_PLAYER,
@@ -517,9 +526,9 @@ class BEmbeds:
         )
         return embed
 
-    def MISSING_PERMISSIONS(self, command_name):
+    def MISSING_PERMISSIONS(self):
         embed = Embed(
-            title=f'Error: Use of {self.__config.BOT_PREFIX}{command_name} is forbidden for this user',
+            title=f'Error: Use of this command is forbidden for this user',
             description='You do not have the necessary permission to run this command.',
             color=self.__colors.RED
         )

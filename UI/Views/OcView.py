@@ -119,7 +119,6 @@ class OcGameView(discord.ui.View):
             for child in self.children:
                 if child.custom_id == f"oc_{index}":
                     child.emoji = EMOJI_MAP[color]
-                    child.style = discord.ButtonStyle.blurple
                     child.disabled = True
                     break
 

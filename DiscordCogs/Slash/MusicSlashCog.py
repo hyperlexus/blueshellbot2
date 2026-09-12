@@ -1,5 +1,5 @@
 from discord.ext.commands import slash_command, Cog
-from discord import Option, ApplicationContext, OptionChoice
+from discord import Option, ApplicationContext, OptionChoice, option
 from Handlers.ClearHandler import ClearHandler
 from Handlers.MoveHandler import MoveHandler
 from Handlers.NowPlayingHandler import NowPlayingHandler
@@ -23,8 +23,6 @@ from Config.Embeds import BEmbeds
 from Config.Helper import Helper
 import traceback
 
-from Utils.Utils import Utils
-
 helper = Helper()
 
 
@@ -32,7 +30,7 @@ class MusicSlashCommands(Cog):
     """
     Class to listen to Music commands
     It'll listen for commands from discord, when triggered will create a specific Handler for the command
-    Execute the handler and then create a specific View to be showed in Discord
+    Execute the handler and then create a specific View to be shown in Discord
     """
 
     def __init__(self, bot: BlueshellBot) -> None:
@@ -40,10 +38,9 @@ class MusicSlashCommands(Cog):
         self.__embeds = BEmbeds()
 
     @slash_command(name="play", description=helper.HELP_PLAY)
-    async def play(self, ctx: ApplicationContext,
-                   music: Option(str, "The music name or URL", required=True)) -> None:
-        # Due to the utilization of multiprocessing module in this Project, we have multiple instances of the Bot, and by using this flag
-        # we can control which bot instance will listen to the commands that Discord send to our application
+    @option(name="music", type=str, description="the music name or URL")
+    async def play(self, ctx: ApplicationContext, music: str) -> None:
+        # prevent two bots from playing
         if not self.__bot.listingSlash:
             return
         try:
@@ -52,8 +49,8 @@ class MusicSlashCommands(Cog):
 
             response = await controller.run(music)
             if response is not None:
-                cogResponser1 = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-                await cogResponser1.run()
+                cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+                await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -70,8 +67,8 @@ class MusicSlashCommands(Cog):
             page_number -= 1
             response = await controller.run(page_number)
 
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.QUEUE)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.QUEUE)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -84,8 +81,8 @@ class MusicSlashCommands(Cog):
             controller = SkipHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -98,8 +95,8 @@ class MusicSlashCommands(Cog):
             controller = StopHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -112,8 +109,8 @@ class MusicSlashCommands(Cog):
             controller = PauseHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -126,8 +123,8 @@ class MusicSlashCommands(Cog):
             controller = ResumeHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -141,8 +138,8 @@ class MusicSlashCommands(Cog):
 
             response = await controller.run()
             if response is not None:
-                cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-                await cogResponser.run()
+                cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+                await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -155,18 +152,16 @@ class MusicSlashCommands(Cog):
             controller = HistoryHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.HISTORY)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.HISTORY)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
     @slash_command(name='loop', description=helper.HELP_LOOP)
-    async def loop(self, ctx: ApplicationContext,
-                   loop_type: Option(str, choices=[
-                       OptionChoice(name='off', value='off'),
-                       OptionChoice(name='one', value='one'),
-                       OptionChoice(name='all', value='all')
-                   ])) -> None:
+    @option(name="loop_type", type=str,
+            choices=[OptionChoice(name='off', value='off'), OptionChoice(name='one', value='one'), OptionChoice(name='all', value='all')]
+            )
+    async def loop(self, ctx: ApplicationContext, loop_type: str) -> None:
         if not self.__bot.listingSlash:
             return
         try:
@@ -174,8 +169,8 @@ class MusicSlashCommands(Cog):
             controller = LoopHandler(ctx, self.__bot)
 
             response = await controller.run(loop_type)
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.LOOP)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.LOOP)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -188,8 +183,8 @@ class MusicSlashCommands(Cog):
             controller = ClearHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -202,8 +197,8 @@ class MusicSlashCommands(Cog):
             controller = NowPlayingHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.NOW_PLAYING)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.NOW_PLAYING)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -216,15 +211,15 @@ class MusicSlashCommands(Cog):
             controller = ShuffleHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
     @slash_command(name='move_song', description=helper.HELP_MOVE)
-    async def move(self, ctx: ApplicationContext,
-                   from_pos: Option(int, "The position of song to move", min_value=1),
-                   to_pos: Option(int, "The position to put the song, default 1", min_value=1, default=1)) -> None:
+    @option(name="from_pos", type=int, description="The position of the song to move", min_value=1)
+    @option(name="to_pos", type=int, description="The position to put the song, default 1", min_value=1, default=1)
+    async def move(self, ctx: ApplicationContext, from_pos: int, to_pos: int) -> None:
         if not self.__bot.listingSlash:
             return
         try:
@@ -235,8 +230,8 @@ class MusicSlashCommands(Cog):
             controller = MoveHandler(ctx, self.__bot)
 
             response = await controller.run(from_pos, to_pos)
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.MANAGING_QUEUE)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.MANAGING_QUEUE)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -251,8 +246,8 @@ class MusicSlashCommands(Cog):
             controller = VolumeHandler(ctx, self.__bot)
 
             response = await controller.run(f'{volume}')
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -266,8 +261,8 @@ class MusicSlashCommands(Cog):
             controller = RemoveHandler(ctx, self.__bot)
 
             response = await controller.run(position)
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.MANAGING_QUEUE)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.MANAGING_QUEUE)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
@@ -280,8 +275,8 @@ class MusicSlashCommands(Cog):
             controller = ResetHandler(ctx, self.__bot)
 
             response = await controller.run()
-            cogResponser = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
-            await cogResponser.run()
+            cog_responder = SlashEmbedResponse(response, ctx, MessagesCategory.PLAYER)
+            await cog_responder.run()
         except Exception:
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 

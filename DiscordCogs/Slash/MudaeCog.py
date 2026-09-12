@@ -112,7 +112,7 @@ class MudaeCog(Cog):
         self.absolute_toggle = True
 
         self.max_power = {
-            "hyperlexus": 115,
+            "hyperlexus": 120,
             "ad.infernum": 110,
             "alvideiectiones": 110,
             "julisus": 100
@@ -172,9 +172,7 @@ class MudaeCog(Cog):
 
         match current_user:
             case "ad.infernum":
-                current_tz = "Pacific/Honolulu"
-            case "alvideiectiones":
-                current_tz = "Asia/Tokyo"
+                current_tz = "America/New_York"
             case _:
                 current_tz = "Europe/Berlin"
 
@@ -188,8 +186,7 @@ class MudaeCog(Cog):
         claim_yes = re.search(r'next claim reset is in \*\*([^*]+)\*\*', content)
         claim_no = re.search(r'you can\'t claim for another \*\*([^*]+)\*\*', content)
         if claim_yes:
-            claim_text = format_absolute(claim_yes.group(1), current_tz) if self.absolute_toggle else format_relative(
-                claim_yes.group(1))
+            claim_text = format_absolute(claim_yes.group(1), current_tz) if self.absolute_toggle else format_relative(claim_yes.group(1))
             claim_class = "ready"
         elif claim_no:
             claim_text = format_absolute(claim_no.group(1), current_tz) if self.absolute_toggle else format_relative(claim_no.group(1))
@@ -214,8 +211,7 @@ class MudaeCog(Cog):
         if re.search(r'\$rt is available!', content):
             rt_time = "ready"
         elif rt_cd_match:
-            rt_time = format_absolute(rt_cd_match.group(1), current_tz) if self.absolute_toggle else format_relative(
-                rt_cd_match.group(1))
+            rt_time = format_absolute(rt_cd_match.group(1), current_tz) if self.absolute_toggle else format_relative(rt_cd_match.group(1))
         else:
             rt_time = "?"
 
@@ -223,8 +219,7 @@ class MudaeCog(Cog):
         if re.search(r'\$p is available!', content):
             p_time = "ready"
         elif p_cd_match:
-            p_time = format_absolute(p_cd_match.group(1), current_tz) if self.absolute_toggle else format_relative(
-                p_cd_match.group(1))
+            p_time = format_absolute(p_cd_match.group(1), current_tz) if self.absolute_toggle else format_relative(p_cd_match.group(1))
         else:
             p_time = "?"
 

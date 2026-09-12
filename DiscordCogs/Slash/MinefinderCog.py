@@ -3,6 +3,8 @@ from discord.ext.commands import slash_command, Cog
 from discord import ApplicationContext
 import itertools
 
+from Utils.Utils import is_not_banned
+
 sphere_values = {
     'purple': 5,
     'blue': 10,
@@ -262,6 +264,7 @@ class MinefinderCog(Cog):
         self.bot = bot
 
     @slash_command(name='minefinder', description='mudae $oq solver')
+    @is_not_banned()
     async def minefinder(self, ctx: ApplicationContext):
         view = OqSolverView(ctx.author.id)
         await ctx.respond((

@@ -12,7 +12,8 @@ from Config.Helper import Helper
 from Config.Embeds import BEmbeds
 from Config.Colors import BColors
 from Config.Configs import BConfigs
-from Utils.Utils import Utils
+from Utils.Utils import Utils, is_not_banned
+
 helper = Helper()
 
 class MiscCog(Cog):
@@ -25,10 +26,8 @@ class MiscCog(Cog):
         self.__bot: BlueshellBot = bot
 
     @command(name='wahl', help=helper.HELP_WAHL, description=helper.HELP_WAHL_LONG, aliases=['wahlkommission'])
+    @is_not_banned()
     async def wahlkommission(self, ctx: Context) -> None:
-        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
-            await ctx.send(embed=self.__embeds.BANNED())
-            return
         result = round(random() * 100)
         if result == 69:
             result = (f"{str(result)}. 恭喜你獲得傳奇號碼69！無論您是擲骰子、轉動輪盤，還是只是碰巧發現了這個標誌性數字，今天都是您的幸運"
@@ -43,50 +42,9 @@ class MiscCog(Cog):
 
         await ctx.send(embed=self.__embeds.WAHLKOMMISSION(result))
 
-    @command(name='alert', help=helper.HELP_ALERT, description=helper.HELP_ALERT_LONG, aliases=['remindme', 'timer', 'reminder'])
-    async def alert(self, ctx: Context, time_str: str, *args: str) -> None:
-        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
-            await ctx.send(embed=self.__embeds.BANNED())
-            return
-        await ctx.send("this command has been decommissioned. please use /alert!")
-        async def decommissioned():
-            other_user, text = False, None
-            if args:
-                text = " ".join(args[1:]) if len(args) > 1 else None
-                user_id = Utils.ping_to_id(args[0])
-                if not user_id:
-                    await ctx.send(embed=self.__embeds.BAD_USER_ID(args[0]))
-                    return
-                if user_id != args[0]:
-                    other_user = True
-
-            new_time_str = Utils.seconds_until(time_str[1:]) if time_str.startswith('t') else time_str
-            seconds = Utils.convert_to_s(new_time_str)
-            if seconds is None:
-                await ctx.send(embed=self.__embeds.BAD_ALERT(time_str))
-                return
-
-            await ctx.send(embed=self.__embeds.ALERT_SET(new_time_str))
-
-            await asyncio.sleep(seconds)
-
-            if other_user:
-                await ctx.send(f'<@{user_id}>')
-                await ctx.send(embed=self.__embeds.ALERT_DONE(new_time_str, text or "", other_user))
-            else:
-                await ctx.reply(embed=self.__embeds.ALERT_DONE(new_time_str, text or "", other_user))
-
     @command(name='feet', help=helper.HELP_FEET, description=helper.HELP_FEET_LONG)
     async def feet(self, ctx: Context) -> None:
         await ctx.author.send('I love feet🦶')
-
-    @command(name='clean', help=helper.HELP_CLEAN, description=helper.HELP_CLEAN_LONG)
-    async def clean(self, ctx: Context, *args: str) -> None:
-        if Utils.check_if_banned(ctx.message.author.id, self.__config.PROJECT_PATH):
-            await ctx.send(embed=self.__embeds.BANNED())
-            return
-        await ctx.send("this command has been decommissioned. please use /clean!")
-        return
 
     @command(name="blud", help=helper.HELP_BLUD)
     async def blud(self, ctx: Context, *args):
