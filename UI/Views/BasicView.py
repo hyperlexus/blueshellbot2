@@ -24,7 +24,7 @@ class BasicView(View, AbstractView):
         self.__working = True
 
         for button in buttons:
-            # Set the buttons to have a instance of the view that contains them
+            # Set the buttons to have an instance of the view that contains them
             button.set_view(self)
             self.add_item(button)
 

@@ -2,6 +2,7 @@ from typing import List
 from discord import Button, Guild, TextChannel
 from discord.ui import View
 from Config.Emojis import BEmojis
+from Handlers.ShuffleHandler import ShuffleHandler
 from Messages.MessagesCategory import MessagesCategory
 from Music.Playlist import Playlist
 from Music.BlueshellBot import BlueshellBot
@@ -59,9 +60,9 @@ class ProcessCommandsExecutor:
         return view
 
     @classmethod
-    def __getPlayerButtonsForGuild(cls, textChannel: TextChannel, guildID: int, bot: BlueshellBot) -> List[Button]:
+    def __getPlayerButtonsForGuild(cls, textChannel: TextChannel, guildID: int, bot: BlueshellBot) -> List[HandlerButton]:
         """Create the Buttons to be inserted in the Player View"""
-        buttons: List[Button] = [HandlerButton(bot, PrevHandler, cls.EMOJIS.BACK,
+        buttons: List[HandlerButton] = [HandlerButton(bot, PrevHandler, cls.EMOJIS.BACK,
                                                textChannel, guildID, MessagesCategory.PLAYER, "Prev"),
                                  HandlerButton(bot, PauseHandler, cls.EMOJIS.PAUSE,
                                                textChannel, guildID, MessagesCategory.PLAYER, "Pause"),
@@ -78,7 +79,9 @@ class ProcessCommandsExecutor:
                                  HandlerButton(bot, LoopHandler, cls.EMOJIS.LOOP_OFF,
                                                textChannel, guildID, MessagesCategory.LOOP, "Loop Off", 'Off'),
                                  HandlerButton(bot, LoopHandler, cls.EMOJIS.LOOP_ALL,
-                                               textChannel, guildID, MessagesCategory.LOOP, "Loop All", 'All')]
+                                               textChannel, guildID, MessagesCategory.LOOP, "Loop All", 'All'),
+                                 HandlerButton(bot, ShuffleHandler, cls.EMOJIS.SHUFFLE,
+                                               textChannel, guildID, MessagesCategory.SHUFFLE, "Shuffle")]
 
         return buttons
 
@@ -104,27 +107,27 @@ class ProcessCommandsExecutor:
         view = BasicView(self.__bot, buttons)
         return view
 
-    def __getPlayerButtons(self, textChannel: TextChannel) -> List[Button]:
+    def __getPlayerButtons(self, textChannel: TextChannel) -> List[HandlerButton]:
         """Create the Buttons to be inserted in the Player View"""
-        buttons: List[Button] = []
-
-        buttons.append(HandlerButton(self.__bot, PrevHandler, self.__emojis.BACK,
-                                     textChannel, self.__guildID, MessagesCategory.PLAYER, "Prev"))
-        buttons.append(HandlerButton(self.__bot, PauseHandler, self.__emojis.PAUSE,
-                                     textChannel, self.__guildID, MessagesCategory.PLAYER, "Pause"))
-        buttons.append(HandlerButton(self.__bot, ResumeHandler, self.__emojis.PLAY,
-                                     textChannel, self.__guildID, MessagesCategory.PLAYER, "Play"))
-        buttons.append(HandlerButton(self.__bot, StopHandler, self.__emojis.STOP,
-                                     textChannel, self.__guildID, MessagesCategory.PLAYER, "Stop"))
-        buttons.append(HandlerButton(self.__bot, SkipHandler, self.__emojis.SKIP,
-                                     textChannel, self.__guildID, MessagesCategory.PLAYER, "Skip"))
-        buttons.append(HandlerButton(self.__bot, QueueHandler, self.__emojis.QUEUE,
-                                     textChannel, self.__guildID, MessagesCategory.QUEUE, "Queue"))
-        buttons.append(HandlerButton(self.__bot, LoopHandler, self.__emojis.LOOP_ONE,
-                                     textChannel, self.__guildID, MessagesCategory.LOOP, "Loop One", 'One'))
-        buttons.append(HandlerButton(self.__bot, LoopHandler, self.__emojis.LOOP_OFF,
-                                     textChannel, self.__guildID, MessagesCategory.LOOP, "Loop Off", 'Off'))
-        buttons.append(HandlerButton(self.__bot, LoopHandler, self.__emojis.LOOP_ALL,
-                                     textChannel, self.__guildID, MessagesCategory.LOOP, "Loop All", 'All'))
+        buttons: List[HandlerButton] = [HandlerButton(self.__bot, PrevHandler, self.__emojis.BACK,
+                                               textChannel, self.__guildID, MessagesCategory.PLAYER, "Prev"),
+                                 HandlerButton(self.__bot, PauseHandler, self.__emojis.PAUSE,
+                                               textChannel, self.__guildID, MessagesCategory.PLAYER, "Pause"),
+                                 HandlerButton(self.__bot, ResumeHandler, self.__emojis.PLAY,
+                                               textChannel, self.__guildID, MessagesCategory.PLAYER, "Play"),
+                                 HandlerButton(self.__bot, StopHandler, self.__emojis.STOP,
+                                               textChannel, self.__guildID, MessagesCategory.PLAYER, "Stop"),
+                                 HandlerButton(self.__bot, SkipHandler, self.__emojis.SKIP,
+                                               textChannel, self.__guildID, MessagesCategory.PLAYER, "Skip"),
+                                 HandlerButton(self.__bot, QueueHandler, self.__emojis.QUEUE,
+                                               textChannel, self.__guildID, MessagesCategory.QUEUE, "Queue"),
+                                 HandlerButton(self.__bot, LoopHandler, self.__emojis.LOOP_ONE,
+                                               textChannel, self.__guildID, MessagesCategory.LOOP, "One", 'One'),
+                                 HandlerButton(self.__bot, LoopHandler, self.__emojis.LOOP_OFF,
+                                               textChannel, self.__guildID, MessagesCategory.LOOP, "Off", 'Off'),
+                                 HandlerButton(self.__bot, LoopHandler, self.__emojis.LOOP_ALL,
+                                               textChannel, self.__guildID, MessagesCategory.LOOP, "All", 'All'),
+                                 HandlerButton(self.__bot, ShuffleHandler, self.__emojis.SHUFFLE,
+                                               textChannel, self.__guildID, MessagesCategory.SHUFFLE, "Shuffle")]
 
         return buttons

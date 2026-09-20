@@ -4,7 +4,9 @@ import math
 import os
 import time
 import urllib
-from datetime import datetime
+from datetime import datetime, timedelta
+from time import strftime
+
 import aiohttp
 import discord
 from mpmath import mp, mpf, exp
@@ -22,18 +24,31 @@ from Utils import rr_api
 
 helper = Helper()
 
-def save_alerts(alerts_list):
+def save_alerts(alerts_list) -> None:
     file_path = "Storage/alerts.json"
     with open(file_path, "w") as f:
         json.dump(alerts_list, f, indent=4)
 
-def get_alerts():
+def get_alerts() -> list:
     file_path = "Storage/alerts.json"
     if not os.path.exists(file_path):
         return []
     with open(file_path, "r") as f:
         return json.load(f)
 
+def save_diddybluds(diddy_list) -> None:
+    file_path = "Storage/diddybluds.json"
+    with open(file_path, "w") as f:
+        json.dump(diddy_list, f, indent=4)
+
+def get_diddybluds() -> list:
+    file_path = "Storage/diddybluds.json"
+    if not os.path.exists(file_path):
+        with open("Storage/diddybluds.json", "w") as f:
+            json.dump([], f, indent=4)
+        return []
+    with open(file_path, "r") as f:
+        return json.load(f)
 
 class MiscSlashCog(Cog):
     def __init__(self, bot: BlueshellBot) -> None:
@@ -42,6 +57,7 @@ class MiscSlashCog(Cog):
         self.__colors = BColors()
         self.__config = BConfigs()
         self.check_alerts.start()
+        self.check_diddybluds.start()
 
     @slash_command(name='uptime', description="get time since last restart")
     async def uptime(self, ctx: ApplicationContext):
@@ -52,36 +68,62 @@ class MiscSlashCog(Cog):
     @option(name="message", type=str, description="alert description", default=None)
     @option(name="target_user", type=Member, description="Target user", default=None)
     @is_not_banned()
-    async def alert(self, ctx: ApplicationContext, time_input: str = "",
-                    message: str | None = None,
-                    target_user: Member | None = None) -> Interaction | WebhookMessage:
+    async def alert(self, ctx: ApplicationContext, time_input: str, message: str | None, target_user: Member | None) -> Interaction | WebhookMessage:
         await ctx.defer()
 
-        if time_input.startswith("d") or time_input.startswith("t"):
-            seconds = Utils.convert_absolute_time_to_s(time_input)
-        else:
-            seconds = Utils.convert_relative_time_to_s(time_input)
+        seconds = Utils.convert_time_input_to_seconds(time_input)
         time_info = Utils.convert_seconds_to_time_info(seconds)
 
         if seconds is None:
             return await ctx.respond(embed=self.__embeds.BAD_ALERT(time_input))
 
-        send_at = time.time() + seconds
-        target_id = target_user.id if target_user else ctx.author.id
-
         alerts = get_alerts()
         alerts.append({
-            "user_id": target_id,
+            "user_id": target_user.id if target_user else ctx.author.id,
             "author_id": ctx.author.id,
             "channel_id": ctx.channel_id,
             "text": message,
-            "send_at": send_at,
+            "send_at": time.time() + seconds,
             "original_time": time_input
         })
         save_alerts(alerts)
 
         return await ctx.respond(embed=self.__embeds.ALERT_SET(time_info))
 
+    @tasks.loop(seconds=10)
+    async def check_alerts(self):
+        now = time.time()
+        alerts = get_alerts()
+        if not alerts: return
+
+        updated_alerts = []
+        if_sent_alerts = False
+
+        for alert in alerts:
+            if now >= alert['send_at']:
+                if_sent_alerts = True
+                channel = self.__bot.get_channel(alert['channel_id'])
+
+                if channel:
+                    mention = f"<@{alert['user_id']}>"
+                    embed = self.__embeds.ALERT_DONE(
+                        time_str=alert['original_time'],
+                        message=alert['text'],
+                    )
+                    try:
+                        await channel.send(content=mention, embed=embed)
+                    except (HTTPException, Forbidden) as e:
+                        print(f"error sending alert: {e.__type__}, {e}")  # finally after all this time
+
+            else:
+                updated_alerts.append(alert)
+
+        if if_sent_alerts:
+            save_alerts(updated_alerts)
+
+    @check_alerts.before_loop
+    async def before_check_alerts(self):
+        await self.__bot.wait_until_ready()
 
     @slash_command(name='festgelegte_vertrege', description='vertrag mit der bank ausrechnen')
     @option(name='geld', type=int, description="Geld")
@@ -232,41 +274,6 @@ class MiscSlashCog(Cog):
         await ctx.channel.send(embed=self.__embeds.CLEANED(limit, len(to_delete), who, inspect_amount), delete_after=10)
         return await ctx.respond("messages cleaned.")
 
-    @tasks.loop(seconds=10)
-    async def check_alerts(self):
-        now = time.time()
-        alerts = get_alerts()
-        if not alerts: return
-
-        updated_alerts = []
-        if_sent_alerts = False
-
-        for alert in alerts:
-            if now >= alert['send_at']:
-                if_sent_alerts = True
-                channel = self.__bot.get_channel(alert['channel_id'])
-
-                if channel:
-                    mention = f"<@{alert['user_id']}>"
-                    embed = self.__embeds.ALERT_DONE(
-                        time_str=alert['original_time'],
-                        message=alert['text'],
-                    )
-                    try:
-                        await channel.send(content=mention, embed=embed)
-                    except (HTTPException, Forbidden) as e:
-                        print(f"error sending alert: {e.__type__}, {e}")  # finally after all this time
-
-            else:
-                updated_alerts.append(alert)
-
-        if if_sent_alerts:
-            save_alerts(updated_alerts)
-
-    @check_alerts.before_loop
-    async def before_check_alerts(self):
-        await self.__bot.wait_until_ready()
-
     @slash_command(name='restart_compcount', description='compcount gets restarted and all streaks are saved. only runnable by admin')
     async def restart_compcount(self, ctx: ApplicationContext):
         if ctx.interaction.user.id not in (422800248935546880, 468786219258740756):
@@ -326,15 +333,14 @@ class MiscSlashCog(Cog):
     async def restart_blueshellbot(self, ctx: ApplicationContext):
         await ctx.defer()
         if ctx.interaction.user.id != 422800248935546880:
-            await ctx.respond("you are not authorised to run this command as you are not the bot admin.")
-            return
+            return await ctx.respond("you are not authorised to run this command as you are not the bot admin.")
 
         await ctx.respond("restarting...")
         await asyncio.sleep(0.25)
         path = os.getcwd()
         target_path = os.path.abspath(os.path.join(path, "..", "restart-blueshelly.sh"))
 
-        await asyncio.create_subprocess_exec(
+        return await asyncio.create_subprocess_exec(
             program='sh', *target_path,
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.DEVNULL
@@ -342,11 +348,33 @@ class MiscSlashCog(Cog):
 
     @slash_command(name='diddenbludden', description='manage a service (start/stop/restart/status).')
     @option(name='action', type=str, description="systemctl action", choices=["start", "stop", "restart", "status"])
-    async def diddenbludden(self, ctx: ApplicationContext, action: str):
+    @option(name='time_input', type=str, description="when to run this action", required=False, default=None)
+    async def diddenbludden(self, ctx: ApplicationContext, action: str, time_input: str):
         if ctx.interaction.user.id not in (422800248935546880, 640985620948189186):
             return await ctx.respond("you are not authorised to do this.")
 
         await ctx.defer()
+        if time_input is None:
+            return await self.do_diddenbludden(ctx, action)
+        seconds = Utils.convert_time_input_to_seconds(time_input)
+        time_info = Utils.convert_seconds_to_time_info(seconds)
+        run_at = datetime.now() + timedelta(seconds=seconds)
+
+        if seconds is None:
+            await self.do_diddenbludden(ctx.channel, action)
+            return await ctx.respond(f"ran `{action}`.")
+
+        bluds = get_diddybluds()
+        bluds.append({
+            "action": action,
+            "run_at": run_at.timestamp(),
+            "original_time": time_info,
+        })
+        save_diddybluds(bluds)
+        return await ctx.respond(f"queued `{action}` to run at {run_at.strftime('%Y-%m-%d %H:%M:%S')}.")
+
+    @staticmethod
+    async def do_diddenbludden(channel, action: str):
         env = os.environ.copy()
         env['XDG_RUNTIME_DIR'] = f"/run/user/{os.getuid()}"
 
@@ -359,17 +387,54 @@ class MiscSlashCog(Cog):
 
         stdout, _ = await process.communicate()
         output = stdout.decode('utf-8').strip()
+
         if action in ("start", "stop", "restart"):
             if process.returncode == 0:
-                return await ctx.followup.send(f"ran `{action}`.")
+                return await channel.send(f"ran `{action}`.")
             else:
-                return await ctx.followup.send(f"could not `{action}` service. code {process.returncode}:\n```bash\n{output[:1900]}```")
+                return await channel.send(
+                    f"could not `{action}` service. code {process.returncode}:\n```bash\n{output[:1900]}```")
 
         else:
             if not output:
                 output = "no output."
 
-            return await ctx.followup.send(f"status:\n```bash\n{output[:1900]}```")
+            return await channel.send(f"status:\n```bash\n{output[:1900]}```")
+
+    @tasks.loop(seconds=10)
+    async def check_diddybluds(self):
+        now = time.time()
+        bluds = get_diddybluds()
+        if not bluds: return
+
+        updated_bluds = []
+        ran_action = False
+
+        for blud in bluds:
+            if now >= blud['run_at']:
+                ran_action = True
+                channel = self.__bot.get_channel(1511906207164530868)
+
+                if channel:
+                    await self.do_diddenbludden(channel, blud['action'])
+                    embed = self.__embeds.SENT_DIDDYBLUDS(
+                        blud['action'],
+                        blud['original_time']
+                    )
+                    try:
+                        await channel.send(embed=embed)
+                    except (HTTPException, Forbidden) as e:
+                        print(f"error running blud: {e.__type__}, {e}")
+
+            else:
+                updated_bluds.append(blud)
+
+        if ran_action:
+            save_diddybluds(updated_bluds)
+
+    @check_diddybluds.before_loop
+    async def before_check_diddybluds(self):
+        await self.__bot.wait_until_ready()
 
     @slash_command(name="base_kakera_calculator", description="calculate a character's ka value based on rank, claims, and keys.")
     @option(name="r", type=int, description="claim rank ($top)", min_value=1)

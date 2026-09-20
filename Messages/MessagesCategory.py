@@ -9,3 +9,4 @@ class MessagesCategory(Enum):
     PLAYER = 5
     MANAGING_QUEUE = 6
     OTHERS = 7
+    SHUFFLE = 8

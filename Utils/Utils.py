@@ -90,6 +90,14 @@ class Utils:
         return int((obj - datetime.now()).total_seconds())
 
     @classmethod
+    def convert_time_input_to_seconds(cls, time_str: str) -> int:
+        if time_str.startswith("d") or time_str.startswith("t"):
+            seconds = cls.convert_absolute_time_to_s(time_str)
+        else:
+            seconds = cls.convert_relative_time_to_s(time_str)
+        return seconds
+
+    @classmethod
     def convert_seconds_to_time_info(cls, seconds: int) -> str:
         output: str = ""
         for unit_name, unit_value in reversed(cls.time_units.items()):

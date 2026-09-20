@@ -780,3 +780,11 @@ class BEmbeds:
             color=self.__colors.RED
         )
         return embed
+
+    def SENT_DIDDYBLUDS(self, action: str, time_output: str):
+        embed = Embed(
+        title=f"ran diddenbludden {action}:",
+            description=f"ran {action} after {time_output}.",
+            color=self.__colors.BLUE
+        )
+        return embed
