@@ -361,8 +361,8 @@ class MiscSlashCog(Cog):
         run_at = datetime.now() + timedelta(seconds=seconds)
 
         if seconds is None:
-            await self.do_diddenbludden(ctx.channel, action)
-            return await ctx.respond(f"ran `{action}`.")
+            await ctx.respond(f"ran `{action}`.")
+            return await self.do_diddenbludden(ctx.channel, action)
 
         bluds = get_diddybluds()
         bluds.append({
