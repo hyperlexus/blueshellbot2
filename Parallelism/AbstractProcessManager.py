@@ -34,7 +34,7 @@ class AbstractPlayersManager(ABC):
 
     @abstractmethod
     def createPlayerForGuild(self, guild: Guild, context: Union[Context, Interaction]) -> None:
-        """With the context information of a guild create a internal player for the guild"""
+        """With the context information of a guild create an internal player for the guild"""
         pass
 
     @abstractmethod

@@ -35,7 +35,7 @@ class ProcessPlayer(Process):
     def __init__(self, name: str, playlist: Playlist, lock: Lock, queueToReceive: Queue,  queueToSend: Queue, guildID: int, voiceID: int) -> None:
         """
         Start a new process that will have his own bot instance 
-        Due to pickle serialization, no objects are stored, the values initialization are being made in the run method
+        Due to pickle serialisation, no objects are stored, the values initialisation are being made in the run method
         """
         Process.__init__(self, name=name, group=None, target=None, args=(), kwargs={})
         # Synchronization objects

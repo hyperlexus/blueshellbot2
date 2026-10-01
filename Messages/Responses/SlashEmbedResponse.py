@@ -14,7 +14,7 @@ class SlashEmbedResponse(AbstractCommandResponse):
         message = None
         # If the response has both embed and view to send
         if self.response.embed and self.response.view:
-            # Respond to the Slash command and set the view to contain the sent message
+            # Respond to the Slash command and set the view to contain the message to be sent
             message = await self.__ctx.send_followup(embed=self.response.embed, view=self.response.view)
             self.response.view.set_message(message)
 

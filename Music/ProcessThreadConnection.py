@@ -72,7 +72,7 @@ class DiscordStreamNegotiator(AbstractConnectionHandshaker):
                 self._state = BridgeState.TERMINATED
                 return False
 
-    # fixed frame sync in a better way so this isnt necessary anymore
+    # fixed frame sync in a better way so this is no longer necessary
     # for frame in range(0, self._buffer_size, 20):
     #     if not self.validate_integrity(self._packet_buffer[frame]):
     #         raise HandshakeFailure("legacy protocol mismatch during transition")

@@ -5,7 +5,6 @@ import os
 import time
 import urllib
 from datetime import datetime, timedelta
-from time import strftime
 
 import aiohttp
 import discord

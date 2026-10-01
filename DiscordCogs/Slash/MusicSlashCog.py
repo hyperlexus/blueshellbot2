@@ -55,8 +55,8 @@ class MusicSlashCommands(Cog):
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
     @slash_command(name="queue", description=helper.HELP_QUEUE)
-    async def queue(self, ctx: ApplicationContext,
-                    page_number: Option(int, helper.HELP_QUEUE_LONG, min_value=1, default=1)) -> None:
+    @option(name="page_number", description=helper.HELP_QUEUE_LONG, min_value=1, default=1)
+    async def queue(self, ctx: ApplicationContext, page_number: int) -> None:
         if not self.__bot.listingSlash:
             return
         try:
@@ -236,8 +236,8 @@ class MusicSlashCommands(Cog):
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
     @slash_command(name='volume', description=helper.CHANGE_VOLUME_LONG)
-    async def move(self, ctx: ApplicationContext,
-                   volume: Option(float, "The new volume of the song", min_value=1, default=100)) -> None:
+    @option(type=int, name="volume", description="the new volume of the song", min_value=1, default=100)
+    async def move(self, ctx: ApplicationContext, volume: int) -> None:
         if not self.__bot.listingSlash:
             return
         try:
@@ -252,8 +252,8 @@ class MusicSlashCommands(Cog):
             print(f'[ERROR IN SLASH COMMAND] -> {traceback.format_exc()}')
 
     @slash_command(name='remove', description=helper.HELP_REMOVE)
-    async def remove(self, ctx: ApplicationContext,
-                     position: Option(int, "The song position to remove", min_value=1)) -> None:
+    @option(name="position", type=int, description="the position of the song to remove", min_value=1)
+    async def remove(self, ctx: ApplicationContext, position: int) -> None:
         if not self.__bot.listingSlash:
             return
         try:

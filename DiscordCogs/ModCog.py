@@ -74,7 +74,7 @@ class ModCog(Cog):
 
         bot_admins = self.__config.BOT_ADMINS.split(",")
         if str(ctx.author.id) not in bot_admins:
-            await ctx.send(embed=self.__embeds.MISSING_PERMISSIONS("force_embed"))
+            await ctx.send(embed=self.__embeds.MISSING_PERMISSIONS())
             return
 
         all_embeds = [embed_name for embed_name in dir(self.__embeds)

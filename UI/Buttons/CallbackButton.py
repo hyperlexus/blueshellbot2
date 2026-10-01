@@ -11,7 +11,7 @@ from Music.BlueshellBot import BlueshellBot
 
 
 class CallbackButton(Button):
-    """When clicked execute an callback passing the args and kwargs"""
+    """When clicked execute a callback passing the args and kwargs"""
 
     def __init__(self, bot: BlueshellBot, cb: Awaitable, emoji: BEmojis, textChannel: TextChannel, guildID: int,
                  category: MessagesCategory, label=None, *args, **kwargs):

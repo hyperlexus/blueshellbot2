@@ -209,7 +209,7 @@ class ThreadPlayer(Thread):
 
                     # If already playing, stop the current play
                     if self.__verifyIfIsPlaying():
-                        # Will forbidden next_song to execute after stopping current player
+                        # Will prevent next_song from executing after stopping current player
                         self.__forceStop = True
                         self.__voiceClient.stop()
                         self.__playing = False

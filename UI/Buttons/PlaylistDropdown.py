@@ -64,7 +64,7 @@ class PlaylistDropdown(Select, AbstractItem):
             await self.__messagesManager.addMessageAndClearPrevious(self.__guildID, self.__category, message,
                                                                     response.view)
 
-        # Extreme ugly way to wait for the player process to actually retrieve the next song
+        # extremely ugly way to wait for the player process to actually retrieve the next song
         await asyncio.sleep(2)
 
         await self.__update()

@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 
 class BAbstractMessage(ABC):
     """
-    Abstract class to allow create a pattern when dealing with multiple Discord
-    messages types, such as Interaction Messages and the standard discord messages
-    that contains two different ways of deletion 
+    Abstract class to facilitate creating a pattern when dealing with multiple Discord
+    message types, such as Interaction Messages and the standard discord messages
+    that contain two different ways of deletion
     """
     @abstractmethod
     async def delete(self):

@@ -157,7 +157,7 @@ class ProcessPlayerManager(Singleton, AbstractPlayersManager):
                                 queueToListen, guildID, voiceID)
         processInfo = PlayerProcessInfo(process, queueToSend, queueToListen, playlist, lock, context.channel)
 
-        # Create a Thread to listen for the queue coming from the Player Process, this will redirect the Queue to a async
+        # Create a Thread to listen for the queue coming from the Player Process, this will redirect the Queue to an async
         thread = Thread(target=self.__listenToCommands,
                         args=(queueToListen, guild), daemon=True)
         self.__playersListeners[guildID] = (thread, False)
@@ -198,7 +198,7 @@ class ProcessPlayerManager(Singleton, AbstractPlayersManager):
                                 queueToListen, guildID, voiceID)
         processInfo = PlayerProcessInfo(process, queueToSend, queueToListen, playlist, lock, context.channel)
 
-        # Create a Thread to listen for the queue coming from the Player Process, this will redirect the Queue to a async
+        # Create a Thread to listen for the queue coming from the Player Process, this will redirect the Queue to an async
         thread = Thread(target=self.__listenToCommands,
                         args=(queueToListen, guild), daemon=True)
         self.__playersListeners[guildID] = (thread, False)

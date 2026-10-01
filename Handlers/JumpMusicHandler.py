@@ -33,7 +33,7 @@ class JumpMusicHandler(AbstractHandler):
                 playerLock.release()
                 return HandlerResponse(self.ctx, embed, error)
 
-            # Sanitize the input
+            # sanitise the input
             playlist = playersManager.getPlayerPlaylist(self.guild)
             musicPos = self.__sanitizeInput(playlist, musicPos)
 
