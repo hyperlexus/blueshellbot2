@@ -112,9 +112,9 @@ class MudaeCog(Cog):
         self.absolute_toggle = True
 
         self.max_power = {
-            "hyperlexus": 120,
+            "hyperlexus": 110,
             "ad.infernum": 110,
-            "alvideiectiones": 110,
+            "alvideiectiones": 115,
             "julisus": 100
         }
 

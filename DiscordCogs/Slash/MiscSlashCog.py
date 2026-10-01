@@ -339,8 +339,8 @@ class MiscSlashCog(Cog):
         path = os.getcwd()
         target_path = os.path.abspath(os.path.join(path, "..", "restart-blueshelly.sh"))
 
-        return await asyncio.create_subprocess_exec(
-            program='sh', *target_path,
+        await asyncio.create_subprocess_exec(
+            'sh', target_path,
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.DEVNULL
         )
