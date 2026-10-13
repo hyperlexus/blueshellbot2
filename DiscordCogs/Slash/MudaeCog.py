@@ -178,7 +178,10 @@ class MudaeCog(Cog):
 
         current_time_str = datetime.now(ZoneInfo(current_tz)).strftime("%H:%M")
 
-        rolls = extract(r'You have \*\*(\d+)\*\* rolls left', content)
+        rolls_match = re.search(r'You have \*\*(\d+)\*\* rolls(?:\s*\(\+\*\*(\d+)\*\*\s*\$us\))?', content)
+        rolls = rolls_match.group(1) if rolls_match else extract(r'You have \*\*(\d+)\*\* rolls left', content)
+        us_stock = rolls_match.group(2) if rolls_match and rolls_match.lastindex >= 2 and rolls_match.group(2) else "0"
+
         rt_stock = extract(r'You have \*\*(\d+)\*\* rolls reset', content)
 
         rolls_class = "ready-bg" if int(rolls.replace(",", "") or 0) > 0 else ""
@@ -298,10 +301,14 @@ class MudaeCog(Cog):
             kakera_box_class = "warning-bg"
             react_class = "cooldown"
 
+        k_val_int = int(k_stock.replace(',', '').replace('.', '') or 0)
+        kl_val = k_val_int // 500
+
         context = {
             "user": current_user,
             "current_time": current_time_str,
             "rolls": rolls,
+            "us_stock": us_stock,
             "rt_stock": rt_stock,
             "rolls_class": rolls_class,
             "claim_class": claim_class,
@@ -318,6 +325,7 @@ class MudaeCog(Cog):
             "bku_prob": bku_prob,
             "omega_keys": omega_keys,
             "k_stock": k_stock,
+            "kl_val": kl_val,
             "current_power": current_power,
             "max_p_lbl": f"{max_p:g}%",
             "bar_fill_pct": f"{bar_fill_pct:.1f}",

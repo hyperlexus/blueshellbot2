@@ -280,7 +280,7 @@
       <span>{{ current_time }}</span>
     </div>
     <div class="rolls-badge {{ rolls_class }}">
-      <span>Rolls: <strong style="color: var(--scheis);">{{ rolls }}</strong> <span style="color: var(--muted);">(+{{ rt_stock }} stored)</span></span>
+      <span>Rolls: <strong style="color: var(--scheis);">{{ rolls }}</strong>{% if us_stock and us_stock != "0" %} <span style="color: #cccccc; font-size: 11px">+{{ us_stock }}</span>{% endif %} <span style="color: var(--muted);">(+{{ rt_stock }} stored)</span></span>
     </div>
   </div>
 
@@ -295,7 +295,7 @@
 
   <div class="power-section {{ kakera_box_class }}">
     <div class="power-header">
-      <span><strong>{{ k_stock }}</strong> <img src="https://cdn.discordapp.com/emojis/1506799052745080833.png" class="emoji"></span>
+      <span><strong>{{ k_stock }}</strong> <img src="https://cdn.discordapp.com/emojis/1506799052745080833.png" class="emoji"> <span style="color: var(--scheis); font-weight: normal;">(= <strong>{{ kl_val }}</strong> $kl)</span></span>
       <span><img src="https://cdn.discordapp.com/emojis/689475859429720211.png" class="emoji">{{ bku_amount }}, {{ bku_prob }}, <img src="https://cdn.discordapp.com/emojis/1473308158263951582.png" class="emoji">{{ omega_keys }}</span>
       <span><span class="{{ react_class }}">{{ current_power }}% </span> / {{ max_p_lbl }}</span>
     </div>
